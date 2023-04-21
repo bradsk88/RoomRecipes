@@ -1,0 +1,8 @@
+run
+build
+bin
+.gradle
+.idea
+out
+logs
+mcmodsrepo/ca/bradj
