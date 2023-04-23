@@ -7,7 +7,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class WallDetectionTest {
 
@@ -56,7 +57,7 @@ class WallDetectionTest {
                 new Position(0, 2)
         );
 
-        Optional<ZWall> wall = WallDetection.findParallelRoomZWall(4, (Position dp) -> {
+        Optional<ZWall> wall = WallDetection.findParallelRoomZWall(4, doorWall, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -64,7 +65,7 @@ class WallDetectionTest {
                 return false;
             }
             return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
-        }, doorWall);
+        });
 
         assertTrue(wall.isPresent());
         assertEquals(2, wall.get().northCorner.x);
@@ -89,7 +90,7 @@ class WallDetectionTest {
                 new Position(2, 2)
         );
 
-        Optional<ZWall> wall = WallDetection.findParallelRoomZWall(4, (Position dp) -> {
+        Optional<ZWall> wall = WallDetection.findParallelRoomZWall(4, doorWall, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -97,7 +98,7 @@ class WallDetectionTest {
                 return false;
             }
             return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
-        }, doorWall);
+        });
 
         assertTrue(wall.isPresent());
         assertEquals(0, wall.get().northCorner.x);

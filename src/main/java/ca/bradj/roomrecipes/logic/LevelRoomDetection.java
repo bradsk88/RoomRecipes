@@ -11,7 +11,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 public class LevelRoomDetection {
 
@@ -37,6 +36,20 @@ public class LevelRoomDetection {
                     continue;
                 }
                 if (r1.getSpace().equals(r2.getSpace())) {
+                    Optional<Room> alternate = RoomDetection.findRoom(
+                            r2.getDoorPos(), maxDistanceFromDoor, checker, r2
+                    );
+                    if (alternate.isPresent()) {
+                        detectedRooms.put(r2.getDoorPos(), alternate);
+                        continue;
+                    }
+                    alternate = RoomDetection.findRoom(
+                            r1.getDoorPos(), maxDistanceFromDoor, checker, r1
+                    );
+                    if (alternate.isPresent()) {
+                        detectedRooms.put(r1.getDoorPos(), alternate);
+                        continue;
+                    }
                     Optional<RoomSplit> split = LevelRoomDetection.splitRooms(
                             r1.getDoorPos(),
                             r2.getDoorPos(),

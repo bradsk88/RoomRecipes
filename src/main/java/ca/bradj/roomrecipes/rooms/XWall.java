@@ -2,6 +2,8 @@ package ca.bradj.roomrecipes.rooms;
 
 import ca.bradj.roomrecipes.core.space.Position;
 
+import java.util.Objects;
+
 public class XWall {
     public final Position westCorner;
     public final Position eastCorner;
@@ -36,11 +38,31 @@ public class XWall {
         return new XWall(this.westCorner.offset(0, i), this.eastCorner.offset(0, i));
     }
 
+    public int getZ() {
+        return westCorner.z;
+    }
+
     @Override
     public String toString() {
         return "XWall{" +
                 "westCorner=" + westCorner +
                 ", eastCorner=" + eastCorner +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        XWall xWall = (XWall) o;
+        return Objects.equals(westCorner, xWall.westCorner) && Objects.equals(
+                eastCorner,
+                xWall.eastCorner
+        );
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(westCorner, eastCorner);
     }
 }

@@ -3,6 +3,7 @@ package ca.bradj.roomrecipes.rooms;
 import ca.bradj.roomrecipes.core.space.Position;
 import ca.bradj.roomrecipes.logic.RoomDetection;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class ZWall {
@@ -91,5 +92,29 @@ public class ZWall {
 
     public ZWall shiftedEast(int i) {
         return new ZWall(northCorner.offset(i, 0), southCorner.offset(i, 0));
+    }
+
+    @Override
+    public String toString() {
+        return "ZWall{" +
+                "northCorner=" + northCorner +
+                ", southCorner=" + southCorner +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ZWall zWall = (ZWall) o;
+        return Objects.equals(northCorner, zWall.northCorner) && Objects.equals(
+                southCorner,
+                zWall.southCorner
+        );
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(northCorner, southCorner);
     }
 }

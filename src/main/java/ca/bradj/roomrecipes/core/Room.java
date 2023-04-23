@@ -2,11 +2,32 @@ package ca.bradj.roomrecipes.core;
 
 import ca.bradj.roomrecipes.core.space.InclusiveSpace;
 import ca.bradj.roomrecipes.core.space.Position;
-import com.google.common.collect.ImmutableSet;
+import ca.bradj.roomrecipes.rooms.XWall;
+import ca.bradj.roomrecipes.rooms.ZWall;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class Room {
+    public Optional<XWall> getBackXWall() {
+        if (doorPos.z == getSpace().getNorthZ()) {
+            return Optional.of(getSpace().getSouthXWall());
+        }
+        if (doorPos.z == getSpace().getSouthZ()) {
+            return Optional.of(getSpace().getNorthXWall());
+        }
+        return Optional.empty();
+    }
+    public Optional<ZWall> getBackZWall() {
+        if (doorPos.x == getSpace().getWestX()) {
+            return Optional.of(getSpace().getEastZWall());
+        }
+        if (doorPos.x == getSpace().getEastX()) {
+            return Optional.of(getSpace().getWestZWall());
+        }
+        return Optional.empty();
+    }
+
     @Override
     public String toString() {
         return "Room{" +
