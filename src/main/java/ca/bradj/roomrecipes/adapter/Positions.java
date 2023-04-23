@@ -10,8 +10,8 @@ import java.util.Set;
 
 public class Positions {
 
-    public static BlockPos ToBlock(Position p) {
-        return new BlockPos(p.x, p.y, p.z);
+    public static BlockPos ToBlock(Position p, int y) {
+        return new BlockPos(p.x, y, p.z);
     }
 
     public static InclusiveSpace getInclusiveSpace(Collection<Position> doors) {
@@ -30,10 +30,8 @@ public class Positions {
 
         Position firstDoor = doors.iterator().next();
         int minX = firstDoor.x;
-        int minY = firstDoor.y;
         int minZ = firstDoor.z;
         int maxX = firstDoor.x;
-        int maxY = firstDoor.y;
         int maxZ = firstDoor.z;
 
         for (Position door : doors) {
@@ -43,12 +41,6 @@ public class Positions {
                 maxX = door.x;
             }
 
-            if (door.y < minY) {
-                minY = door.y;
-            } else if (door.y > maxY) {
-                maxY = door.y;
-            }
-
             if (door.z < minZ) {
                 minZ = door.z;
             } else if (door.z > maxZ) {
@@ -56,10 +48,10 @@ public class Positions {
             }
         }
 
-        return new InclusiveSpace(new Position(minX, minY, minZ), new Position(maxX, maxY, maxZ));
+        return new InclusiveSpace(new Position(minX, minZ), new Position(maxX, maxZ));
     }
 
     public static Position FromBlockPos(BlockPos blockPos) {
-        return new Position(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+        return new Position(blockPos.getX(), blockPos.getZ());
     }
 }

@@ -6,7 +6,10 @@ import ca.bradj.roomrecipes.rooms.XWall;
 import java.util.Optional;
 
 public class XWallLogic {
-    public static boolean isConnected(XWall wall, RoomDetector.WallDetector wd) {
+    public static boolean isConnected(XWall wall, RoomDetection.WallDetector wd) {
+        if (wall.westCorner.z != wall.eastCorner.z) {
+            return false;
+        }
         for (int i = wall.westCorner.x; i <= wall.eastCorner.x; i++) {
             Position shifted = wall.westCorner.WithX(i);
             if (wd.IsWall(shifted)) {
@@ -18,7 +21,7 @@ public class XWallLogic {
     }
 
     public static Optional<XWall> eastFromCorner(
-            RoomDetector.WallDetector wd,
+            RoomDetection.WallDetector wd,
             Position northCorner,
             int maxDistFromDoor
     ) {
@@ -36,7 +39,7 @@ public class XWallLogic {
         );
     }
     public static Optional<XWall> westFromCorner(
-            RoomDetector.WallDetector wd,
+            RoomDetection.WallDetector wd,
             Position northCorner,
             int maxDistFromDoor
     ) {

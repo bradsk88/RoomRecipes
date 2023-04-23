@@ -10,13 +10,13 @@ public class WallDetection {
 
     public static Optional<ZWall> findNorthToSouthWall(
             int maxDistFromDoor,
-            RoomDetector.WallDetector wd,
+            RoomDetection.WallDetector wd,
             Position doorPos
     ) {
         int northCornerZ = Integer.MAX_VALUE, southCornerZ = -Integer.MAX_VALUE;
         boolean started = false;
         for (int i = 0; i < maxDistFromDoor; i++) {
-            Position op = doorPos.offset(0, 0, i);
+            Position op = doorPos.offset(0, i);
             if (wd.IsWall(op)) {
                 started = true;
                 northCornerZ = Math.min(northCornerZ, op.z);
@@ -26,7 +26,7 @@ public class WallDetection {
             }
         }
         for (int i = 0; i < maxDistFromDoor; i++) {
-            Position op = doorPos.offset(0, 0, -i);
+            Position op = doorPos.offset(0, -i);
             if (wd.IsWall(op)) {
                 started = true;
                 northCornerZ = Math.min(northCornerZ, op.z);
@@ -50,13 +50,13 @@ public class WallDetection {
 
     public static Optional<XWall> findEastToWestWall(
             int maxDistFromDoor,
-            RoomDetector.WallDetector wd,
+            RoomDetection.WallDetector wd,
             Position doorPos
     ) {
         int westCornerX = Integer.MAX_VALUE, eastCornerX = -Integer.MAX_VALUE;
         boolean started = false;
         for (int i = 0; i < maxDistFromDoor; i++) {
-            Position op = doorPos.offset(i, 0, 0);
+            Position op = doorPos.offset(i, 0);
             if (wd.IsWall(op)) {
                 started = true;
                 westCornerX = Math.min(westCornerX, op.x);
@@ -66,7 +66,7 @@ public class WallDetection {
             }
         }
         for (int i = 0; i < maxDistFromDoor; i++) {
-            Position op = doorPos.offset(-i, 0, 0);
+            Position op = doorPos.offset(-i, 0);
             if (wd.IsWall(op)) {
                 started = true;
                 westCornerX = Math.min(westCornerX, op.x);
@@ -88,7 +88,7 @@ public class WallDetection {
 
     public static Optional<ZWall> findParallelRoomZWall(
             int maxDistFromDoor,
-            RoomDetector.WallDetector wd,
+            RoomDetection.WallDetector wd,
             ZWall doorWall
     ) {
         int eastLength = 0;
@@ -148,7 +148,7 @@ public class WallDetection {
 
     public static Optional<XWall> findParallelRoomXWall(
             int maxDistFromDoor,
-            RoomDetector.WallDetector wd,
+            RoomDetection.WallDetector wd,
             XWall wall
     ) {
         int northLength = 0;

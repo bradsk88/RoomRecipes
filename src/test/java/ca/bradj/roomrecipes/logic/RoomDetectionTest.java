@@ -1,15 +1,17 @@
 package ca.bradj.roomrecipes.logic;
 
+import ca.bradj.roomrecipes.core.Room;
+import ca.bradj.roomrecipes.core.space.InclusiveSpace;
 import ca.bradj.roomrecipes.core.space.Position;
-import com.google.common.collect.ImmutableSet;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class RoomDetectorTest {
+class RoomDetectionTest {
 
     @Test
     public void Test_DetectSimpleRoom_N() {
@@ -23,8 +25,7 @@ class RoomDetectorTest {
                 {"W", "W", "W", "A"}
         };
 
-        RoomDetector rd = new RoomDetector(new Position(1, 0, 0), 4);
-        rd.update((Position dp) -> {
+        Optional<Room> room = RoomDetection.findRoom(new Position(1, 0), 4, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -33,15 +34,10 @@ class RoomDetectorTest {
             }
             return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
         });
-        assertTrue(rd.isRoom());
+        assertTrue(room.isPresent());
 
-        ImmutableSet<Position> expectedCorners = ImmutableSet.of(
-                new Position(0, 0, 0),
-                new Position(2, 0, 0),
-                new Position(2, 0, 2),
-                new Position(0, 0, 2)
-        );
-        assertEquals(expectedCorners, rd.getCorners());
+        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        assertEquals(expectedCorners, room.get().getSpace());
 
     }
 @Test
@@ -56,8 +52,7 @@ class RoomDetectorTest {
                 {"W", "W", "W", "A"}
         };
 
-        RoomDetector rd = new RoomDetector(new Position(1, 0, 0), 4);
-        rd.update((Position dp) -> {
+        Optional<Room> room = RoomDetection.findRoom(new Position(1, 0), 4, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -66,15 +61,10 @@ class RoomDetectorTest {
             }
             return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
         });
-        assertTrue(rd.isRoom());
+        assertTrue(room.isPresent());
 
-        ImmutableSet<Position> expectedCorners = ImmutableSet.of(
-                new Position(0, 0, 0),
-                new Position(2, 0, 0),
-                new Position(2, 0, 2),
-                new Position(0, 0, 2)
-        );
-        assertEquals(expectedCorners, rd.getCorners());
+        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        assertEquals(expectedCorners, room.get().getSpace());
 
     }
 @Test
@@ -89,8 +79,7 @@ class RoomDetectorTest {
                 {"W", "D", "W", "A"}
         };
 
-        RoomDetector rd = new RoomDetector(new Position(1, 0, 0), 4);
-        rd.update((Position dp) -> {
+        Optional<Room> room = RoomDetection.findRoom(new Position(1, 0), 4, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -99,15 +88,10 @@ class RoomDetectorTest {
             }
             return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
         });
-        assertTrue(rd.isRoom());
+        assertTrue(room.isPresent());
 
-        ImmutableSet<Position> expectedCorners = ImmutableSet.of(
-                new Position(0, 0, 0),
-                new Position(2, 0, 0),
-                new Position(2, 0, 2),
-                new Position(0, 0, 2)
-        );
-        assertEquals(expectedCorners, rd.getCorners());
+        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        assertEquals(expectedCorners, room.get().getSpace());
 
     }
 @Test
@@ -122,8 +106,7 @@ class RoomDetectorTest {
                 {"W", "W", "W", "A"}
         };
 
-        RoomDetector rd = new RoomDetector(new Position(1, 0, 0), 4);
-        rd.update((Position dp) -> {
+        Optional<Room> room = RoomDetection.findRoom(new Position(1, 0), 4, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -132,15 +115,10 @@ class RoomDetectorTest {
             }
             return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
         });
-        assertTrue(rd.isRoom());
+        assertTrue(room.isPresent());
 
-        ImmutableSet<Position> expectedCorners = ImmutableSet.of(
-                new Position(0, 0, 0),
-                new Position(2, 0, 0),
-                new Position(2, 0, 2),
-                new Position(0, 0, 2)
-        );
-        assertEquals(expectedCorners, rd.getCorners());
+        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        assertEquals(expectedCorners, room.get().getSpace());
 
     }
 
@@ -156,8 +134,7 @@ class RoomDetectorTest {
                 {"W", "W", "A", "A"}
         };
 
-        RoomDetector rd = new RoomDetector(new Position(1, 0, 0), 4);
-        rd.update((Position dp) -> {
+        Optional<Room> room = RoomDetection.findRoom(new Position(1, 0), 4, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -166,11 +143,7 @@ class RoomDetectorTest {
             }
             return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
         });
-        assertFalse(rd.isRoom());
-
-        ImmutableSet<Position> expectedCorners = ImmutableSet.of();
-        assertEquals(expectedCorners, rd.getCorners());
-
+        assertFalse(room.isPresent());
     }
 
     @Test
@@ -199,14 +172,11 @@ class RoomDetectorTest {
             return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
         };
 
+        Optional<Room> room = RoomDetection.findRoom(new Position(1, 0), 4, position -> wdFn.apply(map1).test(position));
+        assertTrue(room.isPresent());
 
-        RoomDetector rd = new RoomDetector(new Position(1, 0, 0), 4);
-
-        rd.update(position -> wdFn.apply(map1).test(position));
-        assertTrue(rd.isRoom());
-
-        rd.update(position -> wdFn.apply(map2).test(position));
-        assertFalse(rd.isRoom());
+        room = RoomDetection.findRoom(new Position(1, 0), 4, position -> wdFn.apply(map2).test(position));
+        assertFalse(room.isPresent());
 
     }
 
@@ -224,8 +194,7 @@ class RoomDetectorTest {
                 {"A", "A", "A", "A", "A"}
         };
 
-        RoomDetector rd = new RoomDetector(new Position(1, 0, 1), 4);
-        rd.update((Position dp) -> {
+        Optional<Room> room = RoomDetection.findRoom(new Position(1, 1), 4, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -234,15 +203,10 @@ class RoomDetectorTest {
             }
             return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
         });
-        assertTrue(rd.isRoom());
+        assertTrue(room.isPresent());
 
-        ImmutableSet<Position> expectedCorners = ImmutableSet.of(
-                new Position(1, 0, 1),
-                new Position(3, 0, 1),
-                new Position(3, 0, 3),
-                new Position(1, 0, 3)
-        );
-        assertEquals(expectedCorners, rd.getCorners());
+        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(1, 1), new Position(3, 3));
+        assertEquals(expectedCorners, room.get().getSpace());
 
     }
     @Test
@@ -259,8 +223,7 @@ class RoomDetectorTest {
                 {"A", "A", "A", "A", "A", "A"}
         };
 
-        RoomDetector rd = new RoomDetector(new Position(3, 0, 1), 4);
-        rd.update((Position dp) -> {
+        Optional<Room> room = RoomDetection.findRoom(new Position(3, 1), 4, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -269,15 +232,10 @@ class RoomDetectorTest {
             }
             return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
         });
-        assertTrue(rd.isRoom());
+        assertTrue(room.isPresent());
 
-        ImmutableSet<Position> expectedCorners = ImmutableSet.of(
-                new Position(2, 0, 1),
-                new Position(4, 0, 1),
-                new Position(4, 0, 3),
-                new Position(2, 0, 3)
-        );
-        assertEquals(expectedCorners, rd.getCorners());
+        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(2, 1), new Position(4, 3));
+        assertEquals(expectedCorners, room.get().getSpace());
 
     }
     @Test
@@ -294,8 +252,7 @@ class RoomDetectorTest {
                 {"A", "A", "A", "A", "A", "A"}
         };
 
-        RoomDetector rd = new RoomDetector(new Position(3, 0, 1), 4);
-        rd.update((Position dp) -> {
+        Optional<Room> room = RoomDetection.findRoom(new Position(3, 1), 4, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -304,11 +261,7 @@ class RoomDetectorTest {
             }
             return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
         });
-        assertFalse(rd.isRoom());
-
-        ImmutableSet<Position> expectedCorners = ImmutableSet.of();
-        assertEquals(expectedCorners, rd.getCorners());
-
+        assertFalse(room.isPresent());
     }
     @Test
     public void Test_DetectShapeLikeLetterA() {
@@ -323,8 +276,7 @@ class RoomDetectorTest {
                 {"W", "A", "W"},
         };
 
-        RoomDetector rd = new RoomDetector(new Position(1, 0, 0), 5);
-        rd.update((Position dp) -> {
+        Optional<Room> room = RoomDetection.findRoom(new Position(1, 0), 5, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -333,15 +285,10 @@ class RoomDetectorTest {
             }
             return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
         });
-        assertTrue(rd.isRoom());
+        assertTrue(room.isPresent());
 
-        ImmutableSet<Position> expectedCorners = ImmutableSet.of(
-                new Position(0, 0, 0),
-                new Position(2, 0, 0),
-                new Position(2, 0, 2),
-                new Position(0, 0, 2)
-        );
-        assertEquals(expectedCorners, rd.getCorners());
+        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        assertEquals(expectedCorners, room.get().getSpace());
     }
     @Test
     public void Test_DetectShapeLikeLetterA_90() {
@@ -355,8 +302,7 @@ class RoomDetectorTest {
                 {"W", "W", "W", "W"},
         };
 
-        RoomDetector rd = new RoomDetector(new Position(0, 0, 1), 5);
-        rd.update((Position dp) -> {
+        Optional<Room> room = RoomDetection.findRoom(new Position(0, 1), 5, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -365,15 +311,10 @@ class RoomDetectorTest {
             }
             return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
         });
-        assertTrue(rd.isRoom());
+        assertTrue(room.isPresent());
 
-        ImmutableSet<Position> expectedCorners = ImmutableSet.of(
-                new Position(0, 0, 0),
-                new Position(2, 0, 0),
-                new Position(2, 0, 2),
-                new Position(0, 0, 2)
-        );
-        assertEquals(expectedCorners, rd.getCorners());
+        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        assertEquals(expectedCorners, room.get().getSpace());
     }
     @Test
     public void Test_DetectShapeLikeLetterA_180() {
@@ -388,8 +329,7 @@ class RoomDetectorTest {
                 {"W", "D", "W"},
         };
 
-        RoomDetector rd = new RoomDetector(new Position(1, 0, 3), 5);
-        rd.update((Position dp) -> {
+        Optional<Room> room = RoomDetection.findRoom(new Position(1, 3), 5, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -398,15 +338,10 @@ class RoomDetectorTest {
             }
             return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
         });
-        assertTrue(rd.isRoom());
+        assertTrue(room.isPresent());
 
-        ImmutableSet<Position> expectedCorners = ImmutableSet.of(
-                new Position(0, 0, 1), // Top left of room
-                new Position(2, 0, 1), // Top right of room
-                new Position(2, 0, 3), // Bottom right of room
-                new Position(0, 0, 3) // Bottom left of room
-        );
-        assertEquals(expectedCorners, rd.getCorners());
+        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 1), new Position(2, 3));
+        assertEquals(expectedCorners, room.get().getSpace());
     }
     @Test
     public void Test_DetectShapeLikeLetterA_270() {
@@ -420,8 +355,7 @@ class RoomDetectorTest {
                 {"W", "W", "W", "W"},
         };
 
-        RoomDetector rd = new RoomDetector(new Position(3, 0, 1), 5);
-        rd.update((Position dp) -> {
+        Optional<Room> room = RoomDetection.findRoom(new Position(3, 1), 5, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -430,15 +364,10 @@ class RoomDetectorTest {
             }
             return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
         });
-        assertTrue(rd.isRoom());
+        assertTrue(room.isPresent());
 
-        ImmutableSet<Position> expectedCorners = ImmutableSet.of(
-                new Position(1, 0, 0),
-                new Position(3, 0, 0),
-                new Position(3, 0, 2),
-                new Position(1, 0, 2)
-        );
-        assertEquals(expectedCorners, rd.getCorners());
+        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(1, 0), new Position(3, 2));
+        assertEquals(expectedCorners, room.get().getSpace());
     }
  // TODO: Rotate rooms 90
 }

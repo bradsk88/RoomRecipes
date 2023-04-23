@@ -20,8 +20,8 @@ class ZWallLogicTest {
         };
         boolean connected = ZWallLogic.isConnected(
                 new ZWall(
-                        new Position(0, 0, 0),
-                        new Position(0, 0, 2)
+                        new Position(0, 0),
+                        new Position(0, 2)
                 ), (Position dp) -> {
                     if (dp.x < 0 || dp.z < 0) {
                         return false;
@@ -46,8 +46,8 @@ class ZWallLogicTest {
         };
         boolean connected = ZWallLogic.isConnected(
                 new ZWall(
-                        new Position(0, 0, 0),
-                        new Position(0, 0, 2)
+                        new Position(0, 0),
+                        new Position(0, 2)
                 ), (Position dp) -> {
                     if (dp.x < 0 || dp.z < 0) {
                         return false;

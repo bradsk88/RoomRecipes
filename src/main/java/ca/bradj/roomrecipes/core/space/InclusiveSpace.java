@@ -1,5 +1,8 @@
 package ca.bradj.roomrecipes.core.space;
 
+import ca.bradj.roomrecipes.rooms.XWall;
+import ca.bradj.roomrecipes.rooms.ZWall;
+
 import java.util.Objects;
 
 // InclusiveSpace is defined by two corner positions. An inclusive space is the
@@ -44,5 +47,73 @@ public class InclusiveSpace {
 
     public Position getCornerB() {
         return bb;
+    }
+
+    public int getNorthZ() {
+        return Math.min(aa.z, bb.z);
+    }
+
+    public int getSouthZ() {
+        return Math.max(aa.z, bb.z);
+    }
+
+    public ZWall getWestZWall() {
+        return new ZWall(
+                new Position(
+                        Math.min(aa.x, bb.x),
+                        getNorthZ()
+                ),
+                new Position(
+                        Math.min(aa.x, bb.x),
+                        getSouthZ()
+                )
+        );
+    }
+
+    public ZWall getEastZWall() {
+        return new ZWall(
+                new Position(
+                        Math.max(aa.x, bb.x),
+                        getNorthZ()
+                ),
+                new Position(
+                        Math.max(aa.x, bb.x),
+                        getSouthZ()
+                )
+        );
+    }
+
+    public XWall getNorthXWall() {
+        return new XWall(
+                new Position(
+                        getWestX(),
+                        Math.min(aa.z, bb.z)
+                ),
+                new Position(
+                        getEastX(),
+                        Math.min(aa.z, bb.z)
+                )
+        );
+    }
+
+    public int getWestX() {
+        return Math.min(aa.x, bb.x);
+    }
+
+    public int getEastX() {
+        return Math.max(aa.x, bb.x);
+    }
+
+    public XWall getSouthXWall() {
+        return new XWall(
+                new Position(
+                        getWestX(),
+                        Math.max(aa.z, bb.z)
+                ),
+                new Position(
+                        getEastX(),
+                        Math.max(aa.z, bb.z)
+                )
+        );
     }
 }

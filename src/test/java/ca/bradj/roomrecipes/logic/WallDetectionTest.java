@@ -30,7 +30,7 @@ class WallDetectionTest {
                 return false;
             }
             return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
-        }, new Position(0, 0, 1));
+        }, new Position(0, 1));
 
         assertTrue(wall.isPresent());
         assertEquals(0, wall.get().northCorner.x);
@@ -52,8 +52,8 @@ class WallDetectionTest {
         };
 
         ZWall doorWall = new ZWall(
-                new Position(0, 0, 0),
-                new Position(0, 0, 2)
+                new Position(0, 0),
+                new Position(0, 2)
         );
 
         Optional<ZWall> wall = WallDetection.findParallelRoomZWall(4, (Position dp) -> {
@@ -85,8 +85,8 @@ class WallDetectionTest {
         };
 
         ZWall doorWall = new ZWall(
-                new Position(2, 0, 0),
-                new Position(2, 0, 2)
+                new Position(2, 0),
+                new Position(2, 2)
         );
 
         Optional<ZWall> wall = WallDetection.findParallelRoomZWall(4, (Position dp) -> {
@@ -118,8 +118,8 @@ class WallDetectionTest {
         };
 
         XWall doorWall = new XWall(
-                new Position(0, 0, 2),
-                new Position(2, 0, 2)
+                new Position(0, 2),
+                new Position(2, 2)
         );
 
         Optional<XWall> wall = WallDetection.findParallelRoomXWall(4, (Position dp) -> {
@@ -151,8 +151,8 @@ class WallDetectionTest {
         };
 
         XWall doorWall = new XWall(
-                new Position(0, 0, 0),
-                new Position(2, 0, 0)
+                new Position(0, 0),
+                new Position(2, 0)
         );
 
         Optional<XWall> wall = WallDetection.findParallelRoomXWall(4, (Position dp) -> {
@@ -185,8 +185,8 @@ class WallDetectionTest {
         };
 
         XWall doorWall = new XWall(
-                new Position(0, 0, 3),
-                new Position(2, 0, 3)
+                new Position(0, 3),
+                new Position(2, 3)
         );
 
         Optional<XWall> wall = WallDetection.findParallelRoomXWall(4, (Position dp) -> {
@@ -220,8 +220,8 @@ class WallDetectionTest {
         };
 
         XWall doorWall = new XWall(
-                new Position(0, 0, 0),
-                new Position(2, 0, 0)
+                new Position(0, 0),
+                new Position(2, 0)
         );
 
         Optional<XWall> wall = WallDetection.findParallelRoomXWall(4, (Position dp) -> {

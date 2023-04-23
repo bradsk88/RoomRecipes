@@ -20,7 +20,7 @@ public class DoorDetection {
         ImmutableList.Builder<Position> dps = ImmutableList.builder();
         for (int z = -radius; z < radius; z++) {
             for (int x = -radius; x < radius; x++) {
-                Position dp = new Position(pos.x + x, pos.y, pos.z + z);
+                Position dp = new Position(pos.x + x, pos.z + z);
                 if (checker.IsDoor(dp)) {
                     dps.add(dp);
                 }

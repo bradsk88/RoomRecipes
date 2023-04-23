@@ -28,7 +28,7 @@ class XWallLogicTest {
                 return false;
             }
             return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
-        }, new Position(0, 0, 0), 4);
+        }, new Position(0, 0), 4);
 
         assertTrue(wall.isPresent());
         assertEquals(0, wall.get().westCorner.x);
@@ -53,7 +53,7 @@ class XWallLogicTest {
                 return false;
             }
             return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
-        }, new Position(2, 0, 0), 4);
+        }, new Position(2, 0), 4);
 
         assertTrue(wall.isPresent());
         assertEquals(0, wall.get().westCorner.x);

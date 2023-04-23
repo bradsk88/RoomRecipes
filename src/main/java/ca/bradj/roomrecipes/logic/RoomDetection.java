@@ -1,5 +1,7 @@
 package ca.bradj.roomrecipes.logic;
 
+import ca.bradj.roomrecipes.adapter.Positions;
+import ca.bradj.roomrecipes.core.Room;
 import ca.bradj.roomrecipes.core.space.Position;
 import ca.bradj.roomrecipes.rooms.XWall;
 import ca.bradj.roomrecipes.rooms.ZWall;
@@ -7,9 +9,8 @@ import com.google.common.collect.ImmutableSet;
 
 import java.util.Optional;
 
-public class RoomDetector {
+public class RoomDetection {
     private final int maxDistFromDoor;
-    private final Position doorPos;
     private ImmutableSet<Position> corners = ImmutableSet.of();
 
     public boolean isRoom() {
@@ -20,81 +21,84 @@ public class RoomDetector {
         return corners;
     }
 
-    public Position getDoorPos() {
-        return doorPos;
-    }
-
     public interface WallDetector {
         boolean IsWall(Position dp);
     }
 
-    public RoomDetector(
+    public RoomDetection(
             Position dp,
             int maxDistanceFromDoor
     ) {
-        this.doorPos = dp;
         this.maxDistFromDoor = maxDistanceFromDoor;
     }
 
-    public void update(WallDetector wd) {
-        if (this.findNorthOrSouthWallFromDoor(wd)) {
-            return;
+    public static Optional<Room> findRoom(
+            Position doorPos,
+            int maxDistFromDoor,
+            WallDetector wd
+    ) {
+        Optional<Room> room = findNorthOrSouthWallFromDoor(doorPos, maxDistFromDoor, wd);
+        if (room.isPresent()) {
+            return room;
         }
-        this.findEastOrWestWallFromDoor(wd);
+        return findEastOrWestWallFromDoor(doorPos, maxDistFromDoor, wd);
     }
 
-    public boolean findNorthOrSouthWallFromDoor(WallDetector wd) {
+    public static Optional<Room> findNorthOrSouthWallFromDoor(
+            Position doorPos,
+            int maxDistFromDoor,
+            WallDetector wd
+    ) {
         Optional<XWall> doorWall = WallDetection.findEastToWestWall(maxDistFromDoor, wd, doorPos);
         if (doorWall.isEmpty()) {
-            this.corners = ImmutableSet.of();
-            return false;
+            return Optional.empty();
         }
         Optional<XWall> ewWall = WallDetection.findParallelRoomXWall(maxDistFromDoor, wd, doorWall.get());
         if (ewWall.isEmpty()) {
-            this.corners = ImmutableSet.of();
-            return false;
+            return Optional.empty();
         }
         if (ewWall.get().westCorner.z != ewWall.get().eastCorner.z) {
-            return false;
+            return Optional.empty();
         }
 
         if (XWallLogic.isConnected(ewWall.get(), wd)) {
-            this.corners = ImmutableSet.of(
+            return Optional.of(new Room(doorPos, Positions.getInclusiveSpace(ImmutableSet.of(
                     doorWall.get().westCorner,
                     doorWall.get().eastCorner,
                     ewWall.get().westCorner,
                     ewWall.get().eastCorner
-            );
-            return true;
+            ))));
         }
-        return false;
+        return Optional.empty();
     }
 
-    public boolean findEastOrWestWallFromDoor(WallDetector wd) {
+    public static Optional<Room> findEastOrWestWallFromDoor(
+            Position doorPos,
+            int maxDistFromDoor,
+            WallDetector wd
+    ) {
         Optional<ZWall> doorWall = WallDetection.findNorthToSouthWall(maxDistFromDoor, wd, doorPos);
         if (doorWall.isEmpty()) {
-            this.corners = ImmutableSet.of();
-            return false;
+            return Optional.empty();
         }
         Optional<ZWall> ewWall = WallDetection.findParallelRoomZWall(maxDistFromDoor, wd, doorWall.get());
         if (ewWall.isEmpty()) {
-            this.corners = ImmutableSet.of();
-            return false;
+            return Optional.empty();
         }
         if (ewWall.get().northCorner.x != ewWall.get().southCorner.x) {
-            return false;
+            return Optional.empty();
         }
 
         if (ZWallLogic.isConnected(ewWall.get(), wd)) {
-            this.corners = ImmutableSet.of(
-                    doorWall.get().northCorner,
-                    doorWall.get().southCorner,
-                    ewWall.get().northCorner,
-                    ewWall.get().southCorner
-            );
-            return true;
+            return Optional.of(
+                    new Room(doorPos, Positions.getInclusiveSpace(ImmutableSet.of(
+                            doorWall.get().northCorner,
+                            doorWall.get().southCorner,
+                            ewWall.get().northCorner,
+                            ewWall.get().southCorner
+                    ))));
         }
-        return false;
+        return Optional.empty();
     }
 
     private boolean isConnected(
@@ -103,7 +107,7 @@ public class RoomDetector {
     ) {
         int width = wall.eastCorner.x - wall.westCorner.x;
         for (int i = 0; i < width; i++) {
-            if (!wd.IsWall(wall.westCorner.offset(i, 0, 0))) {
+            if (!wd.IsWall(wall.westCorner.offset(i, 0))) {
                 return false;
             }
         }

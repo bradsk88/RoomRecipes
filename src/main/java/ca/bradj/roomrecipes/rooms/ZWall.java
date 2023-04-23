@@ -1,7 +1,7 @@
 package ca.bradj.roomrecipes.rooms;
 
 import ca.bradj.roomrecipes.core.space.Position;
-import ca.bradj.roomrecipes.logic.RoomDetector;
+import ca.bradj.roomrecipes.logic.RoomDetection;
 
 import java.util.Optional;
 
@@ -23,14 +23,14 @@ public class ZWall {
         this.southCorner = sc;
     }
     public static Optional<ZWall> northFromCorner(
-            RoomDetector.WallDetector wd,
+            RoomDetection.WallDetector wd,
             Position cornerPos,
             int maxDistFromCorner
     ) {
         int southCornerZ = -Integer.MAX_VALUE, northCornerZ = Integer.MAX_VALUE;
         boolean started = false;
         for (int i = 0; i < maxDistFromCorner; i++) {
-            Position op = cornerPos.offset(0, 0, -i);
+            Position op = cornerPos.offset(0, -i);
             if (wd.IsWall(op)) {
                 started = true;
                 southCornerZ = Math.max(southCornerZ, op.z);
@@ -51,14 +51,14 @@ public class ZWall {
     }
 
     public static Optional<ZWall> southFromCorner(
-            RoomDetector.WallDetector wd,
+            RoomDetection.WallDetector wd,
             Position doorPos,
             int maxDistFromCorner
     ) {
         int southCornerZ = -Integer.MAX_VALUE, northCornerZ = Integer.MAX_VALUE;
         boolean started = false;
         for (int i = 0; i < maxDistFromCorner; i++) {
-            Position op = doorPos.offset(0, 0, i);
+            Position op = doorPos.offset(0, i);
             if (wd.IsWall(op)) {
                 started = true;
                 southCornerZ = Math.max(southCornerZ, op.z);
@@ -87,5 +87,9 @@ public class ZWall {
     }
     public ZWall shortenNorthEnd(int i) {
         return new ZWall(northCorner.WithZ(northCorner.z + i), southCorner);
+    }
+
+    public ZWall shiftedEast(int i) {
+        return new ZWall(northCorner.offset(i, 0), southCorner.offset(i, 0));
     }
 }

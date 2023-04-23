@@ -21,14 +21,14 @@ class DoorFinderTest {
         };
 
         ImmutableList<Position> expected = ImmutableList.of(
-                new Position(0, 0, 0),
-                new Position(3, 0, 0),
-                new Position(1, 0, 1),
-                new Position(2, 0, 2)
+                new Position(0, 0),
+                new Position(3, 0),
+                new Position(1, 1),
+                new Position(2, 2)
         );
 
         Collection<Position> dps = DoorDetection.LocateDoorsAroundPosition(
-                new Position(0, 0, 0),
+                new Position(0, 0),
                 (Position dp) -> {
                     if (dp.x < 0 || dp.z < 0) {
                         return false;
