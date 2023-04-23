@@ -1,7 +1,7 @@
 package ca.bradj.roomrecipes.rooms;
 
 import ca.bradj.roomrecipes.core.space.Position;
-import ca.bradj.roomrecipes.logic.RoomDetection;
+import ca.bradj.roomrecipes.logic.interfaces.WallDetector;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -24,7 +24,7 @@ public class ZWall {
         this.southCorner = sc;
     }
     public static Optional<ZWall> northFromCorner(
-            RoomDetection.WallDetector wd,
+            WallDetector wd,
             Position cornerPos,
             int maxDistFromCorner
     ) {
@@ -52,7 +52,7 @@ public class ZWall {
     }
 
     public static Optional<ZWall> southFromCorner(
-            RoomDetection.WallDetector wd,
+            WallDetector wd,
             Position doorPos,
             int maxDistFromCorner
     ) {

@@ -6,6 +6,7 @@ import ca.bradj.roomrecipes.core.Room;
 import ca.bradj.roomrecipes.core.RoomSplit;
 import ca.bradj.roomrecipes.core.space.InclusiveSpace;
 import ca.bradj.roomrecipes.core.space.Position;
+import ca.bradj.roomrecipes.logic.interfaces.WallDetector;
 import ca.bradj.roomrecipes.rooms.XWall;
 import ca.bradj.roomrecipes.rooms.ZWall;
 import com.google.common.collect.ImmutableList;
@@ -16,7 +17,7 @@ import java.util.stream.Stream;
 
 public class LevelRoomDetection {
 
-    public interface BlockChecker extends RoomDetection.WallDetector {
+    public interface BlockChecker extends WallDetector {
         boolean IsEmpty(Position dp);
 
         boolean IsDoor(Position dp);
@@ -25,11 +26,13 @@ public class LevelRoomDetection {
     public static ImmutableMap<Position, Optional<Room>> findRooms(
             Collection<Position> currentDoors,
             int maxDistanceFromDoor,
-            RoomDetection.WallDetector checker
+            WallDetector checker
     ) {
         Map<Position, Optional<Room>> detectedRooms = new HashMap<>();
         for (Position doorPos : ImmutableList.copyOf(currentDoors)) {
-            detectedRooms.put(doorPos, RoomDetection.findRoom(doorPos, maxDistanceFromDoor, checker));
+            detectedRooms.put(doorPos, RoomDetection.findRoomForDoor(
+                doorPos, maxDistanceFromDoor, Optional.empty(), checker
+            ));
         }
         detectedRooms.values().forEach(r -> RoomRecipes.LOGGER.debug("Detected room: " + r));
         int attempts = 0;
@@ -48,8 +51,8 @@ public class LevelRoomDetection {
                         continue;
                     }
                     if (r1.getSpace().equals(r2.getSpace())) {
-                        Optional<Room> alternate = RoomDetection.findRoom(
-                                r2.getDoorPos(), maxDistanceFromDoor, checker, r2
+                        Optional<Room> alternate = RoomDetection.findRoomForDoor(
+                                r2.getDoorPos(), maxDistanceFromDoor, Optional.of(r1.getSpace()), checker
                         );
                         if (alternate.isPresent()) {
                             RoomRecipes.LOGGER.debug("Using alternate room: " + alternate.get());
@@ -57,34 +60,13 @@ public class LevelRoomDetection {
                             corrections++;
                             break;
                         }
-                        alternate = RoomDetection.findRoom(
-                                r1.getDoorPos(), maxDistanceFromDoor, checker, r1
+                        alternate = RoomDetection.findRoomForDoor(
+                                r1.getDoorPos(), maxDistanceFromDoor, Optional.of(r2.getSpace()), checker
                         );
                         if (alternate.isPresent()) {
                             detectedRooms.put(r1.getDoorPos(), alternate);
                             corrections++;
                             RoomRecipes.LOGGER.debug("Using alternate room: " + alternate.get());
-                            break;
-                        }
-                        Optional<RoomSplit> split = LevelRoomDetection.splitRooms(
-                                r1.getDoorPos(),
-                                r2.getDoorPos(),
-                                r1.getSpace(),
-                                checker
-                        );
-                        if (split.isPresent()) {
-                            RoomRecipes.LOGGER.debug("Using room split: " + split.get());
-                            RoomSplit roomSplit = split.get();
-                            Room a = roomSplit.getRoomA();
-                            Room b = roomSplit.getRoomB();
-                            detectedRooms.put(a.getDoorPos(), Optional.of(a));
-                            detectedRooms.put(b.getDoorPos(), Optional.of(b));
-                            corrections++;
-                            break;
-                        } else {
-                            // Two doors on a single enclosed space - treat it like one room
-                            detectedRooms.remove(r2.getDoorPos());
-                            corrections++;
                             break;
                         }
                     } else {
@@ -117,7 +99,7 @@ public class LevelRoomDetection {
             Position doorPos1,
             Position doorPos2,
             InclusiveSpace space,
-            RoomDetection.WallDetector wd
+            WallDetector wd
     ) {
         Position westDP = doorPos1;
         Position eastDP = doorPos2;
@@ -180,7 +162,7 @@ public class LevelRoomDetection {
             int westX,
             int eastX,
             InclusiveSpace space,
-            RoomDetection.WallDetector wd
+            WallDetector wd
     ) {
         for (int i = 1; i < eastX - westX; i++) {
             ZWall middleWall = new ZWall(
@@ -198,7 +180,7 @@ public class LevelRoomDetection {
             int northZ,
             int southZ,
             InclusiveSpace space,
-            RoomDetection.WallDetector wd
+            WallDetector wd
     ) {
         for (int i = 1; i < southZ - northZ; i++) {
             XWall middleWall = new XWall(

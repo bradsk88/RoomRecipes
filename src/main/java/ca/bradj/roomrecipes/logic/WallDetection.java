@@ -2,6 +2,7 @@ package ca.bradj.roomrecipes.logic;
 
 import ca.bradj.roomrecipes.core.Room;
 import ca.bradj.roomrecipes.core.space.Position;
+import ca.bradj.roomrecipes.logic.interfaces.WallDetector;
 import ca.bradj.roomrecipes.rooms.XWall;
 import ca.bradj.roomrecipes.rooms.ZWall;
 
@@ -11,7 +12,7 @@ public class WallDetection {
 
     public static Optional<ZWall> findNorthToSouthWall(
             int maxDistFromDoor,
-            RoomDetection.WallDetector wd,
+            WallDetector wd,
             Position doorPos
     ) {
         int northCornerZ = Integer.MAX_VALUE, southCornerZ = -Integer.MAX_VALUE;
@@ -51,7 +52,7 @@ public class WallDetection {
 
     public static Optional<XWall> findEastToWestWall(
             int maxDistFromDoor,
-            RoomDetection.WallDetector wd,
+            WallDetector wd,
             Position doorPos
     ) {
         int westCornerX = Integer.MAX_VALUE, eastCornerX = -Integer.MAX_VALUE;
@@ -90,7 +91,7 @@ public class WallDetection {
     public static Optional<ZWall> findParallelRoomZWall(
             int maxDistFromDoor,
             ZWall doorWall,
-            RoomDetection.WallDetector wd
+            WallDetector wd
         ) {
         return findParallelRoomZWall(maxDistFromDoor, doorWall, Optional.empty(), wd);
     }
@@ -98,7 +99,7 @@ public class WallDetection {
             int maxDistFromDoor,
             ZWall doorWall,
             Optional<Room> findAlternativeTo,
-            RoomDetection.WallDetector wd
+            WallDetector wd
         ) {
         if (!alreadyFoundEast(findAlternativeTo)) {
             Optional<ZWall> northWall = findEastParallelZWall(doorWall, maxDistFromDoor, wd);
@@ -112,7 +113,7 @@ public class WallDetection {
     private static Optional<ZWall> findEastParallelZWall(
             ZWall doorWall,
             int maxDistFromDoor,
-            RoomDetection.WallDetector wd
+            WallDetector wd
     ) {
         for (int i = 2; i < maxDistFromDoor; i++) {
             ZWall shifted = doorWall.shiftedEast(i);
@@ -135,7 +136,7 @@ public class WallDetection {
     private static Optional<ZWall> findWestParallelZWall(
             ZWall doorWall,
             int maxDistFromDoor,
-            RoomDetection.WallDetector wd
+            WallDetector wd
     ) {
         for (int i = 2; i < maxDistFromDoor; i++) {
             ZWall shifted = doorWall.shiftedWest(i);
@@ -148,7 +149,7 @@ public class WallDetection {
 
     public static Optional<XWall> findParallelRoomXWall(
             int maxDistFromDoor,
-            RoomDetection.WallDetector wd,
+            WallDetector wd,
             XWall wall
     ) {
         return findParallelRoomXWall(maxDistFromDoor, Optional.empty(), wd, wall);
@@ -157,7 +158,7 @@ public class WallDetection {
     public static Optional<XWall> findParallelRoomXWall(
             int maxDistFromDoor,
             Optional<Room> findAlt,
-            RoomDetection.WallDetector wd,
+            WallDetector wd,
             XWall wall
     ) {
         if (!alreadyFoundNorth(findAlt)) {
@@ -181,7 +182,7 @@ public class WallDetection {
     private static Optional<XWall> findSouthParallelXWall(
             int maxDistFromDoor,
             XWall wall,
-            RoomDetection.WallDetector wd
+            WallDetector wd
     ) {
         for (int i = 2; i < maxDistFromDoor; i++) {
             XWall shifted = wall.shiftedSouthBy(i);
@@ -195,7 +196,7 @@ public class WallDetection {
     private static Optional<XWall> findNorthParallelXWall(
             int maxDistFromDoor,
             XWall wall,
-            RoomDetection.WallDetector wd
+            WallDetector wd
     ) {
         for (int i = 2; i < maxDistFromDoor; i++) {
             XWall shifted = wall.shiftedNorthBy(i);

@@ -1,12 +1,13 @@
 package ca.bradj.roomrecipes.logic;
 
 import ca.bradj.roomrecipes.core.space.Position;
+import ca.bradj.roomrecipes.logic.interfaces.WallDetector;
 import ca.bradj.roomrecipes.rooms.XWall;
 
 import java.util.Optional;
 
 public class XWalls {
-    public static boolean isConnected(XWall wall, RoomDetection.WallDetector wd) {
+    public static boolean isConnected(XWall wall, WallDetector wd) {
         if (wall.westCorner.z != wall.eastCorner.z) {
             return false;
         }
@@ -21,7 +22,7 @@ public class XWalls {
     }
 
     public static Optional<XWall> eastFromCorner(
-            RoomDetection.WallDetector wd,
+            WallDetector wd,
             Position northCorner,
             int maxDistFromDoor
     ) {
@@ -39,7 +40,7 @@ public class XWalls {
         );
     }
     public static Optional<XWall> westFromCorner(
-            RoomDetection.WallDetector wd,
+            WallDetector wd,
             Position northCorner,
             int maxDistFromDoor
     ) {

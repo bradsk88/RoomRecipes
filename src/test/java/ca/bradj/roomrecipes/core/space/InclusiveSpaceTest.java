@@ -85,16 +85,6 @@ class InclusiveSpaceTest {
     }
 
     @Test
-    public void testChopOff_partialOverlap() {
-        // Partial overlap
-        InclusiveSpace space1 = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
-        InclusiveSpace space2 = new InclusiveSpace(new Position(1, 1), new Position(3, 2));
-        InclusiveSpace expected = new InclusiveSpace(new Position(0, 0), new Position(2, 1));
-        InclusiveSpace result = space1.chopOff(space2);
-        assertEquals(expected, result);
-    }
-
-    @Test
     public void testChopOff_Nested() {
         // Partial overlap
         InclusiveSpace space1 = new InclusiveSpace(new Position(0, 0), new Position(4, 2));

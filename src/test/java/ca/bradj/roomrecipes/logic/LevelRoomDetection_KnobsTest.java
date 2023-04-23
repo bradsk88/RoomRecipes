@@ -1,24 +1,21 @@
 package ca.bradj.roomrecipes.logic;
 
-import ca.bradj.roomrecipes.RoomRecipes;
 import ca.bradj.roomrecipes.core.Room;
 import ca.bradj.roomrecipes.core.space.InclusiveSpace;
 import ca.bradj.roomrecipes.core.space.Position;
+import ca.bradj.roomrecipes.logic.interfaces.WallDetector;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
-import java.util.logging.ConsoleHandler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class LevelRoomDetection_KnobsTest {
 
-    private RoomDetection.WallDetector WD(String[][] map) {
+    private WallDetector WD(String[][] map) {
 
         return (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {

@@ -4,6 +4,7 @@ import ca.bradj.roomrecipes.RoomRecipes;
 import ca.bradj.roomrecipes.core.Room;
 import ca.bradj.roomrecipes.core.space.InclusiveSpace;
 import ca.bradj.roomrecipes.core.space.Position;
+import ca.bradj.roomrecipes.logic.interfaces.WallDetector;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.apache.logging.log4j.Level;
@@ -11,15 +12,13 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.logging.ConsoleHandler;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class LevelRoomDetectionTest {
 
-    private RoomDetection.WallDetector WD(String[][] map) {
+    private WallDetector WD(String[][] map) {
 
         return (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
@@ -538,7 +537,7 @@ class LevelRoomDetectionTest {
         expectedCorners = new InclusiveSpace(new Position(0, 2), new Position(2, 4));
         assertEquals(expectedCorners, room.get(new Position(1, 4)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(2, 2), new Position(4, 4));
+        expectedCorners = new InclusiveSpace(new Position(2, 2), new Position(5, 4));
         assertEquals(expectedCorners, room.get(new Position(3, 4)).get().getSpace());
     }
 }

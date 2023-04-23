@@ -1,196 +1,148 @@
 package ca.bradj.roomrecipes.logic;
 
-import ca.bradj.roomrecipes.adapter.Positions;
 import ca.bradj.roomrecipes.core.Room;
+import ca.bradj.roomrecipes.core.space.InclusiveSpace;
 import ca.bradj.roomrecipes.core.space.Position;
+import ca.bradj.roomrecipes.logic.interfaces.WallDetector;
 import ca.bradj.roomrecipes.rooms.XWall;
 import ca.bradj.roomrecipes.rooms.ZWall;
-import com.google.common.collect.ImmutableSet;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 public class RoomDetection {
-    private final int maxDistFromDoor;
-    private ImmutableSet<Position> corners = ImmutableSet.of();
 
-    public boolean isRoom() {
-        return corners.size() == 4;
-    }
-
-    public ImmutableSet<Position> getCorners() {
-        return corners;
-    }
-
-    public interface WallDetector {
-        boolean IsWall(Position dp);
-    }
-
-    public RoomDetection(
-            Position dp,
-            int maxDistanceFromDoor
-    ) {
-        this.maxDistFromDoor = maxDistanceFromDoor;
-    }
-
-    public static Optional<Room> findRoom(
+    public static Optional<Room> findRoomForDoor(
             Position doorPos,
-            int maxDistFromDoor,
+            int maxDistanceFromDoor,
             WallDetector wd
     ) {
-        return findRoom(doorPos, maxDistFromDoor, Optional.empty(), wd);
+        return findRoomForDoor(doorPos, maxDistanceFromDoor, Optional.empty(), wd);
     }
 
-    private static Optional<Room> findRoom(
+    public static Optional<Room> findRoomForDoor(
             Position doorPos,
-            int maxDistFromDoor,
-            Optional<Room> findAlternateSpace,
+            int maxDistanceFromDoor,
+            Optional<InclusiveSpace> findAlternativeTo,
             WallDetector wd
     ) {
-        return findRoom(doorPos, maxDistFromDoor, wd, findAlternateSpace);
-    }
+        Function<Position, Optional<Room>> findFromBackWall = (Position wallPos) ->
+                findRoomFromBackWall(
+                        doorPos, wallPos, maxDistanceFromDoor, findAlternativeTo, wd
+                );
 
-    public interface AlternateTo {
-        boolean IsSame(Position p1, Position p2);
-    }
-
-    public static Optional<Room> findRoom(
-            Position doorPos,
-            int maxDistFromDoor,
-            WallDetector wd,
-            Room findAlternateTo
-    ) {
-        return findRoom(doorPos, maxDistFromDoor, wd, Optional.of(findAlternateTo));
-    }
-    private static Optional<Room> findRoom(
-            Position doorPos,
-            int maxDistFromDoor,
-            WallDetector wd,
-            Optional<Room> findAlternateTo
-    ) {
-        Optional<ZWall> altZ = Optional.empty();
-        if (findAlternateTo.isPresent()) {
-            altZ = findAlternateTo.get().getBackZWall();
-        }
-        Optional<Room> room = findNorthOrSouthRoomFromDoor(
-                doorPos, maxDistFromDoor, findAlternateTo, wd
-        );
-        if (room.isPresent()) {
-            return room;
-        }
-        return findEastOrWestWallFromDoor(doorPos, maxDistFromDoor, findAlternateTo, wd);
-    }
-
-    public static Optional<Room> findNorthOrSouthRoomFromDoor(
-            Position doorPos,
-            int maxDistFromDoor,
-            WallDetector wd
-    ) {
-        return findNorthOrSouthRoomFromDoor(doorPos, maxDistFromDoor, Optional.empty(), wd);
-    }
-    public static Optional<Room> findNorthOrSouthRoomFromDoor(
-            Position doorPos,
-            int maxDistFromDoor,
-            Room findAlternateTo,
-            WallDetector wd
-    ) {
-        return findNorthOrSouthRoomFromDoor(doorPos, maxDistFromDoor, Optional.of(findAlternateTo), wd);
-    }
-
-    private static Optional<Room> findNorthOrSouthRoomFromDoor(
-            Position doorPos,
-            int maxDistFromDoor,
-            Optional<Room> findAlt,
-            WallDetector wd
-    ) {
-        Optional<XWall> doorWall = WallDetection.findEastToWestWall(maxDistFromDoor, wd, doorPos);
-        if (doorWall.isEmpty()) {
-            return Optional.empty();
-        }
-        Optional<XWall> ewWall = WallDetection.findParallelRoomXWall(maxDistFromDoor, findAlt, wd, doorWall.get());
-        if (ewWall.isEmpty()) {
-            return Optional.empty();
-        }
-        if (ewWall.get().westCorner.z != ewWall.get().eastCorner.z) {
-            return Optional.empty();
-        }
-        if (findAlt.isPresent()) {
-            if (findAlt.get().getBackXWall().isPresent()) {
-                if (findAlt.get().getBackXWall().get().equals(ewWall.get())) {
-                    return Optional.empty();
-                }
+        for (int i = 2; i < maxDistanceFromDoor; i++) {
+            Optional<Room> foundRoom = findFromBackWall.apply(doorPos.offset(i, 0));
+            if (foundRoom.isPresent()) {
+                return foundRoom;
             }
-        }
-
-        if (XWalls.isConnected(ewWall.get(), wd)) {
-            return Optional.of(new Room(doorPos, Positions.getInclusiveSpace(ImmutableSet.of(
-                    doorWall.get().westCorner,
-                    doorWall.get().eastCorner,
-                    ewWall.get().westCorner,
-                    ewWall.get().eastCorner
-            ))));
+            foundRoom = findFromBackWall.apply(doorPos.offset(-i, 0));
+            if (foundRoom.isPresent()) {
+                return foundRoom;
+            }
+            foundRoom = findFromBackWall.apply(doorPos.offset(0, i));
+            if (foundRoom.isPresent()) {
+                return foundRoom;
+            }
+            foundRoom = findFromBackWall.apply(doorPos.offset(0, -i));
+            if (foundRoom.isPresent()) {
+                return foundRoom;
+            }
         }
         return Optional.empty();
     }
 
-    public static Optional<Room> findEastOrWestWallFromDoor(
+    private static Optional<Room> findRoomFromBackWall(
             Position doorPos,
+            Position wallPos,
             int maxDistFromDoor,
-            Room findAlternateTo,
+            Optional<InclusiveSpace> findAlt,
             WallDetector wd
     ) {
-        return findEastOrWestWallFromDoor(doorPos, maxDistFromDoor, Optional.of(findAlternateTo), wd);
+        if (!wd.IsWall(wallPos)) {
+            return Optional.empty();
+        }
+        Optional<Room> room = findRoomBetween(doorPos, wallPos, maxDistFromDoor, wd);
+        if (room.isEmpty()) {
+            return Optional.empty();
+        }
+        if (findAlt.isPresent() && room.get().getSpace().equals(findAlt.get())) {
+            return Optional.empty();
+        }
+        return room;
     }
-    private static Optional<Room> findEastOrWestWallFromDoor(
+
+    private static Optional<Room> findRoomBetween(
             Position doorPos,
+            Position wallPos,
             int maxDistFromDoor,
-            Optional<Room> findAlternateTo,
             WallDetector wd
     ) {
-        Optional<ZWall> doorWall = WallDetection.findNorthToSouthWall(maxDistFromDoor, wd, doorPos);
-        if (doorWall.isEmpty()) {
-            return Optional.empty();
+        if (doorPos.x != wallPos.x && doorPos.z != wallPos.z) {
+            throw new IllegalStateException("Expected straight line between positions");
         }
-        Optional<ZWall> ewWall = WallDetection.findParallelRoomZWall(maxDistFromDoor,
-                doorWall.get(),
-                findAlternateTo,
-                wd);
-        if (ewWall.isEmpty()) {
-            return Optional.empty();
-        }
-        if (ewWall.get().northCorner.x != ewWall.get().southCorner.x) {
-            return Optional.empty();
-        }
-        if (findAlternateTo.isPresent()) {
-            if (findAlternateTo.get().getBackZWall().isPresent()) {
-                if (findAlternateTo.get().getBackZWall().get().equals(ewWall.get())) {
-                    return Optional.empty();
+        int diffX = Math.max(doorPos.x, wallPos.x) - Math.min(doorPos.x, wallPos.x);
+        int diffZ = Math.max(doorPos.z, wallPos.z) - Math.min(doorPos.z, wallPos.z);
+        if (diffZ > diffX) {
+            ZWall midWall = new ZWall(doorPos, wallPos);
+            if (ZWalls.isConnected(midWall, wd)) {
+                return Optional.empty();
+            }
+            Optional<ZWall> westWall = Optional.empty();
+            Optional<ZWall> eastWall = Optional.empty();
+            for (int i = 1; i < maxDistFromDoor; i++) {
+                if (eastWall.isPresent() && westWall.isPresent()) {
+                    XWall nWall = new XWall(westWall.get().northCorner, eastWall.get().northCorner);
+                    XWall sWall = new XWall(westWall.get().southCorner, eastWall.get().southCorner);
+                    if (!XWalls.isConnected(nWall, wd)) {
+                        continue;
+                    }
+                    if (!XWalls.isConnected(sWall, wd)) {
+                        continue;
+                    }
+                    return Optional.of(new Room(doorPos, new InclusiveSpace(
+                            westWall.get().northCorner,
+                            eastWall.get().southCorner
+                    )));
+                }
+                if (ZWalls.isConnected(midWall.shiftedWest(i), wd)) {
+                    westWall = Optional.of(midWall.shiftedWest(i));
+                }
+                if (ZWalls.isConnected(midWall.shiftedEast(i), wd)) {
+                    eastWall = Optional.of(midWall.shiftedEast(i));
+                }
+            }
+        } else {
+            XWall midWall = new XWall(doorPos, wallPos);
+            if (XWalls.isConnected(midWall, wd)) {
+                return Optional.empty();
+            }
+            Optional<XWall> northWall = Optional.empty();
+            Optional<XWall> southWall = Optional.empty();
+            for (int i = 1; i < maxDistFromDoor; i++) {
+                if (southWall.isPresent() && northWall.isPresent()) {
+                    ZWall wWall = new ZWall(northWall.get().westCorner, southWall.get().westCorner);
+                    ZWall eWall = new ZWall(northWall.get().eastCorner, southWall.get().eastCorner);
+                    if (!ZWalls.isConnected(wWall, wd)) {
+                        continue;
+                    }
+                    if (!ZWalls.isConnected(eWall, wd)) {
+                        continue;
+                    }
+                    return Optional.of(new Room(doorPos, new InclusiveSpace(
+                            northWall.get().westCorner,
+                            southWall.get().eastCorner
+                    )));
+                }
+                if (XWalls.isConnected(midWall.shiftedNorthBy(i), wd)) {
+                    northWall = Optional.of(midWall.shiftedNorthBy(i));
+                }
+                if (XWalls.isConnected(midWall.shiftedSouthBy(i), wd)) {
+                    southWall = Optional.of(midWall.shiftedSouthBy(i));
                 }
             }
         }
-
-        if (ZWalls.isConnected(ewWall.get(), wd)) {
-            return Optional.of(
-                    new Room(doorPos, Positions.getInclusiveSpace(ImmutableSet.of(
-                            doorWall.get().northCorner,
-                            doorWall.get().southCorner,
-                            ewWall.get().northCorner,
-                            ewWall.get().southCorner
-                    ))));
-        }
         return Optional.empty();
-    }
-
-    private boolean isConnected(
-            XWall wall,
-            WallDetector wd
-    ) {
-        int width = wall.eastCorner.x - wall.westCorner.x;
-        for (int i = 0; i < width; i++) {
-            if (!wd.IsWall(wall.westCorner.offset(i, 0))) {
-                return false;
-            }
-        }
-        return true;
     }
 
 }
