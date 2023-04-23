@@ -1,5 +1,6 @@
 package ca.bradj.roomrecipes.core.space;
 
+import ca.bradj.roomrecipes.logic.InclusiveSpaces;
 import ca.bradj.roomrecipes.rooms.XWall;
 import ca.bradj.roomrecipes.rooms.ZWall;
 
@@ -13,8 +14,9 @@ public class InclusiveSpace {
             Position aa,
             Position bb
     ) {
-        this.aa = aa;
-        this.bb = bb;
+        // TODO: Ensure space corners are aligned correctly.
+        this.aa = new Position(Math.min(aa.x, bb.x), Math.min(aa.z, bb.z));
+        this.bb = new Position(Math.max(aa.x, bb.x), Math.max(aa.z, bb.z));
     }
 
     private final Position aa;
@@ -115,5 +117,36 @@ public class InclusiveSpace {
                         Math.max(aa.z, bb.z)
                 )
         );
+    }
+
+    public InclusiveSpace chopOff(InclusiveSpace otherSpace) {
+        if (!InclusiveSpaces.overlapOnXZPlane(this, otherSpace)) {
+            // If the otherSpace does not overlap with this space, return a copy of this space
+            return new InclusiveSpace(aa, bb);
+        }
+
+        // Calculate the overlapping region between the two spaces
+        int overlapNorthZ = Math.max(getNorthZ(), otherSpace.getNorthZ());
+        int overlapSouthZ = Math.min(getSouthZ(), otherSpace.getSouthZ());
+        int overlapWestX = Math.max(getWestX(), otherSpace.getWestX());
+        int overlapEastX = Math.min(getEastX(), otherSpace.getEastX());
+
+        // Determine which side(s) of this space need to be chopped off
+        boolean chopNorth = overlapNorthZ == getNorthZ();
+        boolean chopSouth = overlapSouthZ == getSouthZ();
+        boolean chopWest = overlapWestX == getWestX();
+        boolean chopEast = overlapEastX == getEastX();
+
+        // Calculate the new bounding box
+        Position newAA = new Position(
+                chopWest ? overlapEastX : getWestX(),
+                chopNorth ? overlapSouthZ : getNorthZ()
+        );
+        Position newBB = new Position(
+                chopEast ? overlapWestX : getEastX(),
+                chopSouth ? overlapNorthZ : getSouthZ()
+        );
+
+        return new InclusiveSpace(newAA, newBB);
     }
 }

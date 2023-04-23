@@ -90,6 +90,10 @@ public class ZWall {
         return new ZWall(northCorner.WithZ(northCorner.z + i), southCorner);
     }
 
+    public ZWall shiftedWest(int i) {
+        return shiftedEast(-i);
+    }
+
     public ZWall shiftedEast(int i) {
         return new ZWall(northCorner.offset(i, 0), southCorner.offset(i, 0));
     }

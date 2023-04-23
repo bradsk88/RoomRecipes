@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 class InclusiveSpaceTest {
 
     @Test
@@ -38,7 +40,7 @@ class InclusiveSpaceTest {
     void testGetInclusiveSpaceWithTwoDoors() {
         Collection<Position> doors = Arrays.asList(new Position(1, 1), new Position(2, 2));
         InclusiveSpace space = Positions.getInclusiveSpace(doors);
-        Assertions.assertEquals(new InclusiveSpace(new Position(1, 1), new Position(2, 2)), space);
+        assertEquals(new InclusiveSpace(new Position(1, 1), new Position(2, 2)), space);
     }
 
     @Test
@@ -50,7 +52,56 @@ class InclusiveSpaceTest {
                 new Position(7, 9)
         );
         InclusiveSpace space = Positions.getInclusiveSpace(doors);
-        Assertions.assertEquals(new InclusiveSpace(new Position(0, -2), new Position(7, 9)), space);
+        assertEquals(new InclusiveSpace(new Position(0, -2), new Position(7, 9)), space);
+    }
+
+    @Test
+    public void testChopOff_noOverlap() {
+        // No overlap
+        InclusiveSpace space1 = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace space2 = new InclusiveSpace(new Position(4, 4), new Position(6, 6));
+        InclusiveSpace result = space1.chopOff(space2);
+        assertEquals(space1, result);
+    }
+
+    @Test
+    public void testChopOff_overlap() {
+        // Overlap
+        InclusiveSpace space1 = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace space2 = new InclusiveSpace(new Position(1, 1), new Position(3, 3));
+        InclusiveSpace expected = new InclusiveSpace(new Position(0, 0), new Position(1, 1));
+        InclusiveSpace result = space1.chopOff(space2);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testChopOff_sameSpace() {
+        // Same space
+        InclusiveSpace space1 = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace space2 = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace expected = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace result = space1.chopOff(space2);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testChopOff_partialOverlap() {
+        // Partial overlap
+        InclusiveSpace space1 = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace space2 = new InclusiveSpace(new Position(1, 1), new Position(3, 2));
+        InclusiveSpace expected = new InclusiveSpace(new Position(0, 0), new Position(2, 1));
+        InclusiveSpace result = space1.chopOff(space2);
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testChopOff_Nested() {
+        // Partial overlap
+        InclusiveSpace space1 = new InclusiveSpace(new Position(0, 0), new Position(4, 2));
+        InclusiveSpace space2 = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace expected = new InclusiveSpace(new Position(2, 0), new Position(4, 2));
+        InclusiveSpace result = space1.chopOff(space2);
+        assertEquals(expected, result);
     }
 
 }

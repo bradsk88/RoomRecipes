@@ -1,5 +1,6 @@
 package ca.bradj.roomrecipes.logic;
 
+import ca.bradj.roomrecipes.RoomRecipes;
 import ca.bradj.roomrecipes.adapter.Positions;
 import ca.bradj.roomrecipes.core.Room;
 import ca.bradj.roomrecipes.core.RoomSplit;
@@ -11,6 +12,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 public class LevelRoomDetection {
 
@@ -29,42 +31,81 @@ public class LevelRoomDetection {
         for (Position doorPos : ImmutableList.copyOf(currentDoors)) {
             detectedRooms.put(doorPos, RoomDetection.findRoom(doorPos, maxDistanceFromDoor, checker));
         }
-        List<Room> rooms = detectedRooms.values().stream().filter(Optional::isPresent).map(Optional::get).toList();
-        for (Room r1 : rooms) {
-            for (Room r2 : rooms) {
-                if (r1.equals(r2)) {
-                    continue;
+        detectedRooms.values().forEach(r -> RoomRecipes.LOGGER.debug("Detected room: " + r));
+        int attempts = 0;
+        int corrections = 1;
+        while (corrections > 0 && attempts <= 3) {
+            attempts++;
+            Stream<Optional<Room>> onlyPresent = detectedRooms.values().stream().filter(Optional::isPresent);
+            List<Room> rooms = onlyPresent.map(Optional::get).toList();
+            corrections = 0;
+            for (Room r1 : rooms) {
+                if (corrections > 0) {
+                    break;
                 }
-                if (r1.getSpace().equals(r2.getSpace())) {
-                    Optional<Room> alternate = RoomDetection.findRoom(
-                            r2.getDoorPos(), maxDistanceFromDoor, checker, r2
-                    );
-                    if (alternate.isPresent()) {
-                        detectedRooms.put(r2.getDoorPos(), alternate);
+                for (Room r2 : rooms) {
+                    if (r1.equals(r2)) {
                         continue;
                     }
-                    alternate = RoomDetection.findRoom(
-                            r1.getDoorPos(), maxDistanceFromDoor, checker, r1
-                    );
-                    if (alternate.isPresent()) {
-                        detectedRooms.put(r1.getDoorPos(), alternate);
-                        continue;
-                    }
-                    Optional<RoomSplit> split = LevelRoomDetection.splitRooms(
-                            r1.getDoorPos(),
-                            r2.getDoorPos(),
-                            r1.getSpace(),
-                            checker
-                    );
-                    if (split.isPresent()) {
-                        RoomSplit roomSplit = split.get();
-                        Room a = roomSplit.getRoomA();
-                        Room b = roomSplit.getRoomB();
-                        detectedRooms.put(a.getDoorPos(), Optional.of(a));
-                        detectedRooms.put(b.getDoorPos(), Optional.of(b));
+                    if (r1.getSpace().equals(r2.getSpace())) {
+                        Optional<Room> alternate = RoomDetection.findRoom(
+                                r2.getDoorPos(), maxDistanceFromDoor, checker, r2
+                        );
+                        if (alternate.isPresent()) {
+                            RoomRecipes.LOGGER.debug("Using alternate room: " + alternate.get());
+                            detectedRooms.put(r2.getDoorPos(), alternate);
+                            corrections++;
+                            break;
+                        }
+                        alternate = RoomDetection.findRoom(
+                                r1.getDoorPos(), maxDistanceFromDoor, checker, r1
+                        );
+                        if (alternate.isPresent()) {
+                            detectedRooms.put(r1.getDoorPos(), alternate);
+                            corrections++;
+                            RoomRecipes.LOGGER.debug("Using alternate room: " + alternate.get());
+                            break;
+                        }
+                        Optional<RoomSplit> split = LevelRoomDetection.splitRooms(
+                                r1.getDoorPos(),
+                                r2.getDoorPos(),
+                                r1.getSpace(),
+                                checker
+                        );
+                        if (split.isPresent()) {
+                            RoomRecipes.LOGGER.debug("Using room split: " + split.get());
+                            RoomSplit roomSplit = split.get();
+                            Room a = roomSplit.getRoomA();
+                            Room b = roomSplit.getRoomB();
+                            detectedRooms.put(a.getDoorPos(), Optional.of(a));
+                            detectedRooms.put(b.getDoorPos(), Optional.of(b));
+                            corrections++;
+                            break;
+                        } else {
+                            // Two doors on a single enclosed space - treat it like one room
+                            detectedRooms.remove(r2.getDoorPos());
+                            corrections++;
+                            break;
+                        }
                     } else {
-                        // Two doors on a single enclosed space - treat it like one room
-                        detectedRooms.remove(r2.getDoorPos());
+                        if (InclusiveSpaces.overlapOnXZPlane(r1.getSpace(), r2.getSpace())) {
+                            double a1 = InclusiveSpaces.calculateArea(r1.getSpace());
+                            double a2 = InclusiveSpaces.calculateArea(r2.getSpace());
+                            if (a1 > a2) {
+                                RoomRecipes.LOGGER.debug("Chopping " + r2 + " off of " + r1);
+                                InclusiveSpace chopped = r1.getSpace().chopOff(r2.getSpace());
+                                detectedRooms.put(r1.getDoorPos(), Optional.of(r1.withSpace(chopped)));
+                                corrections++;
+                                break;
+                            }
+                            if (a2 > a1) {
+                                RoomRecipes.LOGGER.debug("Chopping " + r1 + " off of " + r2);
+                                InclusiveSpace chopped = r2.getSpace().chopOff(r1.getSpace());
+                                detectedRooms.put(r2.getDoorPos(), Optional.of(r2.withSpace(chopped)));
+                                corrections++;
+                                break;
+                            }
+                        }
                     }
                 }
             }
@@ -146,7 +187,7 @@ public class LevelRoomDetection {
                     new Position(westX + i, space.getNorthZ()),
                     new Position(westX + i, space.getSouthZ())
             );
-            if (ZWallLogic.isConnected(middleWall, wd)) {
+            if (ZWalls.isConnected(middleWall, wd)) {
                 return Optional.of(middleWall);
             }
         }
@@ -164,7 +205,7 @@ public class LevelRoomDetection {
                     new Position(space.getWestX(), northZ + i),
                     new Position(space.getEastX(), northZ + i)
             );
-            if (XWallLogic.isConnected(middleWall, wd)) {
+            if (XWalls.isConnected(middleWall, wd)) {
                 return Optional.of(middleWall);
             }
         }

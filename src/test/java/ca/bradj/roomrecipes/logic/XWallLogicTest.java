@@ -2,7 +2,6 @@ package ca.bradj.roomrecipes.logic;
 
 import ca.bradj.roomrecipes.core.space.Position;
 import ca.bradj.roomrecipes.rooms.XWall;
-import ca.bradj.roomrecipes.rooms.ZWall;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -20,7 +19,7 @@ class XWallLogicTest {
                 {"W", "W", "W"},
         };
 
-        Optional<XWall> wall = XWallLogic.eastFromCorner((Position dp) -> {
+        Optional<XWall> wall = XWalls.eastFromCorner((Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -45,7 +44,7 @@ class XWallLogicTest {
                 {"W", "W", "W"},
         };
 
-        Optional<XWall> wall = XWallLogic.westFromCorner((Position dp) -> {
+        Optional<XWall> wall = XWalls.westFromCorner((Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }

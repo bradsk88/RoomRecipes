@@ -68,4 +68,8 @@ public class Room {
     public int hashCode() {
         return Objects.hash(doorPos, space);
     }
+
+    public Room withSpace(InclusiveSpace chopped) {
+        return new Room(this.getDoorPos(), chopped);
+    }
 }

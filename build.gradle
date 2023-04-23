@@ -127,6 +127,7 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 dependencies {
     implementation 'org.junit.jupiter:junit-jupiter:5.4.0'
+    implementation 'org.apache.logging.log4j:log4j-core:2.17.1'
 
     // Specify the version of Minecraft to use, If this is any group other then 'net.minecraft' it is assumed
     // that the dep is a ForgeGradle 'patcher' dependency. And it's patches will be applied.

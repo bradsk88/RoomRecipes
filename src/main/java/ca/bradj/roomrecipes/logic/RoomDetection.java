@@ -121,7 +121,7 @@ public class RoomDetection {
             }
         }
 
-        if (XWallLogic.isConnected(ewWall.get(), wd)) {
+        if (XWalls.isConnected(ewWall.get(), wd)) {
             return Optional.of(new Room(doorPos, Positions.getInclusiveSpace(ImmutableSet.of(
                     doorWall.get().westCorner,
                     doorWall.get().eastCorner,
@@ -168,7 +168,7 @@ public class RoomDetection {
             }
         }
 
-        if (ZWallLogic.isConnected(ewWall.get(), wd)) {
+        if (ZWalls.isConnected(ewWall.get(), wd)) {
             return Optional.of(
                     new Room(doorPos, Positions.getInclusiveSpace(ImmutableSet.of(
                             doorWall.get().northCorner,

@@ -114,29 +114,10 @@ public class WallDetection {
             int maxDistFromDoor,
             RoomDetection.WallDetector wd
     ) {
-        int eastLength = 0;
-        Optional<XWall> northEastWall = XWallLogic.eastFromCorner(wd, doorWall.northCorner, maxDistFromDoor);
-        Optional<XWall> southEastWall = XWallLogic.eastFromCorner(wd, doorWall.southCorner, maxDistFromDoor);
-        if (northEastWall.isPresent() && southEastWall.isPresent()) {
-            eastLength = Math.min(
-                    southEastWall.get().eastCorner.x - southEastWall.get().westCorner.x,
-                    northEastWall.get().eastCorner.x - northEastWall.get().westCorner.x
-            );
-        }
-        if (eastLength > 0) {
-            ZWall foundWall = new ZWall(northEastWall.get().eastCorner, southEastWall.get().eastCorner);
-            if (ZWallLogic.isConnected(foundWall, wd)) {
-                return Optional.of(foundWall);
-            }
-            XWall nwWall = northEastWall.get();
-            XWall swWall = southEastWall.get();
-            while (swWall.getLength() > 2) {
-                nwWall = nwWall.shortenEastEnd(1);
-                swWall = swWall.shortenEastEnd(1);
-                ZWall wWall = new ZWall(nwWall.eastCorner, swWall.eastCorner);
-                if (ZWallLogic.isConnected(wWall, wd)) {
-                    return Optional.of(wWall);
-                }
+        for (int i = 2; i < maxDistFromDoor; i++) {
+            ZWall shifted = doorWall.shiftedEast(i);
+            if (ZWalls.isConnected(shifted, wd)) {
+                return Optional.of(shifted);
             }
         }
         return Optional.empty();
@@ -156,30 +137,10 @@ public class WallDetection {
             int maxDistFromDoor,
             RoomDetection.WallDetector wd
     ) {
-        Optional<XWall> northWestWall = XWallLogic.westFromCorner(wd, doorWall.northCorner, maxDistFromDoor);
-        Optional<XWall> southWestWall = XWallLogic.westFromCorner(wd, doorWall.southCorner, maxDistFromDoor);
-
-        int westLength = 0;
-        if (northWestWall.isPresent() && southWestWall.isPresent()) {
-            westLength = Math.min(
-                    southWestWall.get().eastCorner.x - southWestWall.get().westCorner.x,
-                    northWestWall.get().eastCorner.x - northWestWall.get().westCorner.x
-            );
-        }
-        if (westLength > 0) {
-            ZWall foundWall = new ZWall(northWestWall.get().westCorner, southWestWall.get().westCorner);
-            if (ZWallLogic.isConnected(foundWall, wd)) {
-                return Optional.of(foundWall);
-            }
-            XWall nwWall = northWestWall.get();
-            XWall swWall = southWestWall.get();
-            while (swWall.getLength() > 2) {
-                nwWall = nwWall.shortenWestEnd(1);
-                swWall = swWall.shortenWestEnd(1);
-                ZWall wWall = new ZWall(nwWall.westCorner, swWall.westCorner);
-                if (ZWallLogic.isConnected(wWall, wd)) {
-                    return Optional.of(wWall);
-                }
+        for (int i = 2; i < maxDistFromDoor; i++) {
+            ZWall shifted = doorWall.shiftedWest(i);
+            if (ZWalls.isConnected(shifted, wd)) {
+                return Optional.of(shifted);
             }
         }
         return Optional.empty();
@@ -222,35 +183,11 @@ public class WallDetection {
             XWall wall,
             RoomDetection.WallDetector wd
     ) {
-        int southLength = 0;
-        Optional<ZWall> southWestWall = ZWall.southFromCorner(wd, wall.westCorner, maxDistFromDoor);
-        Optional<ZWall> southEastWall = ZWall.southFromCorner(wd, wall.eastCorner, maxDistFromDoor);
-        if (southEastWall.isPresent() && southWestWall.isPresent()) {
-            southLength = Math.min(
-                    southWestWall.get().getLength(),
-                    southEastWall.get().getLength()
-            );
-        }
-        if (southLength != 0) {
-            if (southLength > 0) {
-                XWall foundWall = new XWall(southWestWall.get().southCorner, southEastWall.get().southCorner);
-                if (XWallLogic.isConnected(foundWall, wd)) {
-                    return Optional.of(foundWall);
-                }
-                ZWall swWall = southWestWall.get();
-                ZWall seWall = southEastWall.get();
-                while (swWall.getLength() > 2) {
-                    swWall = swWall.shortenSouthEnd(1);
-                    seWall = seWall.shortenSouthEnd(1);
-                    XWall sWall = new XWall(swWall.southCorner, seWall.southCorner);
-                    if (XWallLogic.isConnected(sWall, wd)) {
-                        return Optional.of(sWall);
-                    }
-                }
+        for (int i = 2; i < maxDistFromDoor; i++) {
+            XWall shifted = wall.shiftedSouthBy(i);
+            if (XWalls.isConnected(shifted, wd)) {
+                return Optional.of(shifted);
             }
-            return Optional.of(
-                    new XWall(southWestWall.get().southCorner, southEastWall.get().southCorner)
-            );
         }
         return Optional.empty();
     }
@@ -260,33 +197,11 @@ public class WallDetection {
             XWall wall,
             RoomDetection.WallDetector wd
     ) {
-        int northLength = 0;
-        Optional<ZWall> northWestWall = ZWall.northFromCorner(wd, wall.westCorner, maxDistFromDoor);
-        Optional<ZWall> northEastWall = ZWall.northFromCorner(wd, wall.eastCorner, maxDistFromDoor);
-        if (northEastWall.isPresent() && northWestWall.isPresent()) {
-            northLength = Math.min(
-                    northWestWall.get().getLength(),
-                    northEastWall.get().getLength()
-            );
-        }
-        if (northLength > 0) {
-            XWall foundWall = new XWall(northWestWall.get().northCorner, northEastWall.get().northCorner);
-            if (XWallLogic.isConnected(foundWall, wd)) {
-                return Optional.of(foundWall);
+        for (int i = 2; i < maxDistFromDoor; i++) {
+            XWall shifted = wall.shiftedNorthBy(i);
+            if (XWalls.isConnected(shifted, wd)) {
+                return Optional.of(shifted);
             }
-            ZWall swWall = northWestWall.get();
-            ZWall seWall = northEastWall.get();
-            while (swWall.getLength() > 2) {
-                swWall = swWall.shortenNorthEnd(1);
-                seWall = seWall.shortenNorthEnd(1);
-                XWall sWall = new XWall(swWall.northCorner, seWall.northCorner);
-                if (XWallLogic.isConnected(sWall, wd)) {
-                    return Optional.of(sWall);
-                }
-            }
-            return Optional.of(
-                    new XWall(northWestWall.get().northCorner, northEastWall.get().northCorner)
-            );
         }
         return Optional.empty();
     }

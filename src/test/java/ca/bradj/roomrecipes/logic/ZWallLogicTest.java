@@ -18,7 +18,7 @@ class ZWallLogicTest {
                 {"W"},
                 {"W"},
         };
-        boolean connected = ZWallLogic.isConnected(
+        boolean connected = ZWalls.isConnected(
                 new ZWall(
                         new Position(0, 0),
                         new Position(0, 2)
@@ -44,7 +44,7 @@ class ZWallLogicTest {
                 {"A"},
                 {"W"},
         };
-        boolean connected = ZWallLogic.isConnected(
+        boolean connected = ZWalls.isConnected(
                 new ZWall(
                         new Position(0, 0),
                         new Position(0, 2)

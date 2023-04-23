@@ -5,7 +5,7 @@ import ca.bradj.roomrecipes.rooms.XWall;
 
 import java.util.Optional;
 
-public class XWallLogic {
+public class XWalls {
     public static boolean isConnected(XWall wall, RoomDetection.WallDetector wd) {
         if (wall.westCorner.z != wall.eastCorner.z) {
             return false;

@@ -27,14 +27,18 @@ public class XWall {
     }
 
     public XWall shortenWestEnd(int i) {
-        return new XWall(this.westCorner.WithX(this.westCorner.x + 1), this.eastCorner);
+        return new XWall(this.westCorner.WithX(this.westCorner.x + i), this.eastCorner);
     }
 
     public XWall shortenEastEnd(int i) {
-        return new XWall(this.westCorner, this.eastCorner.WithX(this.eastCorner.x - 1));
+        return new XWall(this.westCorner, this.eastCorner.WithX(this.eastCorner.x - i));
     }
 
-    public XWall shiftedSouth(int i) {
+    public XWall shiftedNorthBy(int i) {
+        return shiftedSouthBy(-i);
+    }
+
+    public XWall shiftedSouthBy(int i) {
         return new XWall(this.westCorner.offset(0, i), this.eastCorner.offset(0, i));
     }
 

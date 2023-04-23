@@ -2,7 +2,7 @@ package ca.bradj.roomrecipes.logic;
 
 import ca.bradj.roomrecipes.rooms.ZWall;
 
-public class ZWallLogic {
+public class ZWalls {
 
     public static boolean isConnected(ZWall wall, RoomDetection.WallDetector wd) {
         for (int i = wall.northCorner.z; i < wall.southCorner.z; i++) {
