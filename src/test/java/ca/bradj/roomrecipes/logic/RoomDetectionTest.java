@@ -369,5 +369,125 @@ class RoomDetectionTest {
         InclusiveSpace expectedCorners = new InclusiveSpace(new Position(1, 0), new Position(3, 2));
         assertEquals(expectedCorners, room.get().getSpace());
     }
- // TODO: Rotate rooms 90
+
+    @Test
+    public void Test_DetectSimpleRoomWithSeparateWestWall_EquidistantToEast() {
+
+        // A = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"_", "_", "_", "_", "_", "_", "_"},
+                {"W", "_", "W", "W", "W", "W", "W"},
+                {"W", "_", "W", "_", "_", "_", "W"},
+                {"W", "_", "W", "D", "W", "W", "W"},
+                {"_", "_", "_", "_", "_", "_", "_"}
+        };
+
+        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(3, 3), 10, (Position dp) -> {
+            if (dp.x < 0 || dp.z < 0) {
+                return false;
+            }
+            if (dp.x >= map[0].length || dp.z >= map.length) {
+                return false;
+            }
+            return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
+        });
+        assertTrue(room.isPresent());
+
+        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(2, 1), new Position(6, 3));
+        assertEquals(expectedCorners, room.get().getSpace());
+
+    }
+    @Test
+    public void Test_DetectSimpleRoomWithSeparateEastWall_EquidistantToWest() {
+
+        // A = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"_", "_", "_", "_", "_", "_", "_"},
+                {"W", "W", "W", "W", "W", "_", "W"},
+                {"W", "_", "_", "_", "W", "_", "W"},
+                {"W", "W", "W", "D", "W", "_", "W"},
+                {"_", "_", "_", "_", "_", "_", "_"}
+        };
+
+        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(3, 3), 10, (Position dp) -> {
+            if (dp.x < 0 || dp.z < 0) {
+                return false;
+            }
+            if (dp.x >= map[0].length || dp.z >= map.length) {
+                return false;
+            }
+            return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
+        });
+        assertTrue(room.isPresent());
+
+        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 1), new Position(4, 3));
+        assertEquals(expectedCorners, room.get().getSpace());
+
+    }
+    @Test
+    public void Test_DetectSimpleRoomWithSeparateNorthWall_EquidistantToSouth() {
+
+        // A = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"_", "W", "W", "W", "W", "_", "_"},
+                {"_", "_", "_", "_", "_", "_", "_"},
+                {"_", "W", "W", "W", "W", "_", "_"},
+                {"_", "W", "_", "_", "D", "_", "_"},
+                {"_", "W", "_", "_", "W", "_", "_"},
+                {"_", "W", "_", "_", "W", "_", "_"},
+                {"_", "W", "W", "W", "W", "_", "_"},
+        };
+
+        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(4, 3), 10, (Position dp) -> {
+            if (dp.x < 0 || dp.z < 0) {
+                return false;
+            }
+            if (dp.x >= map[0].length || dp.z >= map.length) {
+                return false;
+            }
+            return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
+        });
+        assertTrue(room.isPresent());
+
+        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(1, 2), new Position(4, 6));
+        assertEquals(expectedCorners, room.get().getSpace());
+
+    }
+    @Test
+    public void Test_DetectSimpleRoomWithSeparateSouthWall_EquidistantToNorth() {
+
+        // A = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"_", "W", "W", "W", "W", "_", "_"},
+                {"_", "W", "_", "_", "W", "_", "_"},
+                {"_", "W", "_", "_", "W", "_", "_"},
+                {"_", "D", "_", "_", "W", "_", "_"},
+                {"_", "W", "W", "W", "W", "_", "_"},
+                {"_", "_", "_", "_", "_", "_", "_"},
+                {"_", "W", "W", "W", "W", "_", "_"},
+        };
+
+        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(1, 3), 10, (Position dp) -> {
+            if (dp.x < 0 || dp.z < 0) {
+                return false;
+            }
+            if (dp.x >= map[0].length || dp.z >= map.length) {
+                return false;
+            }
+            return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
+        });
+        assertTrue(room.isPresent());
+
+        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(1, 0), new Position(4, 4));
+        assertEquals(expectedCorners, room.get().getSpace());
+
+    }
 }

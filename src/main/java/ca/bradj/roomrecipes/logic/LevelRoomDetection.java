@@ -17,24 +17,20 @@ import java.util.stream.Stream;
 
 public class LevelRoomDetection {
 
-    public interface BlockChecker extends WallDetector {
-        boolean IsEmpty(Position dp);
-
-        boolean IsDoor(Position dp);
-    }
-
     public static ImmutableMap<Position, Optional<Room>> findRooms(
             Collection<Position> currentDoors,
             int maxDistanceFromDoor,
             WallDetector checker
     ) {
+        // TODO: Implement early exit.
+        //  Take a snapshot of the town. If nothing has changed, return.
         Map<Position, Optional<Room>> detectedRooms = new HashMap<>();
         for (Position doorPos : ImmutableList.copyOf(currentDoors)) {
             detectedRooms.put(doorPos, RoomDetection.findRoomForDoor(
                 doorPos, maxDistanceFromDoor, Optional.empty(), checker
             ));
         }
-        detectedRooms.values().forEach(r -> RoomRecipes.LOGGER.debug("Detected room: " + r));
+        detectedRooms.values().forEach(r -> RoomRecipes.LOGGER.trace("Detected room: " + r));
         int attempts = 0;
         int corrections = 1;
         while (corrections > 0 && attempts <= 3) {
@@ -51,24 +47,32 @@ public class LevelRoomDetection {
                         continue;
                     }
                     if (r1.getSpace().equals(r2.getSpace())) {
-                        Optional<Room> alternate = RoomDetection.findRoomForDoor(
+                        final Optional<Room> alternate = RoomDetection.findRoomForDoor(
                                 r2.getDoorPos(), maxDistanceFromDoor, Optional.of(r1.getSpace()), checker
                         );
                         if (alternate.isPresent()) {
-                            RoomRecipes.LOGGER.debug("Using alternate room: " + alternate.get());
+                            if (rooms.stream().anyMatch(v -> v.getSpace().equals(alternate.get().getSpace()))) {
+                                detectedRooms.put(r2.getDoorPos(), Optional.empty());
+                                corrections++;
+                                break;
+                            }
+                            RoomRecipes.LOGGER.trace("Using alternate room: " + alternate.get());
                             detectedRooms.put(r2.getDoorPos(), alternate);
                             corrections++;
                             break;
                         }
-                        alternate = RoomDetection.findRoomForDoor(
+                        Optional<Room> alternate2 = RoomDetection.findRoomForDoor(
                                 r1.getDoorPos(), maxDistanceFromDoor, Optional.of(r2.getSpace()), checker
                         );
-                        if (alternate.isPresent()) {
-                            detectedRooms.put(r1.getDoorPos(), alternate);
+                        if (alternate2.isPresent()) {
+                            detectedRooms.put(r1.getDoorPos(), alternate2);
                             corrections++;
-                            RoomRecipes.LOGGER.debug("Using alternate room: " + alternate.get());
+                            RoomRecipes.LOGGER.trace("Using alternate room: " + alternate2.get());
                             break;
                         }
+                        detectedRooms.put(r2.getDoorPos(), Optional.empty());
+                        corrections++;
+                        break;
                     } else {
                         if (InclusiveSpaces.overlapOnXZPlane(r1.getSpace(), r2.getSpace())) {
                             double a1 = InclusiveSpaces.calculateArea(r1.getSpace());

@@ -105,10 +105,10 @@ public class RoomDetection {
                             eastWall.get().southCorner
                     )));
                 }
-                if (ZWalls.isConnected(midWall.shiftedWest(i), wd)) {
+                if (westWall.isEmpty() && ZWalls.isConnected(midWall.shiftedWest(i), wd)) {
                     westWall = Optional.of(midWall.shiftedWest(i));
                 }
-                if (ZWalls.isConnected(midWall.shiftedEast(i), wd)) {
+                if (eastWall.isEmpty() && ZWalls.isConnected(midWall.shiftedEast(i), wd)) {
                     eastWall = Optional.of(midWall.shiftedEast(i));
                 }
             }
@@ -134,10 +134,10 @@ public class RoomDetection {
                             southWall.get().eastCorner
                     )));
                 }
-                if (XWalls.isConnected(midWall.shiftedNorthBy(i), wd)) {
+                if (northWall.isEmpty() && XWalls.isConnected(midWall.shiftedNorthBy(i), wd)) {
                     northWall = Optional.of(midWall.shiftedNorthBy(i));
                 }
-                if (XWalls.isConnected(midWall.shiftedSouthBy(i), wd)) {
+                if (southWall.isEmpty() && XWalls.isConnected(midWall.shiftedSouthBy(i), wd)) {
                     southWall = Optional.of(midWall.shiftedSouthBy(i));
                 }
             }

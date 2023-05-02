@@ -180,7 +180,6 @@ public class RoomRecipe implements Recipe<Container>, Comparable<RoomRecipe> {
             for (Ingredient ing : recipe.getIngredients()) {
                 ing.toNetwork(buffer);
             }
-            buffer.writeItem(recipe.getResultItem());
             buffer.writeInt(recipe.recipeStrength);
         }
     }
