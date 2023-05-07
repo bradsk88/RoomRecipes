@@ -702,6 +702,38 @@ class LevelRoomDetectionTest {
     }
 
     @Test
+    public void Test_Detect_OpenLShape_E() {
+        java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
+        Configurator.setLevel(RoomRecipes.LOGGER.getName(), Level.TRACE);
+        // _ = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"W", "W", "W", "W", "W", "_"},
+                {"D", "_", "_", "_", "W", "_"},
+                {"W", "_", "W", "W", "W", "_"},
+                {"W", "_", "W", "_", "_", "_"},
+                {"W", "W", "W", "_", "_", "_"}
+        };
+
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
+                new Position(0, 1)
+        ), 10, WD(map));
+        assertTrue(room.containsKey(new Position(0, 1)));
+
+        assertTrue(room.get(new Position(0, 1)).isPresent());
+
+        List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(0, 1)).get().getSpaces());
+        assertEquals(2, spaces.size());
+
+        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(0, 0), new Position(2, 4));
+        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(2, 0), new Position(4, 2));
+
+        assertEquals(expectedCorners1, spaces.get(0));
+        assertEquals(expectedCorners2, spaces.get(1));
+    }
+
+    @Test
     public void Test_DetectJoiningDoor() {
         java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
         Configurator.setLevel(RoomRecipes.LOGGER.getName(), Level.TRACE);

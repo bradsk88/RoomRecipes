@@ -3,6 +3,7 @@ package ca.bradj.roomrecipes.logic;
 import ca.bradj.roomrecipes.core.space.Position;
 import ca.bradj.roomrecipes.logic.interfaces.WallDetector;
 import ca.bradj.roomrecipes.rooms.XWall;
+import ca.bradj.roomrecipes.rooms.ZWall;
 
 import java.util.Optional;
 
@@ -56,5 +57,28 @@ public class XWalls {
         return Optional.of(
                 new XWall(northCorner.WithX(westX), northCorner)
         );
+    }
+
+
+    public static Optional<XWall> findOpening(
+            XWall xWall,
+            WallDetector wd
+    ) {
+        boolean wasWall = true;
+        int xWest = 0;
+        for (int i = xWall.westCorner.z; i <= xWall.eastCorner.z; i++) {
+            if (wd.IsWall(xWall.westCorner.WithZ(i))) {
+                if (wasWall) {
+                    xWest = i;
+                    continue;
+                }
+                return Optional.of(new XWall(xWall.westCorner.WithX(xWest), xWall.eastCorner.WithX(i)));
+            }
+            if (i == 0) {
+                return Optional.empty();
+            }
+            wasWall = false;
+        }
+        return Optional.empty();
     }
 }

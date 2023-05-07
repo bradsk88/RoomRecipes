@@ -116,6 +116,7 @@ public class RoomDetection {
         }
         Optional<InclusiveSpace> extra = Optional.empty();
         Optional<ZWall> eastWallWithOpening = Optional.empty();
+        Optional<XWall> southWallWithOpening = Optional.empty();
         int diffX = Math.max(doorPos.x, wallPos.x) - Math.min(doorPos.x, wallPos.x);
         int diffZ = Math.max(doorPos.z, wallPos.z) - Math.min(doorPos.z, wallPos.z);
         if (diffZ > diffX) {
@@ -197,6 +198,28 @@ public class RoomDetection {
                 }
                 if (southWall.isEmpty() && XWalls.isConnected(midWall.shiftedSouthBy(i), wd)) {
                     southWall = Optional.of(midWall.shiftedSouthBy(i));
+                }
+                if (southWall.isEmpty()) {
+                    Optional<XWall> opening = XWalls.findOpening(midWall.shiftedSouthBy(i), wd);
+                    if (opening.isPresent()) {
+                        extra = findRoomForDoor(
+                                opening.get().westCorner.offset(0, 1),
+                                maxDistFromDoor,
+                                Optional.empty(),
+                                wd,
+                                true,
+                                false
+                        ).map(Room::getSpace);
+                        southWallWithOpening = Optional.of(midWall.shiftedSouthBy(i));
+                    }
+                }
+            }
+            if (northWall.isPresent() && southWall.isEmpty()) {
+                if (extra.isPresent() && southWallWithOpening.isPresent()) {
+                    return Optional.of(new Room(doorPos, new InclusiveSpace(
+                            northWall.get().westCorner,
+                            southWallWithOpening.get().eastCorner
+                    )).withExtraSpace(extra.get()));
                 }
             }
         }
