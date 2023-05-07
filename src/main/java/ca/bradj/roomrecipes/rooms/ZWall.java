@@ -121,4 +121,5 @@ public class ZWall {
     public int hashCode() {
         return Objects.hash(northCorner, southCorner);
     }
+
 }

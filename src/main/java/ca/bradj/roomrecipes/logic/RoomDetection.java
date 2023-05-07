@@ -17,7 +17,7 @@ public class RoomDetection {
             int maxDistanceFromDoor,
             WallDetector wd
     ) {
-        return findRoomForDoor(doorPos, maxDistanceFromDoor, Optional.empty(), wd);
+        return findRoomForDoor(doorPos, maxDistanceFromDoor, Optional.empty(), wd, false, false);
     }
 
     public static Optional<Room> findRoomForDoor(
@@ -26,9 +26,20 @@ public class RoomDetection {
             Optional<InclusiveSpace> findAlternativeTo,
             WallDetector wd
     ) {
+        return findRoomForDoor(doorPos, maxDistanceFromDoor, findAlternativeTo, wd, false, false);
+    }
+
+    public static Optional<Room> findRoomForDoor(
+            Position doorPos,
+            int maxDistanceFromDoor,
+            Optional<InclusiveSpace> findAlternativeTo,
+            WallDetector wd,
+            boolean allowWestOpen,
+            boolean allowEastOpen
+    ) {
         Function<Position, Optional<Room>> findFromBackWall = (Position wallPos) ->
                 findRoomFromBackWall(
-                        doorPos, wallPos, maxDistanceFromDoor, findAlternativeTo, wd
+                        doorPos, wallPos, maxDistanceFromDoor, findAlternativeTo, wd, allowWestOpen, allowEastOpen
                 );
 
         for (int i = 2; i < maxDistanceFromDoor; i++) {
@@ -59,10 +70,22 @@ public class RoomDetection {
             Optional<InclusiveSpace> findAlt,
             WallDetector wd
     ) {
+        return findRoomFromBackWall(doorPos, wallPos, maxDistFromDoor, findAlt, wd, false, false);
+    }
+
+    private static Optional<Room> findRoomFromBackWall(
+            Position doorPos,
+            Position wallPos,
+            int maxDistFromDoor,
+            Optional<InclusiveSpace> findAlt,
+            WallDetector wd,
+            boolean allowWestOpen,
+            boolean allowEastOpen
+    ) {
         if (!wd.IsWall(wallPos)) {
             return Optional.empty();
         }
-        Optional<Room> room = findRoomBetween(doorPos, wallPos, maxDistFromDoor, wd);
+        Optional<Room> room = findRoomBetween(doorPos, wallPos, maxDistFromDoor, wd, allowWestOpen, allowEastOpen);
         if (room.isEmpty()) {
             return Optional.empty();
         }
@@ -78,9 +101,21 @@ public class RoomDetection {
             int maxDistFromDoor,
             WallDetector wd
     ) {
+        return findRoomBetween(doorPos, wallPos, maxDistFromDoor, wd, false, false);
+    }
+    private static Optional<Room> findRoomBetween(
+            Position doorPos,
+            Position wallPos,
+            int maxDistFromDoor,
+            WallDetector wd,
+            boolean allowWestOpen,
+            boolean allowEastOpen
+    ) {
         if (doorPos.x != wallPos.x && doorPos.z != wallPos.z) {
             throw new IllegalStateException("Expected straight line between positions");
         }
+        Optional<InclusiveSpace> extra = Optional.empty();
+        Optional<ZWall> eastWallWithOpening = Optional.empty();
         int diffX = Math.max(doorPos.x, wallPos.x) - Math.min(doorPos.x, wallPos.x);
         int diffZ = Math.max(doorPos.z, wallPos.z) - Math.min(doorPos.z, wallPos.z);
         if (diffZ > diffX) {
@@ -100,16 +135,39 @@ public class RoomDetection {
                     if (!XWalls.isConnected(sWall, wd)) {
                         continue;
                     }
-                    return Optional.of(new Room(doorPos, new InclusiveSpace(
+                    Room room = new Room(doorPos, new InclusiveSpace(
                             westWall.get().northCorner,
                             eastWall.get().southCorner
-                    )));
+                    ));
+                    return Optional.of(room);
                 }
                 if (westWall.isEmpty() && ZWalls.isConnected(midWall.shiftedWest(i), wd)) {
                     westWall = Optional.of(midWall.shiftedWest(i));
                 }
                 if (eastWall.isEmpty() && ZWalls.isConnected(midWall.shiftedEast(i), wd)) {
                     eastWall = Optional.of(midWall.shiftedEast(i));
+                }
+                if (eastWall.isEmpty()) {
+                    Optional<ZWall> opening = ZWalls.findOpening(midWall.shiftedEast(i), wd);
+                    if (opening.isPresent()) {
+                        extra = findRoomForDoor(
+                                opening.get().northCorner.offset(0, 1),
+                                maxDistFromDoor,
+                                Optional.empty(),
+                                wd,
+                                true,
+                                false
+                        ).map(Room::getSpace);
+                        eastWallWithOpening = Optional.of(midWall.shiftedEast(i));
+                    }
+                }
+            }
+            if (westWall.isPresent() && eastWall.isEmpty()) {
+                if (extra.isPresent() && eastWallWithOpening.isPresent()) {
+                    return Optional.of(new Room(doorPos, new InclusiveSpace(
+                            westWall.get().northCorner,
+                            eastWallWithOpening.get().southCorner
+                    )).withExtraSpace(extra.get()));
                 }
             }
         } else {
@@ -123,10 +181,10 @@ public class RoomDetection {
                 if (southWall.isPresent() && northWall.isPresent()) {
                     ZWall wWall = new ZWall(northWall.get().westCorner, southWall.get().westCorner);
                     ZWall eWall = new ZWall(northWall.get().eastCorner, southWall.get().eastCorner);
-                    if (!ZWalls.isConnected(wWall, wd)) {
+                    if (!ZWalls.isConnected(wWall, wd) && !allowWestOpen) {
                         continue;
                     }
-                    if (!ZWalls.isConnected(eWall, wd)) {
+                    if (!ZWalls.isConnected(eWall, wd) && !allowEastOpen) {
                         continue;
                     }
                     return Optional.of(new Room(doorPos, new InclusiveSpace(

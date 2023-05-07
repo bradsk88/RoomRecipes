@@ -11,6 +11,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -665,6 +666,39 @@ class LevelRoomDetectionTest {
 
         expectedCorners = new InclusiveSpace(new Position(2, 2), new Position(5, 4));
         assertEquals(expectedCorners, room.get(new Position(3, 4)).get().getSpace());
+    }
+
+    // TODO: Add other compass directions
+    @Test
+    public void Test_Detect_OpenLShape_N() {
+        java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
+        Configurator.setLevel(RoomRecipes.LOGGER.getName(), Level.TRACE);
+        // _ = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"W", "W", "W", "_", "_", "_"},
+                {"W", "_", "W", "_", "_", "_"},
+                {"W", "_", "W", "W", "W", "_"},
+                {"W", "_", "_", "_", "W", "_"},
+                {"W", "D", "W", "W", "W", "_"}
+        };
+
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
+                new Position(1, 4)
+        ), 10, WD(map));
+        assertTrue(room.containsKey(new Position(1, 4)));
+
+        assertTrue(room.get(new Position(1, 4)).isPresent());
+
+        List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(1, 4)).get().getSpaces());
+        assertEquals(2, spaces.size());
+
+        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(0, 0), new Position(2, 4));
+        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(2, 2), new Position(4, 4));
+
+        assertEquals(expectedCorners1, spaces.get(0));
+        assertEquals(expectedCorners2, spaces.get(1));
     }
 
     @Test

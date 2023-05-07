@@ -4,9 +4,9 @@ import ca.bradj.roomrecipes.core.space.InclusiveSpace;
 import ca.bradj.roomrecipes.core.space.Position;
 import ca.bradj.roomrecipes.rooms.XWall;
 import ca.bradj.roomrecipes.rooms.ZWall;
+import com.google.common.collect.ImmutableList;
 
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 public class Room {
     public Optional<XWall> getBackXWall() {
@@ -41,18 +41,29 @@ public class Room {
     }
 
     Position doorPos;
-    InclusiveSpace space;
+    List<InclusiveSpace> space;
 
     public Room(
             Position doorPos,
             InclusiveSpace space
     ) {
         // TODO: Validate doorPos is in space
+        this(doorPos, ImmutableList.of(space));
+    }
+    public Room(
+            Position doorPos,
+            Collection<InclusiveSpace> spaces
+    ) {
+        // TODO: Validate doorPos is in space
         this.doorPos = doorPos;
-        this.space = space;
+        this.space = new ArrayList<>(spaces);
     }
 
     public InclusiveSpace getSpace() {
+        return this.space.get(0);
+    }
+
+    public Collection<InclusiveSpace> getSpaces() {
         return this.space;
     }
 
@@ -71,5 +82,10 @@ public class Room {
 
     public Room withSpace(InclusiveSpace chopped) {
         return new Room(this.getDoorPos(), chopped);
+    }
+
+    public Room withExtraSpace(InclusiveSpace inclusiveSpace) {
+        this.space.add(inclusiveSpace);
+        return this;
     }
 }
