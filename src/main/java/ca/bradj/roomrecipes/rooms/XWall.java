@@ -69,4 +69,8 @@ public class XWall {
     public int hashCode() {
         return Objects.hash(westCorner, eastCorner);
     }
+
+    public Position getMidpoint() {
+        return new Position((westCorner.x + eastCorner.x) / 2, getZ());
+    }
 }
