@@ -125,4 +125,8 @@ public class ZWall {
     public Position getMidpoint() {
         return new Position(northCorner.x, (northCorner.z + southCorner.z) / 2);
     }
+
+    public boolean sameHeight(ZWall wall) {
+        return this.northCorner.z == wall.northCorner.z && this.southCorner.z == wall.southCorner.z;
+    }
 }

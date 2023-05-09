@@ -234,6 +234,20 @@ public class RoomHints {
         );
     }
 
+    public RoomHints withWestOpening(ZWall opening) {
+        return new RoomHints(
+                northWall, southWall, westWall, eastWall,
+                northOpening, southOpening, opening, eastOpening
+        );
+    }
+
+    public RoomHints withEastOpening(ZWall opening) {
+        return new RoomHints(
+                northWall, southWall, westWall, eastWall,
+                northOpening, southOpening, westOpening, opening
+        );
+    }
+
     public boolean hasAnyOpenings() {
         return northOpening != null || southOpening != null || westOpening != null || eastOpening != null;
     }
