@@ -3,7 +3,6 @@ package ca.bradj.roomrecipes.logic;
 import ca.bradj.roomrecipes.core.Room;
 import ca.bradj.roomrecipes.core.space.InclusiveSpace;
 import ca.bradj.roomrecipes.core.space.Position;
-import ca.bradj.roomrecipes.logic.interfaces.WallDetector;
 import ca.bradj.roomrecipes.rooms.XWall;
 import ca.bradj.roomrecipes.rooms.ZWall;
 import org.jetbrains.annotations.Nullable;
@@ -16,6 +15,10 @@ public class RoomHints {
     public final XWall southWall;
     public final ZWall westWall;
     public final ZWall eastWall;
+    public final XWall northOpening;
+    public final XWall southOpening;
+    public final ZWall westOpening;
+    public final ZWall eastOpening;
 
     public RoomHints(
             @Nullable XWall northWall,
@@ -23,10 +26,27 @@ public class RoomHints {
             @Nullable ZWall westWall,
             @Nullable ZWall eastWall
     ) {
+        this(northWall, southWall, westWall, eastWall, null, null, null, null);
+    }
+
+    public RoomHints(
+            @Nullable XWall northWall,
+            @Nullable XWall southWall,
+            @Nullable ZWall westWall,
+            @Nullable ZWall eastWall,
+            @Nullable XWall northOpening,
+            @Nullable XWall southOpening,
+            @Nullable ZWall westOpening,
+            @Nullable ZWall eastOpening
+    ) {
         this.northWall = northWall;
         this.southWall = southWall;
         this.westWall = westWall;
         this.eastWall = eastWall;
+        this.northOpening = northOpening;
+        this.southOpening = southOpening;
+        this.westOpening = westOpening;
+        this.eastOpening = eastOpening;
     }
 
     public static RoomHints empty() {
@@ -38,7 +58,11 @@ public class RoomHints {
                 northWall,
                 this.southWall,
                 this.westWall,
-                this.eastWall
+                this.eastWall,
+                northOpening,
+                southOpening,
+                westOpening,
+                eastOpening
         );
     }
 
@@ -47,7 +71,11 @@ public class RoomHints {
                 this.northWall,
                 southWall,
                 this.westWall,
-                this.eastWall
+                this.eastWall,
+                northOpening,
+                southOpening,
+                westOpening,
+                eastOpening
         );
     }
 
@@ -56,7 +84,11 @@ public class RoomHints {
                 this.northWall,
                 this.southWall,
                 westWall,
-                this.eastWall
+                this.eastWall,
+                northOpening,
+                southOpening,
+                westOpening,
+                eastOpening
         );
     }
 
@@ -65,21 +97,25 @@ public class RoomHints {
                 this.northWall,
                 this.southWall,
                 this.westWall,
-                eastWall
+                eastWall,
+                northOpening,
+                southOpening,
+                westOpening,
+                eastOpening
         );
     }
 
     public boolean isRoom(RoomDetection.WallExclusion exclusion) {
-        if (northWall == null && !exclusion.allowOpenNorthWall) {
+        if ((northOpening != null || northWall == null) && !exclusion.allowOpenNorthWall) {
             return false;
         }
-        if (southWall == null && !exclusion.allowOpenSouthWall) {
+        if ((southOpening != null || southWall == null) && !exclusion.allowOpenSouthWall) {
             return false;
         }
-        if (westWall == null && !exclusion.allowOpenWestWall) {
+        if ((westOpening != null || westWall == null) && !exclusion.allowOpenWestWall) {
             return false;
         }
-        if (eastWall == null && !exclusion.allowOpenEastWall) {
+        if ((eastOpening != null || eastWall == null) && !exclusion.allowOpenEastWall) {
             return false;
         }
         return true;
@@ -101,7 +137,10 @@ public class RoomHints {
     }
 
     public RoomHints copy() {
-        return new RoomHints(this.northWall, this.southWall, this.westWall, this.eastWall);
+        return new RoomHints(
+                this.northWall, this.southWall, this.westWall, this.eastWall,
+                this.northOpening, this.southOpening, this.westOpening, this.eastOpening
+        );
     }
 
     public Optional<RoomHints> getOpening() {
@@ -130,55 +169,72 @@ public class RoomHints {
     }
 
     private boolean hasOneOpening() {
-        int wallsCount = 0;
-        wallsCount = northWall == null ? wallsCount : wallsCount + 1;
-        wallsCount = southWall == null ? wallsCount : wallsCount + 1;
-        wallsCount = westWall == null ? wallsCount : wallsCount + 1;
-        wallsCount = eastWall == null ? wallsCount : wallsCount + 1;
-        boolean hasOneOpening = wallsCount != 3;
+        int openCount = 0;
+        openCount = northOpening == null ? openCount : openCount + 1;
+        openCount = southOpening == null ? openCount : openCount + 1;
+        openCount = westOpening == null ? openCount : openCount + 1;
+        openCount = eastOpening == null ? openCount : openCount + 1;
+        boolean hasOneOpening = openCount == 1;
         return hasOneOpening;
     }
 
-    public Optional<Room> adjoinedTo(Position doorPos, InclusiveSpace space) {
+    public Optional<Room> adjoinedTo(
+            Position doorPos,
+            InclusiveSpace space
+    ) {
         if (!hasOneOpening()) {
             throw new IllegalStateException("RoomHints can only be adjoined if they have a singular opening");
         }
-        if (northWall == null) {
-            boolean joinW = space.getSouthXWall().westCorner.equals(westWall.northCorner);
-            boolean joinE = space.getSouthXWall().eastCorner.equals(eastWall.northCorner);
+        if (northOpening != null) {
+            boolean joinW = space.getSouthXWall().westCorner.equals(northOpening.westCorner);
+            boolean joinE = space.getSouthXWall().eastCorner.equals(northOpening.eastCorner);
             if (joinW && joinE) {
-                return this.withNorthWall(space.getSouthXWall())
-                        .asRoom(doorPos, RoomDetection.WallExclusion.mustHaveAllWalls())
+                return this.asRoom(doorPos, RoomDetection.WallExclusion.allowNorthOpen())
                         .map(r -> r.withExtraSpace(space));
             }
         }
-        if (southWall == null) {
-            boolean joinW = space.getNorthXWall().westCorner.equals(westWall.southCorner);
-            boolean joinE = space.getNorthXWall().eastCorner.equals(eastWall.southCorner);
+        if (southOpening != null) {
+            boolean joinW = space.getNorthXWall().westCorner.equals(southOpening.westCorner);
+            boolean joinE = space.getNorthXWall().eastCorner.equals(southOpening.eastCorner);
             if (joinW && joinE) {
-                return this.withSouthWall(space.getNorthXWall())
-                        .asRoom(doorPos, RoomDetection.WallExclusion.mustHaveAllWalls())
+                return this.asRoom(doorPos, RoomDetection.WallExclusion.allowSouthOpen())
                         .map(r -> r.withExtraSpace(space));
             }
         }
-        if (westWall == null) {
-            boolean joinN = space.getEastZWall().northCorner.equals(northWall.westCorner);
-            boolean joinS = space.getEastZWall().southCorner.equals(southWall.westCorner);
+        if (westOpening != null) {
+            boolean joinN = space.getEastZWall().northCorner.equals(westOpening.northCorner);
+            boolean joinS = space.getEastZWall().southCorner.equals(westOpening.southCorner);
             if (joinN && joinS) {
-                return this.withWestWall(space.getEastZWall())
-                        .asRoom(doorPos, RoomDetection.WallExclusion.mustHaveAllWalls())
+                return this.asRoom(doorPos, RoomDetection.WallExclusion.allowWestOpen())
                         .map(r -> r.withExtraSpace(space));
             }
         }
-        if (eastWall == null) {
-            boolean joinN = space.getWestZWall().northCorner.equals(northWall.eastCorner);
-            boolean joinS = space.getWestZWall().southCorner.equals(southWall.eastCorner);
+        if (eastOpening != null) {
+            boolean joinN = space.getWestZWall().northCorner.equals(eastOpening.northCorner);
+            boolean joinS = space.getWestZWall().southCorner.equals(eastOpening.southCorner);
             if (joinN && joinS) {
-                return this.withWestWall(space.getWestZWall())
-                        .asRoom(doorPos, RoomDetection.WallExclusion.mustHaveAllWalls())
+                return this.asRoom(doorPos, RoomDetection.WallExclusion.allowEastOpen())
                         .map(r -> r.withExtraSpace(space));
             }
         }
         return Optional.empty();
+    }
+
+    public RoomHints withNorthOpening(XWall opening) {
+        return new RoomHints(
+                northWall, southWall, westWall, eastWall,
+                opening, southOpening, westOpening, eastOpening
+        );
+    }
+
+    public RoomHints withSouthOpening(XWall xWall) {
+        return new RoomHints(
+                northWall, southWall, westWall, eastWall,
+                northOpening, xWall, westOpening, eastOpening
+        );
+    }
+
+    public boolean hasAnyOpenings() {
+        return northOpening != null || southOpening != null || westOpening != null || eastOpening != null;
     }
 }

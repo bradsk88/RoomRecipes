@@ -122,4 +122,7 @@ public class ZWall {
         return Objects.hash(northCorner, southCorner);
     }
 
+    public Position getMidpoint() {
+        return new Position(northCorner.x, (northCorner.z + southCorner.z) / 2);
+    }
 }

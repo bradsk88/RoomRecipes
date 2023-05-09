@@ -73,4 +73,8 @@ public class XWall {
     public Position getMidpoint() {
         return new Position((westCorner.x + eastCorner.x) / 2, getZ());
     }
+
+    public boolean sameWidth(XWall southOpening) {
+        return this.westCorner.x == southOpening.westCorner.x && this.eastCorner.x == southOpening.eastCorner.x;
+    }
 }

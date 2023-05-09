@@ -726,8 +726,8 @@ class LevelRoomDetectionTest {
         List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(0, 1)).get().getSpaces());
         assertEquals(2, spaces.size());
 
-        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(0, 0), new Position(2, 4));
-        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(2, 0), new Position(4, 2));
+        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(0, 0), new Position(4, 2));
+        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(0, 2), new Position(2, 4));
 
         assertEquals(expectedCorners1, spaces.get(0));
         assertEquals(expectedCorners2, spaces.get(1));
