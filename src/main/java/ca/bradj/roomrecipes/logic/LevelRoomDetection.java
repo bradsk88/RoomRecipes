@@ -27,7 +27,7 @@ public class LevelRoomDetection {
         Map<Position, Optional<Room>> detectedRooms = new HashMap<>();
         for (Position doorPos : ImmutableList.copyOf(currentDoors)) {
             detectedRooms.put(doorPos, RoomDetection.findRoomForDoor(
-                doorPos, maxDistanceFromDoor, Optional.empty(), checker
+                    doorPos, maxDistanceFromDoor, Optional.empty(), 0, checker
             ));
         }
         detectedRooms.values().forEach(r -> RoomRecipes.LOGGER.trace("Detected room: " + r));
@@ -48,7 +48,7 @@ public class LevelRoomDetection {
                     }
                     if (r1.getSpace().equals(r2.getSpace())) {
                         final Optional<Room> alternate = RoomDetection.findRoomForDoor(
-                                r2.getDoorPos(), maxDistanceFromDoor, Optional.of(r1.getSpace()), checker
+                                r2.getDoorPos(), maxDistanceFromDoor, Optional.of(r1.getSpace()), 0, checker
                         );
                         if (alternate.isPresent()) {
                             if (rooms.stream().anyMatch(v -> v.getSpace().equals(alternate.get().getSpace()))) {
@@ -62,7 +62,7 @@ public class LevelRoomDetection {
                             break;
                         }
                         Optional<Room> alternate2 = RoomDetection.findRoomForDoor(
-                                r1.getDoorPos(), maxDistanceFromDoor, Optional.of(r2.getSpace()), checker
+                                r1.getDoorPos(), maxDistanceFromDoor, Optional.of(r2.getSpace()), 0, checker
                         );
                         if (alternate2.isPresent()) {
                             detectedRooms.put(r1.getDoorPos(), alternate2);

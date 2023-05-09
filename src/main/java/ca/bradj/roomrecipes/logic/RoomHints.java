@@ -168,7 +168,7 @@ public class RoomHints {
         ));
     }
 
-    private boolean hasOneOpening() {
+    public boolean hasOneOpening() {
         int openCount = 0;
         openCount = northOpening == null ? openCount : openCount + 1;
         openCount = southOpening == null ? openCount : openCount + 1;

@@ -1,5 +1,6 @@
 package ca.bradj.roomrecipes.logic;
 
+import ca.bradj.roomrecipes.RoomRecipes;
 import ca.bradj.roomrecipes.core.Room;
 import ca.bradj.roomrecipes.core.space.InclusiveSpace;
 import ca.bradj.roomrecipes.core.space.Position;
@@ -16,6 +17,7 @@ public class RoomDetection {
     public static Optional<Room> findRoomForDoor(
             Position doorPos,
             int maxDistanceFromDoor,
+            int depth,
             WallDetector wd
     ) {
         return findRoomForDoor(
@@ -24,6 +26,7 @@ public class RoomDetection {
                 new SearchRange(null, null, null, null),
                 Optional.empty(),
                 WallExclusion.mustHaveAllWalls(),
+                depth + 1,
                 wd
         );
     }
@@ -32,6 +35,7 @@ public class RoomDetection {
             Position doorPos,
             int maxDistanceFromDoor,
             Optional<InclusiveSpace> findAlternativeTo,
+            int depth,
             WallDetector wd
     ) {
         return findRoomForDoor(
@@ -40,6 +44,7 @@ public class RoomDetection {
                 new SearchRange(null, null, null, null),
                 findAlternativeTo,
                 WallExclusion.mustHaveAllWalls(),
+                depth + 1,
                 wd
         );
     }
@@ -70,11 +75,12 @@ public class RoomDetection {
             Optional<InclusiveSpace> findAlternativeTo,
             // TODO: Is this needed anymore
             WallExclusion exclusion,
+            int depth,
             WallDetector wd
     ) {
         Function<Position, Optional<Room>> findFromBackWall = (Position wallPos) ->
                 findRoomFromBackWall(
-                        doorPos, wallPos, maxDistanceFromDoor, findAlternativeTo, exclusion, wd
+                        doorPos, wallPos, maxDistanceFromDoor, findAlternativeTo, exclusion, depth + 1, wd
                 );
 
         for (int i = 2; i < maxDistanceFromDoor; i++) {
@@ -120,9 +126,18 @@ public class RoomDetection {
             Position wallPos,
             int maxDistFromDoor,
             Optional<InclusiveSpace> findAlt,
+            int depth,
             WallDetector wd
     ) {
-        return findRoomFromBackWall(doorPos, wallPos, maxDistFromDoor, findAlt, WallExclusion.mustHaveAllWalls(), wd);
+        return findRoomFromBackWall(
+                doorPos,
+                wallPos,
+                maxDistFromDoor,
+                findAlt,
+                WallExclusion.mustHaveAllWalls(),
+                depth + 1,
+                wd
+        );
     }
 
     private static Optional<Room> findRoomFromBackWall(
@@ -131,12 +146,13 @@ public class RoomDetection {
             int maxDistFromDoor,
             Optional<InclusiveSpace> findAlt,
             WallExclusion exclusion,
+            int depth,
             WallDetector wd
     ) {
         if (!wd.IsWall(wallPos)) {
             return Optional.empty();
         }
-        Optional<Room> room = findRoomBetween(doorPos, wallPos, maxDistFromDoor, exclusion, wd);
+        Optional<Room> room = findRoomBetween(doorPos, wallPos, maxDistFromDoor, exclusion, depth + 1, wd);
         if (room.isEmpty()) {
             return Optional.empty();
         }
@@ -150,9 +166,10 @@ public class RoomDetection {
             Position doorPos,
             Position wallPos,
             int maxDistFromDoor,
+            int depth,
             WallDetector wd
     ) {
-        return findRoomBetween(doorPos, wallPos, maxDistFromDoor, WallExclusion.mustHaveAllWalls(), wd);
+        return findRoomBetween(doorPos, wallPos, maxDistFromDoor, WallExclusion.mustHaveAllWalls(), depth + 1, wd);
     }
 
     private static Optional<Room> findRoomBetween(
@@ -160,6 +177,7 @@ public class RoomDetection {
             Position wallPos,
             int maxDistFromDoor,
             WallExclusion exclusion,
+            int depth,
             WallDetector wd
     ) {
         if (doorPos.x != wallPos.x && doorPos.z != wallPos.z) {
@@ -168,9 +186,9 @@ public class RoomDetection {
         int diffX = Math.max(doorPos.x, wallPos.x) - Math.min(doorPos.x, wallPos.x);
         int diffZ = Math.max(doorPos.z, wallPos.z) - Math.min(doorPos.z, wallPos.z);
         if (diffZ > diffX) {
-            return findRoomWithNorthOrSouthDoor(doorPos, wallPos, maxDistFromDoor, exclusion, wd);
+            return findRoomWithNorthOrSouthDoor(doorPos, wallPos, maxDistFromDoor, exclusion, depth + 1, wd);
         }
-        return findRoomWithWestOrEastDoor(doorPos, wallPos, maxDistFromDoor, exclusion, wd);
+        return findRoomWithWestOrEastDoor(doorPos, wallPos, maxDistFromDoor, exclusion, depth + 1, wd);
     }
 
     private static Optional<Room> findRoomWithNorthOrSouthDoor(
@@ -178,6 +196,7 @@ public class RoomDetection {
             Position wallPos,
             int maxDistFromDoor,
             WallExclusion exclusion,
+            int depth,
             WallDetector wd
     ) {
         if (doorPos.x != wallPos.x && doorPos.z != wallPos.z) {
@@ -198,7 +217,7 @@ public class RoomDetection {
         }
         if (roomHints.hasAnyOpenings()) {
             Optional<Room> adjoined = findAdjoiningRoom(
-                    roomHints, doorPos, maxDistFromDoor, wd
+                    roomHints, doorPos, maxDistFromDoor, depth + 1, wd
             );
 
             if (adjoined.isPresent()) {
@@ -213,8 +232,13 @@ public class RoomDetection {
             Position wallPos,
             int maxDistFromDoor,
             WallExclusion exclusion,
+            int depth,
             WallDetector wd
     ) {
+        if (depth > maxDistFromDoor) {
+            RoomRecipes.LOGGER.error("Reached detection limit for room between {} and {}", doorPos, wallPos);
+            return Optional.empty();
+        }
         if (doorPos.x != wallPos.x && doorPos.z != wallPos.z) {
             return Optional.empty();
         }
@@ -233,7 +257,7 @@ public class RoomDetection {
         }
         if (roomHints.hasAnyOpenings()) {
             Optional<Room> adjoined = findAdjoiningRoom(
-                    roomHints, doorPos, maxDistFromDoor, wd
+                    roomHints, doorPos, maxDistFromDoor, depth + 1, wd
             );
 
             if (adjoined.isPresent()) {
@@ -247,6 +271,7 @@ public class RoomDetection {
             RoomHints roomHints,
             Position doorPos,
             int maxDistFromDoor,
+            int depth,
             WallDetector wd
     ) {
         if (roomHints.northOpening != null) {
@@ -261,9 +286,10 @@ public class RoomDetection {
                     ),
                     Optional.empty(),
                     WallExclusion.allowSouthOpen(),
+                    depth + 1,
                     wd
             );
-            if (room.isPresent()) {
+            if (room.isPresent() && roomHints.hasOneOpening()) {
                 return roomHints.adjoinedTo(doorPos, room.get().getSpace());
             }
         }
@@ -279,9 +305,10 @@ public class RoomDetection {
                     ),
                     Optional.empty(),
                     WallExclusion.allowNorthOpen(),
+                    depth + 1,
                     wd
             );
-            if (room.isPresent()) {
+            if (room.isPresent() && roomHints.hasOneOpening()) {
                 return roomHints.adjoinedTo(doorPos, room.get().getSpace());
             }
         }
@@ -297,9 +324,10 @@ public class RoomDetection {
                     ),
                     Optional.empty(),
                     WallExclusion.allowEastOpen(),
+                    depth + 1,
                     wd
             );
-            if (room.isPresent()) {
+            if (room.isPresent() && roomHints.hasOneOpening()) { // TODO: Add test for multi-opening
                 return roomHints.adjoinedTo(doorPos, room.get().getSpace());
             }
         }
@@ -315,9 +343,10 @@ public class RoomDetection {
                     ),
                     Optional.empty(),
                     WallExclusion.allowWestOpen(),
+                    depth + 1,
                     wd
             );
-            if (room.isPresent()) {
+            if (room.isPresent() && roomHints.hasOneOpening()) {
                 return roomHints.adjoinedTo(doorPos, room.get().getSpace());
             }
         }

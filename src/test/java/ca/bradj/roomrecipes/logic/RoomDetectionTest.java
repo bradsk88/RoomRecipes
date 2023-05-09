@@ -25,7 +25,7 @@ class RoomDetectionTest {
                 {"W", "W", "W", "A"}
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(1, 0), 4, (Position dp) -> {
+        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(1, 0), 4, 0, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -40,7 +40,8 @@ class RoomDetectionTest {
         assertEquals(expectedCorners, room.get().getSpace());
 
     }
-@Test
+
+    @Test
     public void Test_DetectSimpleRoom_E() {
 
         // A = air
@@ -52,7 +53,7 @@ class RoomDetectionTest {
                 {"W", "W", "W", "A"}
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(1, 0), 4, (Position dp) -> {
+        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(1, 0), 4, 0, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -67,7 +68,8 @@ class RoomDetectionTest {
         assertEquals(expectedCorners, room.get().getSpace());
 
     }
-@Test
+
+    @Test
     public void Test_DetectSimpleRoom_S() {
 
         // A = air
@@ -79,7 +81,7 @@ class RoomDetectionTest {
                 {"W", "D", "W", "A"}
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(1, 0), 4, (Position dp) -> {
+        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(1, 0), 4, 0, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -94,7 +96,8 @@ class RoomDetectionTest {
         assertEquals(expectedCorners, room.get().getSpace());
 
     }
-@Test
+
+    @Test
     public void Test_DetectSimpleRoom_W() {
 
         // A = air
@@ -106,7 +109,7 @@ class RoomDetectionTest {
                 {"W", "W", "W", "A"}
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(1, 0), 4, (Position dp) -> {
+        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(1, 0), 4, 0, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -134,7 +137,7 @@ class RoomDetectionTest {
                 {"W", "W", "A", "A"}
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(1, 0), 4, (Position dp) -> {
+        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(1, 0), 4, 0, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -172,10 +175,15 @@ class RoomDetectionTest {
             return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(1, 0), 4, position -> wdFn.apply(map1).test(position));
+        Optional<Room> room = RoomDetection.findRoomForDoor(
+                new Position(1, 0),
+                4,
+                0,
+                position -> wdFn.apply(map1).test(position)
+        );
         assertTrue(room.isPresent());
 
-        room = RoomDetection.findRoomForDoor(new Position(1, 0), 4, position -> wdFn.apply(map2).test(position));
+        room = RoomDetection.findRoomForDoor(new Position(1, 0), 4, 0, position -> wdFn.apply(map2).test(position));
         assertFalse(room.isPresent());
 
     }
@@ -194,7 +202,7 @@ class RoomDetectionTest {
                 {"A", "A", "A", "A", "A"}
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(2, 1), 4, (Position dp) -> {
+        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(2, 1), 4, 0, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -209,6 +217,7 @@ class RoomDetectionTest {
         assertEquals(expectedCorners, room.get().getSpace());
 
     }
+
     @Test
     public void Test_DetectSimpleRoomWithAirAndWallAround() {
 
@@ -223,7 +232,7 @@ class RoomDetectionTest {
                 {"A", "A", "A", "A", "A", "A"}
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(3, 1), 4, (Position dp) -> {
+        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(3, 1), 4, 0, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -238,6 +247,7 @@ class RoomDetectionTest {
         assertEquals(expectedCorners, room.get().getSpace());
 
     }
+
     @Test
     public void Test_DetectOpenSouthWall() {
 
@@ -252,7 +262,7 @@ class RoomDetectionTest {
                 {"A", "A", "A", "A", "A", "A"}
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(3, 1), 4, (Position dp) -> {
+        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(3, 1), 4, 0, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -263,6 +273,7 @@ class RoomDetectionTest {
         });
         assertFalse(room.isPresent());
     }
+
     @Test
     public void Test_DetectShapeLikeLetterA() {
 
@@ -276,7 +287,7 @@ class RoomDetectionTest {
                 {"W", "A", "W"},
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(1, 0), 5, (Position dp) -> {
+        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(1, 0), 5, 0, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -290,6 +301,7 @@ class RoomDetectionTest {
         InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
         assertEquals(expectedCorners, room.get().getSpace());
     }
+
     @Test
     public void Test_DetectShapeLikeLetterA_90() {
 
@@ -302,7 +314,7 @@ class RoomDetectionTest {
                 {"W", "W", "W", "W"},
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(0, 1), 5, (Position dp) -> {
+        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(0, 1), 5, 0, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -316,6 +328,7 @@ class RoomDetectionTest {
         InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
         assertEquals(expectedCorners, room.get().getSpace());
     }
+
     @Test
     public void Test_DetectShapeLikeLetterA_180() {
 
@@ -329,7 +342,7 @@ class RoomDetectionTest {
                 {"W", "D", "W"},
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(1, 3), 5, (Position dp) -> {
+        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(1, 3), 5, 0, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -343,6 +356,7 @@ class RoomDetectionTest {
         InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 1), new Position(2, 3));
         assertEquals(expectedCorners, room.get().getSpace());
     }
+
     @Test
     public void Test_DetectShapeLikeLetterA_270() {
 
@@ -355,7 +369,7 @@ class RoomDetectionTest {
                 {"W", "W", "W", "W"},
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(3, 1), 5, (Position dp) -> {
+        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(3, 1), 5, 0, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -384,7 +398,7 @@ class RoomDetectionTest {
                 {"_", "_", "_", "_", "_", "_", "_"}
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(3, 3), 10, (Position dp) -> {
+        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(3, 3), 10, 0, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -399,6 +413,7 @@ class RoomDetectionTest {
         assertEquals(expectedCorners, room.get().getSpace());
 
     }
+
     @Test
     public void Test_DetectSimpleRoomWithSeparateEastWall_EquidistantToWest() {
 
@@ -413,7 +428,7 @@ class RoomDetectionTest {
                 {"_", "_", "_", "_", "_", "_", "_"}
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(3, 3), 10, (Position dp) -> {
+        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(3, 3), 10, 0, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -428,6 +443,7 @@ class RoomDetectionTest {
         assertEquals(expectedCorners, room.get().getSpace());
 
     }
+
     @Test
     public void Test_DetectSimpleRoomWithSeparateNorthWall_EquidistantToSouth() {
 
@@ -444,7 +460,7 @@ class RoomDetectionTest {
                 {"_", "W", "W", "W", "W", "_", "_"},
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(4, 3), 10, (Position dp) -> {
+        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(4, 3), 10, 0, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }
@@ -459,6 +475,7 @@ class RoomDetectionTest {
         assertEquals(expectedCorners, room.get().getSpace());
 
     }
+
     @Test
     public void Test_DetectSimpleRoomWithSeparateSouthWall_EquidistantToNorth() {
 
@@ -475,7 +492,7 @@ class RoomDetectionTest {
                 {"_", "W", "W", "W", "W", "_", "_"},
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(1, 3), 10, (Position dp) -> {
+        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(1, 3), 10, 0, (Position dp) -> {
             if (dp.x < 0 || dp.z < 0) {
                 return false;
             }

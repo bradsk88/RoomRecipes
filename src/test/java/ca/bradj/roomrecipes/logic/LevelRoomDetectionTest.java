@@ -701,6 +701,38 @@ class LevelRoomDetectionTest {
     }
 
     @Test
+    public void Test_Detect_OpenLShape_N_Broken() {
+        java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
+        Configurator.setLevel(RoomRecipes.LOGGER.getName(), Level.TRACE);
+        // _ = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"W", "W", "W", "_", "_", "_"},
+                {"W", "_", "W", "_", "_", "_"},
+                {"W", "_", "_", "W", "W", "_"},
+                {"W", "_", "_", "_", "W", "_"},
+                {"W", "D", "W", "W", "W", "_"}
+        }; // Missing missing inside corner
+
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
+                new Position(1, 4)
+        ), 10, WD(map));
+        assertTrue(room.containsKey(new Position(1, 4)));
+
+        assertTrue(room.get(new Position(1, 4)).isPresent());
+
+        List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(1, 4)).get().getSpaces());
+        assertEquals(2, spaces.size());
+
+        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(0, 0), new Position(2, 4));
+        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(2, 2), new Position(4, 4));
+
+        assertEquals(expectedCorners1, spaces.get(0));
+        assertEquals(expectedCorners2, spaces.get(1));
+    }
+
+    @Test
     public void Test_Detect_OpenLShape_E() {
         java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
         Configurator.setLevel(RoomRecipes.LOGGER.getName(), Level.TRACE);
