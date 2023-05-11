@@ -129,4 +129,18 @@ public class ZWall {
     public boolean sameHeight(ZWall wall) {
         return this.northCorner.z == wall.northCorner.z && this.southCorner.z == wall.southCorner.z;
     }
+
+    public boolean isSameContentAs(
+            ZWall shifted,
+            WallDetector wd
+    ) {
+        for (int i = 0; i < shifted.southCorner.z; i++) {
+            boolean isWall = wd.IsWall(northCorner.offset(0, i));
+            boolean shiftedIsWall = wd.IsWall(shifted.northCorner.offset(0, i));
+            if (isWall != shiftedIsWall) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

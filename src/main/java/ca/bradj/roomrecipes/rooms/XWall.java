@@ -1,6 +1,7 @@
 package ca.bradj.roomrecipes.rooms;
 
 import ca.bradj.roomrecipes.core.space.Position;
+import ca.bradj.roomrecipes.logic.interfaces.WallDetector;
 
 import java.util.Objects;
 
@@ -76,5 +77,16 @@ public class XWall {
 
     public boolean sameWidth(XWall southOpening) {
         return this.westCorner.x == southOpening.westCorner.x && this.eastCorner.x == southOpening.eastCorner.x;
+    }
+
+    public boolean isSameContentAs(XWall shifted, WallDetector wd) {
+        for (int i = 0; i < shifted.westCorner.x; i++) {
+            boolean isWall = wd.IsWall(westCorner.offset(i, 0));
+            boolean shiftedIsWall = wd.IsWall(shifted.westCorner.offset(i, 0));
+            if (isWall != shiftedIsWall) {
+                return false;
+            }
+        }
+        return true;
     }
 }

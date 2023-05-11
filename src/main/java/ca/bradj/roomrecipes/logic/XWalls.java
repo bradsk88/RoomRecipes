@@ -63,6 +63,9 @@ public class XWalls {
             XWall xWall,
             WallDetector wd
     ) {
+        if (!wd.IsWall(xWall.westCorner) || !wd.IsWall(xWall.eastCorner)) {
+            return Optional.empty();
+        }
         boolean wasWall = true;
         int xWest = 0;
         for (int i = xWall.westCorner.x; i <= xWall.eastCorner.x; i++) {

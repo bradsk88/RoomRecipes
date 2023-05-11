@@ -713,23 +713,14 @@ class LevelRoomDetectionTest {
                 {"W", "_", "_", "W", "W", "_"},
                 {"W", "_", "_", "_", "W", "_"},
                 {"W", "D", "W", "W", "W", "_"}
-        }; // Missing missing inside corner
+        }; // Missing inside corner
 
         ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
                 new Position(1, 4)
         ), 10, WD(map));
         assertTrue(room.containsKey(new Position(1, 4)));
 
-        assertTrue(room.get(new Position(1, 4)).isPresent());
-
-        List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(1, 4)).get().getSpaces());
-        assertEquals(2, spaces.size());
-
-        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(0, 0), new Position(2, 4));
-        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(2, 2), new Position(4, 4));
-
-        assertEquals(expectedCorners1, spaces.get(0));
-        assertEquals(expectedCorners2, spaces.get(1));
+        assertFalse(room.get(new Position(1, 4)).isPresent());
     }
 
     @Test
