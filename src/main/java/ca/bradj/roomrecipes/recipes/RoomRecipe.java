@@ -30,6 +30,11 @@ public class RoomRecipe implements Recipe<Container>, Comparable<RoomRecipe> {
     private final int recipeStrength;
 
     @Override
+    public boolean isSpecial() {
+        return true;
+    }
+
+    @Override
     public String toString() {
         return "RoomRecipe{" +
                 "id=" + id +
