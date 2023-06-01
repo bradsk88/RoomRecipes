@@ -26,9 +26,9 @@ public class ActiveRecipesTest {
         Room room = new Room(new Position(0, 0), new InclusiveSpace(new Position(0, 0), new Position(1, 1)));
         int recipeId = 1;
 
-        activeRecipes.update(room, Optional.of(recipeId));
+        activeRecipes.update(room.getDoorPos(), recipeId);
 
-        Mockito.verify(listener, Mockito.times(1)).roomRecipeCreated(room, recipeId);
+        Mockito.verify(listener, Mockito.times(1)).roomRecipeCreated(room.getDoorPos(), recipeId);
     }
 
     @Test
@@ -37,11 +37,11 @@ public class ActiveRecipesTest {
         int oldRecipeId = 1;
         int newRecipeId = 2;
 
-        activeRecipes.update(room, Optional.of(oldRecipeId));
-        activeRecipes.update(room, Optional.of(newRecipeId));
+        activeRecipes.update(room.getDoorPos(), oldRecipeId);
+        activeRecipes.update(room.getDoorPos(), newRecipeId);
 
-        Mockito.verify(listener, Mockito.times(1)).roomRecipeCreated(room, oldRecipeId);
-        Mockito.verify(listener, Mockito.times(1)).roomRecipeChanged(room, oldRecipeId, newRecipeId);
+        Mockito.verify(listener, Mockito.times(1)).roomRecipeCreated(room.getDoorPos(), oldRecipeId);
+        Mockito.verify(listener, Mockito.times(1)).roomRecipeChanged(room.getDoorPos(), oldRecipeId, newRecipeId);
     }
 
     @Test
@@ -49,10 +49,10 @@ public class ActiveRecipesTest {
         Room room = new Room(new Position(0, 0), new InclusiveSpace(new Position(0, 0), new Position(1, 1)));
         int sameRecipeId = 1;
 
-        activeRecipes.update(room, Optional.of(sameRecipeId));
-        activeRecipes.update(room, Optional.of(sameRecipeId));
+        activeRecipes.update(room.getDoorPos(), sameRecipeId);
+        activeRecipes.update(room.getDoorPos(), sameRecipeId);
 
-        Mockito.verify(listener, Mockito.times(1)).roomRecipeCreated(room, sameRecipeId);
+        Mockito.verify(listener, Mockito.times(1)).roomRecipeCreated(room.getDoorPos(), sameRecipeId);
         Mockito.verify(listener, Mockito.never()).roomRecipeChanged(Mockito.any(), Mockito.anyInt(), Mockito.anyInt());
         Mockito.verify(listener, Mockito.never()).roomRecipeDestroyed(Mockito.any(), Mockito.anyInt());
     }
@@ -62,11 +62,11 @@ public class ActiveRecipesTest {
         Room room = new Room(new Position(0, 0), new InclusiveSpace(new Position(0, 0), new Position(1, 1)));
         int recipeId = 1;
 
-        activeRecipes.update(room, Optional.of(recipeId));
-        activeRecipes.update(room, Optional.empty());
+        activeRecipes.update(room.getDoorPos(), recipeId);
+        activeRecipes.update(room.getDoorPos(), null);
 
-        Mockito.verify(listener, Mockito.times(1)).roomRecipeCreated(room, recipeId);
-        Mockito.verify(listener, Mockito.times(1)).roomRecipeDestroyed(room, recipeId);
+        Mockito.verify(listener, Mockito.times(1)).roomRecipeCreated(room.getDoorPos(), recipeId);
+        Mockito.verify(listener, Mockito.times(1)).roomRecipeDestroyed(room.getDoorPos(), recipeId);
     }
 
     @Test
@@ -74,10 +74,10 @@ public class ActiveRecipesTest {
         Room room = new Room(new Position(0, 0), new InclusiveSpace(new Position(0, 0), new Position(1, 1)));
         int recipeId = 1;
 
-        activeRecipes.update(room, Optional.empty());
-        activeRecipes.update(room, Optional.empty());
+        activeRecipes.update(room.getDoorPos(), null);
+        activeRecipes.update(room.getDoorPos(), null);
 
-        Mockito.verify(listener, Mockito.never()).roomRecipeCreated(room, recipeId);
-        Mockito.verify(listener, Mockito.never()).roomRecipeDestroyed(room, recipeId);
+        Mockito.verify(listener, Mockito.never()).roomRecipeCreated(room.getDoorPos(), recipeId);
+        Mockito.verify(listener, Mockito.never()).roomRecipeDestroyed(room.getDoorPos(), recipeId);
     }
 }
