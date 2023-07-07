@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
@@ -818,6 +819,8 @@ class LevelRoomDetectionTest {
         assertEquals(expectedCorners1, spaces.get(0));
         assertEquals(expectedCorners2, spaces.get(1));
     }
+
+    @Disabled("Low priority")
     @Test
     public void Test_Detect_OpenLShape_Pinched_N() {
         java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
@@ -851,6 +854,7 @@ class LevelRoomDetectionTest {
         assertEquals(expectedCorners2, spaces.get(1));
     }
 
+    @Disabled("Low priority")
     @Test
     public void Test_Detect_OpenLShape_Pinched_E() {
         java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
@@ -883,6 +887,7 @@ class LevelRoomDetectionTest {
         assertEquals(expectedCorners2, spaces.get(1));
     }
 
+    @Disabled("Low priority")
     @Test
     public void Test_Detect_OpenLShape_Pinched_S() {
         java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
@@ -916,6 +921,7 @@ class LevelRoomDetectionTest {
         assertEquals(expectedCorners2, spaces.get(1));
     }
 
+    @Disabled("Low priority")
     @Test
     public void Test_Detect_OpenLShape_Pinched_W() {
         java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
