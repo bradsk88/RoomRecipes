@@ -26,7 +26,7 @@ public class RecipeDetection {
             DoorDetection.DoorChecker doorChecker,
             int y
     ) {
-        Map<BlockPos, Block> blocksInSpace = getBlocksInRoom(level, room, y);
+        Map<BlockPos, Block> blocksInSpace = getBlocksInRoom(level, room, y, false);
         RecipeManager recipeManager = level.getRecipeManager();
 
         List<Block> blocksList = ImmutableList.copyOf(blocksInSpace.values());
@@ -46,7 +46,8 @@ public class RecipeDetection {
     private static ImmutableMap<BlockPos, Block> getBlocksInRoom(
             Level level,
             Room room,
-            int y
+            int y,
+            boolean includeWallBlocks
     ) {
         BlockPos pos1 = Positions.ToBlock(room.getSpace().getCornerA(), y);
         BlockPos pos2 = Positions.ToBlock(room.getSpace().getCornerB(), y).above();
@@ -58,6 +59,12 @@ public class RecipeDetection {
         int xMax = Math.max(pos1.getX(), pos2.getX());
         int zMin = Math.min(pos1.getZ(), pos2.getZ());
         int zMax = Math.max(pos1.getZ(), pos2.getZ());
+        if (!includeWallBlocks) {
+            xMin = xMin + 1;
+            xMax = xMax - 1;
+            zMin = zMin + 1;
+            zMax = zMax - 1;
+        }
         int chunkXMin = xMin >> 4;
         int chunkXMax = xMax >> 4;
         int chunkZMin = zMin >> 4;

@@ -3,6 +3,8 @@ package ca.bradj.roomrecipes.logic;
 import ca.bradj.roomrecipes.core.space.InclusiveSpace;
 import ca.bradj.roomrecipes.core.space.Position;
 
+import java.util.Random;
+
 public class InclusiveSpaces {
 
     public static boolean overlapOnXZPlane(InclusiveSpace space1, InclusiveSpace space2) {
@@ -38,5 +40,15 @@ public class InclusiveSpaces {
         int width = Math.abs(cornerA.z - cornerB.z) + 1;
 
         return Math.max(0, (double) length * width);
+    }
+
+    public static Position getRandomEnclosedPosition(InclusiveSpace space, Random random) {
+        int minX = space.getWestX() + 1;
+        int maxX = space.getEastX() - 1;
+        int minZ = space.getNorthZ() + 1;
+        int maxZ = space.getSouthZ() - 1;
+        int width = maxX - minX;
+        int height = maxZ - minZ;
+        return new Position(minX + random.nextInt(width), minZ + random.nextInt(height));
     }
 }
