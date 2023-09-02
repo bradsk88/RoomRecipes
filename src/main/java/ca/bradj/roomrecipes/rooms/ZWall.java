@@ -6,6 +6,7 @@ import ca.bradj.roomrecipes.logic.interfaces.WallDetector;
 import java.util.Objects;
 import java.util.Optional;
 
+// ZWall is a wall that runs from north to south
 public class ZWall {
     public final Position northCorner;
     public final Position southCorner;
@@ -142,5 +143,9 @@ public class ZWall {
             }
         }
         return true;
+    }
+
+    public int getX() {
+        return northCorner.x;
     }
 }

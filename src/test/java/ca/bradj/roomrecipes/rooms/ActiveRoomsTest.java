@@ -15,12 +15,12 @@ import static org.mockito.Mockito.*;
 
 class ActiveRoomsTest {
 
-    private ActiveRooms activeRooms;
-    private ActiveRooms.ChangeListener changeListenerMock;
+    private ActiveRooms<Room> activeRooms;
+    private ActiveRooms.ChangeListener<Room> changeListenerMock;
 
     @BeforeEach
     void setUp() {
-        activeRooms = new ActiveRooms();
+        activeRooms = new ActiveRooms<>();
         changeListenerMock = mock(ActiveRooms.ChangeListener.class);
         activeRooms.addChangeListener(changeListenerMock);
     }

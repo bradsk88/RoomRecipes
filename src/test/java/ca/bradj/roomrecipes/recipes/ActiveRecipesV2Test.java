@@ -7,15 +7,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-public class ActiveRecipesTest {
+public class ActiveRecipesV2Test {
 
-    private ActiveRecipes<Room, Integer> activeRecipes;
-    private ActiveRecipes.ChangeListener<Room, Integer> listener;
+    private ActiveRecipesV2<Integer> activeRecipes;
+    private ActiveRecipesV2.ChangeListener<Integer> listener;
 
     @BeforeEach
     public void setUp() {
-        activeRecipes = new ActiveRecipes<>();
-        listener = Mockito.mock(ActiveRecipes.ChangeListener.class);
+        activeRecipes = new ActiveRecipesV2<>();
+        listener = Mockito.mock(ActiveRecipesV2.ChangeListener.class);
         activeRecipes.addChangeListener(listener);
     }
 
@@ -24,7 +24,7 @@ public class ActiveRecipesTest {
         Room room = new Room(new Position(0, 0), new InclusiveSpace(new Position(0, 0), new Position(1, 1)));
         int recipeId = 1;
 
-        activeRecipes.update(null, room, recipeId);
+        activeRecipes.update(room, recipeId);
 
         Mockito.verify(listener, Mockito.times(1)).roomRecipeCreated(room, recipeId);
     }
@@ -35,24 +35,11 @@ public class ActiveRecipesTest {
         int oldRecipeId = 1;
         int newRecipeId = 2;
 
-        activeRecipes.update(room, room, oldRecipeId);
-        activeRecipes.update(room, room, newRecipeId);
+        activeRecipes.update(room, oldRecipeId);
+        activeRecipes.update(room, newRecipeId);
 
         Mockito.verify(listener, Mockito.times(1)).roomRecipeCreated(room, oldRecipeId);
-        Mockito.verify(listener, Mockito.times(1)).roomRecipeChanged(room, oldRecipeId, room, newRecipeId);
-    }
-
-    @Test
-    public void testChangeRecipeRoom() {
-        Room room = new Room(new Position(0, 0), new InclusiveSpace(new Position(0, 0), new Position(1, 1)));
-        Room newRoom = new Room(new Position(0, 0), new InclusiveSpace(new Position(0, 0), new Position(2, 2)));
-        int sameRecipeId = 1;
-
-        activeRecipes.update(null, room, sameRecipeId);
-        activeRecipes.update(room, newRoom, sameRecipeId);
-
-        Mockito.verify(listener, Mockito.times(1)).roomRecipeCreated(room, sameRecipeId);
-        Mockito.verify(listener, Mockito.times(1)).roomRecipeChanged(room, sameRecipeId, newRoom, sameRecipeId);
+        Mockito.verify(listener, Mockito.times(1)).roomRecipeChanged(room, oldRecipeId, newRecipeId);
     }
 
     @Test
@@ -60,11 +47,11 @@ public class ActiveRecipesTest {
         Room room = new Room(new Position(0, 0), new InclusiveSpace(new Position(0, 0), new Position(1, 1)));
         int sameRecipeId = 1;
 
-        activeRecipes.update(room, room, sameRecipeId);
-        activeRecipes.update(room, room, sameRecipeId);
+        activeRecipes.update(room, sameRecipeId);
+        activeRecipes.update(room, sameRecipeId);
 
         Mockito.verify(listener, Mockito.times(1)).roomRecipeCreated(room, sameRecipeId);
-        Mockito.verify(listener, Mockito.never()).roomRecipeChanged(Mockito.any(), Mockito.anyInt(), Mockito.any(), Mockito.anyInt());
+        Mockito.verify(listener, Mockito.never()).roomRecipeChanged(Mockito.any(), Mockito.anyInt(), Mockito.anyInt());
         Mockito.verify(listener, Mockito.never()).roomRecipeDestroyed(Mockito.any(), Mockito.anyInt());
     }
 
@@ -73,20 +60,8 @@ public class ActiveRecipesTest {
         Room room = new Room(new Position(0, 0), new InclusiveSpace(new Position(0, 0), new Position(1, 1)));
         int recipeId = 1;
 
-        activeRecipes.update(room, room, recipeId);
-        activeRecipes.update(room, room, null);
-
-        Mockito.verify(listener, Mockito.times(1)).roomRecipeCreated(room, recipeId);
-        Mockito.verify(listener, Mockito.times(1)).roomRecipeDestroyed(room, recipeId);
-    }
-
-    @Test
-    public void testDestroyRecipeRoom() {
-        Room room = new Room(new Position(0, 0), new InclusiveSpace(new Position(0, 0), new Position(1, 1)));
-        int recipeId = 1;
-
-        activeRecipes.update(null, room, recipeId);
-        activeRecipes.update(room, null, recipeId);
+        activeRecipes.update(room, recipeId);
+        activeRecipes.update(room, null);
 
         Mockito.verify(listener, Mockito.times(1)).roomRecipeCreated(room, recipeId);
         Mockito.verify(listener, Mockito.times(1)).roomRecipeDestroyed(room, recipeId);
@@ -97,8 +72,8 @@ public class ActiveRecipesTest {
         Room room = new Room(new Position(0, 0), new InclusiveSpace(new Position(0, 0), new Position(1, 1)));
         int recipeId = 1;
 
-        activeRecipes.update(room, room, null);
-        activeRecipes.update(room, room, null);
+        activeRecipes.update(room, null);
+        activeRecipes.update(room, null);
 
         Mockito.verify(listener, Mockito.never()).roomRecipeCreated(room, recipeId);
         Mockito.verify(listener, Mockito.never()).roomRecipeDestroyed(room, recipeId);

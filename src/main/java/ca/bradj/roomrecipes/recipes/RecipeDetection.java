@@ -40,7 +40,9 @@ public class RecipeDetection {
         recipes = Lists.reverse(ImmutableList.sortedCopyOf(recipes));
 
         Optional<RoomRecipe> matchedRecipe = recipes.stream().filter(r -> r.matches(inv, level)).findFirst();
-        return matchedRecipe.map(v -> new RoomRecipeMatch(v.getId(), blocksInSpace.entrySet()));
+        return matchedRecipe.map(v -> new RoomRecipeMatch(
+                room, v.getId(), blocksInSpace.entrySet())
+        );
     }
 
     private static ImmutableMap<BlockPos, Block> getBlocksInRoom(

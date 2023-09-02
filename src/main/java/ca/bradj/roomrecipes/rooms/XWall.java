@@ -5,6 +5,7 @@ import ca.bradj.roomrecipes.logic.interfaces.WallDetector;
 
 import java.util.Objects;
 
+// XWall is a wall that runs from west to east
 public class XWall {
     public final Position westCorner;
     public final Position eastCorner;
