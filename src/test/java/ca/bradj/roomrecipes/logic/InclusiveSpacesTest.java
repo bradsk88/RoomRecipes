@@ -2,7 +2,12 @@ package ca.bradj.roomrecipes.logic;
 
 import ca.bradj.roomrecipes.core.space.InclusiveSpace;
 import ca.bradj.roomrecipes.core.space.Position;
+import com.google.common.collect.ImmutableList;
+import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.util.Collection;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -60,5 +65,29 @@ class InclusiveSpacesTest {
         InclusiveSpace space4 = new InclusiveSpace(new Position(-2, -2), new Position(2, 2));
         double expectedArea4 = 25;
         assertEquals(expectedArea4, InclusiveSpaces.calculateArea(space4), 0.001);
+    }
+
+    @Test
+    void getAllEnclosedPositions() {
+
+        InclusiveSpace space = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        Collection<Position> posz = InclusiveSpaces.getAllEnclosedPositions(space);
+        Assertions.assertEquals(ImmutableList.of(
+                new Position(1, 1)
+        ), ImmutableList.copyOf(posz));
+
+    }
+    @Test
+    void getAllEnclosedPositions_2() {
+
+        InclusiveSpace space = new InclusiveSpace(new Position(0, 0), new Position(3, 3));
+        Collection<Position> posz = InclusiveSpaces.getAllEnclosedPositions(space);
+        Assertions.assertEquals(ImmutableList.of(
+                new Position(1, 1),
+                new Position(2, 1),
+                new Position(1, 2),
+                new Position(2, 2)
+        ), ImmutableList.copyOf(posz));
+
     }
 }

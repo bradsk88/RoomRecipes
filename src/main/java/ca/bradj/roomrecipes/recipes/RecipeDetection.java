@@ -45,7 +45,7 @@ public class RecipeDetection {
         );
     }
 
-    private static ImmutableMap<BlockPos, Block> getBlocksInRoom(
+    public static ImmutableMap<BlockPos, Block> getBlocksInRoom(
             Level level,
             Room room,
             int y,

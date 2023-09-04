@@ -2,7 +2,9 @@ package ca.bradj.roomrecipes.logic;
 
 import ca.bradj.roomrecipes.core.space.InclusiveSpace;
 import ca.bradj.roomrecipes.core.space.Position;
+import com.google.common.collect.ImmutableList;
 
+import java.util.Collection;
 import java.util.Random;
 
 public class InclusiveSpaces {
@@ -50,5 +52,19 @@ public class InclusiveSpaces {
         int width = maxX - minX;
         int height = maxZ - minZ;
         return new Position(minX + random.nextInt(width), minZ + random.nextInt(height));
+    }
+
+    public static Collection<Position> getAllEnclosedPositions(InclusiveSpace space) {
+        int minX = space.getWestX() + 1;
+        int maxX = space.getEastX() - 1;
+        int minZ = space.getNorthZ() + 1;
+        int maxZ = space.getSouthZ() - 1;
+        ImmutableList.Builder<Position> b = ImmutableList.builder();
+        for (int z = minZ; z <= maxZ; z++) {
+            for (int x = minX; x <= maxX; x++) {
+                b.add(new Position(x, z));
+            }
+        }
+        return b.build();
     }
 }
