@@ -88,23 +88,4 @@ public class Room {
         this.space.add(inclusiveSpace);
         return this;
     }
-
-    public boolean contains(Position pos) {
-        for (InclusiveSpace space : getSpaces()) {
-            if (pos.x < space.getWestX() + 1) {
-                continue;
-            }
-            if (pos.x > space.getEastX() - 1) {
-                continue;
-            }
-            if (pos.z < space.getNorthZ() + 1) {
-                continue;
-            }
-            if (pos.z > space.getSouthZ() - 1) {
-                continue;
-            }
-            return true;
-        }
-        return false;
-    }
 }

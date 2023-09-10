@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
+import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -45,7 +46,7 @@ class InclusiveSpacesTest {
 
         assertFalse(InclusiveSpaces.overlapOnXZPlane(
                 new InclusiveSpace(new Position(0, 0), new Position(5, 5)),
-                new InclusiveSpace(new Position(-6, -6), new Position(-1,  -1))
+                new InclusiveSpace(new Position(-6, -6), new Position(-1, -1))
         ));
     }
 
@@ -77,6 +78,7 @@ class InclusiveSpacesTest {
         ), ImmutableList.copyOf(posz));
 
     }
+
     @Test
     void getAllEnclosedPositions_2() {
 
@@ -89,5 +91,23 @@ class InclusiveSpacesTest {
                 new Position(2, 2)
         ), ImmutableList.copyOf(posz));
 
+    }
+
+    @Test
+    void getRandomEnclosedPosition() {
+        Position pos = InclusiveSpaces.getRandomEnclosedPosition(new InclusiveSpace(
+                new Position(0, 0),
+                new Position(2, 2)
+        ), new Random());
+        Assertions.assertTrue(pos.x == 1 || pos.z == 1);
+    }
+
+    @Test
+    void getMidpoint() {
+        Position pos = InclusiveSpaces.getMidpoint(new InclusiveSpace(
+                new Position(0, 0),
+                new Position(2, 2)
+        ));
+        Assertions.assertEquals(new Position(1, 1), pos);
     }
 }
