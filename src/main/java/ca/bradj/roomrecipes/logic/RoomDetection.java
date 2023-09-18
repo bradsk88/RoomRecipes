@@ -7,6 +7,7 @@ import ca.bradj.roomrecipes.core.space.Position;
 import ca.bradj.roomrecipes.logic.interfaces.WallDetector;
 import ca.bradj.roomrecipes.rooms.XWall;
 import ca.bradj.roomrecipes.rooms.ZWall;
+import com.google.common.collect.ImmutableList;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -159,7 +160,22 @@ public class RoomDetection {
         if (findAlt.isPresent() && room.get().getSpace().equals(findAlt.get())) {
             return Optional.empty();
         }
-        return room;
+
+        return room.map(v -> RoomDetection.simplify(v));
+    }
+
+    private static Room simplify(Room v) {
+        if (v.getSpaces().size() == 2) {
+            ImmutableList<InclusiveSpace> s = ImmutableList.copyOf(v.getSpaces());
+            ZWall ew = s.get(0).getEastZWall();
+            ZWall ww = s.get(1).getWestZWall();
+            if (ew.northCorner.equals(ww.northCorner) && ew.southCorner.equals(ww.southCorner)) {
+                ZWall nww = s.get(0).getWestZWall();
+                ZWall eww = s.get(1).getEastZWall();
+                return new Room(v.getDoorPos(), new InclusiveSpace(nww.northCorner, eww.southCorner));
+            }
+        }
+        return v;
     }
 
     private static Optional<Room> findRoomBetween(
@@ -275,12 +291,13 @@ public class RoomDetection {
             WallDetector wd
     ) {
         if (roomHints.northOpening != null) {
-            Optional<InclusiveSpace> space = findRoomForXOpening(
+            Optional<RoomHints> space = findRoomForXOpening(
                     roomHints.northOpening, maxDistFromDoor, -1,
                     (XWall wall, RoomHints hints) -> new RoomHints(
                             wall, roomHints.northOpening, null, null,
                             null, roomHints.northOpening, null, null
                     ),
+                    WallExclusion.allowSouthOpen(),
                     wd
             );
             if (space.isPresent() && roomHints.hasOneOpening()) {
@@ -288,12 +305,13 @@ public class RoomDetection {
             }
         }
         if (roomHints.southOpening != null) {
-            Optional<InclusiveSpace> space = findRoomForXOpening(
+            Optional<RoomHints> space = findRoomForXOpening(
                     roomHints.southOpening, maxDistFromDoor, 1,
                     (XWall wall, RoomHints hints) -> new RoomHints(
                             roomHints.southOpening, wall, null, null,
                             roomHints.southOpening, null, null, null
                     ),
+                    WallExclusion.allowNorthOpen(),
                     wd
             );
             if (space.isPresent() && roomHints.hasOneOpening()) {
@@ -301,12 +319,13 @@ public class RoomDetection {
             }
         }
         if (roomHints.westOpening != null) {
-            Optional<InclusiveSpace> space = findRoomForZOpening(
+            Optional<RoomHints> space = findRoomForZOpening(
                     roomHints.westOpening, maxDistFromDoor, -1,
                     (ZWall wall, RoomHints hints) -> new RoomHints(
                             null, null, wall, roomHints.westOpening,
                             null, null, null, roomHints.westOpening
                     ),
+                    WallExclusion.allowEastOpen(),
                     wd
             );
             if (space.isPresent() && roomHints.hasOneOpening()) { // TODO: Add test for multi-opening
@@ -314,12 +333,13 @@ public class RoomDetection {
             }
         }
         if (roomHints.eastOpening != null) {
-            Optional<InclusiveSpace> space = findRoomForZOpening(
+            Optional<RoomHints> space = findRoomForZOpening(
                     roomHints.eastOpening, maxDistFromDoor, 1,
                     (ZWall wall, RoomHints hints) -> new RoomHints(
                             null, null, roomHints.eastOpening, wall,
                             null, null, roomHints.eastOpening, null
                     ),
+                    WallExclusion.allowWestOpen(),
                     wd
             );
             if (space.isPresent() && roomHints.hasOneOpening()) {
@@ -337,11 +357,12 @@ public class RoomDetection {
         RoomHints applyZWall(ZWall wall, RoomHints hints);
     }
 
-    private static Optional<InclusiveSpace> findRoomForXOpening(
+    private static Optional<RoomHints> findRoomForXOpening(
             XWall opening,
             int maxDistFromDoor,
             int z,
             OpeningXHintFactory factory,
+            WallExclusion exclusion,
             WallDetector wd
     ) {
         if (z == 0) {
@@ -356,7 +377,30 @@ public class RoomDetection {
                 break;
             }
             if (!opening.isSameContentAs(shifted, wd)) {
-                return Optional.empty();
+                break;
+            }
+        }
+
+        Position mp = opening.getMidpoint();
+        for (int i = 1; i < maxDistFromDoor; i++) {
+            int zShift = i * z;
+            Optional<Room> room = findRoomFromBackWall(
+                    mp, mp.offset(0, zShift),
+                    maxDistFromDoor, Optional.empty(),
+                    exclusion,
+                    0, wd
+            );
+            if (room.isPresent()) {
+                return room.map(v -> new RoomHints(
+                        v.getSpace().getNorthXWall(),
+                        v.getSpace().getSouthXWall(),
+                        v.getSpace().getWestZWall(),
+                        v.getSpace().getEastZWall(),
+                        XWalls.findOpening(v.getSpace().getNorthXWall(), wd).orElse(null),
+                        XWalls.findOpening(v.getSpace().getSouthXWall(), wd).orElse(null),
+                        ZWalls.findOpening(v.getSpace().getWestZWall(), wd).orElse(null),
+                        ZWalls.findOpening(v.getSpace().getEastZWall(), wd).orElse(null)
+                ));
             }
         }
         if (hints.northWall == null || hints.southWall == null) {
@@ -365,16 +409,17 @@ public class RoomDetection {
         ZWall westWall = new ZWall(hints.northWall.westCorner, hints.southWall.westCorner);
         ZWall eastWall = new ZWall(hints.northWall.eastCorner, hints.southWall.eastCorner);
         if (ZWalls.isConnected(westWall, wd) && ZWalls.isConnected(eastWall, wd)) {
-            return Optional.of(new InclusiveSpace(hints.southWall.westCorner, hints.northWall.eastCorner));
+            return Optional.of(hints);
         }
         return Optional.empty();
     }
 
-    private static Optional<InclusiveSpace> findRoomForZOpening(
+    private static Optional<RoomHints> findRoomForZOpening(
             ZWall opening,
             int maxDistFromDoor,
             int x,
             OpeningZHintFactory factory,
+            WallExclusion exclusion,
             WallDetector wd
     ) {
         if (x == 0) {
@@ -389,16 +434,40 @@ public class RoomDetection {
                 break;
             }
             if (!opening.isSameContentAs(shifted, wd)) {
-                return Optional.empty();
+                break;
             }
         }
+
+        Position mp = opening.getMidpoint();
+        for (int i = 1; i < maxDistFromDoor; i++) {
+            int xShift = i * x;
+            Optional<Room> room = findRoomFromBackWall(
+                    mp, mp.offset(xShift, 0),
+                    maxDistFromDoor, Optional.empty(),
+                    exclusion,
+                    0, wd
+            );
+            if (room.isPresent()) {
+                return room.map(v -> new RoomHints(
+                        v.getSpace().getNorthXWall(),
+                        v.getSpace().getSouthXWall(),
+                        v.getSpace().getWestZWall(),
+                        v.getSpace().getEastZWall(),
+                        XWalls.findOpening(v.getSpace().getNorthXWall(), wd).orElse(null),
+                        XWalls.findOpening(v.getSpace().getSouthXWall(), wd).orElse(null),
+                        ZWalls.findOpening(v.getSpace().getWestZWall(), wd).orElse(null),
+                        ZWalls.findOpening(v.getSpace().getEastZWall(), wd).orElse(null)
+                ));
+            }
+        }
+
         if (hints.westWall == null || hints.eastWall == null) {
             return Optional.empty();
         }
         XWall northWall = new XWall(hints.westWall.northCorner, hints.eastWall.northCorner);
         XWall southWall = new XWall(hints.westWall.southCorner, hints.eastWall.southCorner);
         if (XWalls.isConnected(northWall, wd) && XWalls.isConnected(southWall, wd)) {
-            return Optional.of(new InclusiveSpace(hints.westWall.southCorner, hints.eastWall.northCorner));
+            return Optional.of(hints);
         }
         return Optional.empty();
     }
@@ -516,21 +585,22 @@ public class RoomDetection {
         if (hints.eastWall == null || hints.eastOpening != null && hints.eastOpening.sameHeight(hints.eastWall)) {
             ZWall pEastWall = midWall.shiftedEast(i);
             if (ZWalls.isConnected(pEastWall, wd)) {
-                hints = hints.withEastWall(pEastWall);
-                hints = hints.withEastOpening(null);
-                hints = hints.withNorthWall(null);
-                hints = hints.withSouthWall(null);
+                if (hints.eastOpening == null) {
+                    hints = hints.withEastWall(pEastWall);
+                    hints = hints.withEastOpening(null);
+                    hints = hints.withNorthWall(null);
+                    hints = hints.withSouthWall(null);
+                }
             } else {
                 Optional<ZWall> opening = ZWalls.findOpening(pEastWall, wd);
                 if (opening.isPresent()) {
                     if (opening.get().sameHeight(pEastWall)) {
-                        hints = hints.withEastWall(opening.get());
+                        hints = hints.withEastOpening(opening.get());
                         hints = hints.withNorthWall(null);
                         hints = hints.withSouthWall(null);
                     } else {
-                        hints = hints.withEastWall(pEastWall);
+//                        hints = hints.withEastWall(pEastWall);
                     }
-                    hints = hints.withEastOpening(opening.get());
                 }
             }
         }
@@ -560,6 +630,7 @@ public class RoomDetection {
                 return hints;
             }
         }
+
         return hints;
     }
 

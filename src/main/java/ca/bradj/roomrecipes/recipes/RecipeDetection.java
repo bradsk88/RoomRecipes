@@ -2,8 +2,8 @@ package ca.bradj.roomrecipes.recipes;
 
 import ca.bradj.roomrecipes.adapter.Positions;
 import ca.bradj.roomrecipes.adapter.RoomRecipeMatch;
-import ca.bradj.roomrecipes.core.Room;
 import ca.bradj.roomrecipes.logic.DoorDetection;
+import ca.bradj.roomrecipes.serialization.MCRoom;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -20,13 +20,12 @@ import java.util.Optional;
 
 public class RecipeDetection {
 
-    public static Optional<RoomRecipeMatch> getActiveRecipe(
+    public static Optional<RoomRecipeMatch<MCRoom>> getActiveRecipe(
             Level level,
-            Room room,
-            DoorDetection.DoorChecker doorChecker,
-            int y
+            MCRoom room,
+            DoorDetection.DoorChecker doorChecker
     ) {
-        Map<BlockPos, Block> blocksInSpace = getBlocksInRoom(level, room, y, false);
+        Map<BlockPos, Block> blocksInSpace = getBlocksInRoom(level, room, false);
         RecipeManager recipeManager = level.getRecipeManager();
 
         List<Block> blocksList = ImmutableList.copyOf(blocksInSpace.values());
@@ -40,19 +39,18 @@ public class RecipeDetection {
         recipes = Lists.reverse(ImmutableList.sortedCopyOf(recipes));
 
         Optional<RoomRecipe> matchedRecipe = recipes.stream().filter(r -> r.matches(inv, level)).findFirst();
-        return matchedRecipe.map(v -> new RoomRecipeMatch(
+        return matchedRecipe.map(v -> new RoomRecipeMatch<>(
                 room, v.getId(), blocksInSpace.entrySet())
         );
     }
 
     public static ImmutableMap<BlockPos, Block> getBlocksInRoom(
             Level level,
-            Room room,
-            int y,
+            MCRoom room,
             boolean includeWallBlocks
     ) {
-        BlockPos pos1 = Positions.ToBlock(room.getSpace().getCornerA(), y);
-        BlockPos pos2 = Positions.ToBlock(room.getSpace().getCornerB(), y).above();
+        BlockPos pos1 = Positions.ToBlock(room.getSpace().getCornerA(), room.yCoord);
+        BlockPos pos2 = Positions.ToBlock(room.getSpace().getCornerB(), room.yCoord).above();
 
         ImmutableMap.Builder<BlockPos, Block> b = ImmutableMap.builder();
 

@@ -40,8 +40,8 @@ public class Room {
         return doorPos;
     }
 
-    Position doorPos;
-    List<InclusiveSpace> space;
+    public final Position doorPos;
+    private final List<InclusiveSpace> space;
 
     public Room(
             Position doorPos,

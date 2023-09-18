@@ -125,12 +125,19 @@ public class RoomHints {
             Position doorPos,
             RoomDetection.WallExclusion exclusion
     ) {
+        Optional<InclusiveSpace> space = asSpace(exclusion);
+        return space.map(v -> new Room(doorPos, v));
+    }
+
+    public Optional<InclusiveSpace> asSpace(
+            RoomDetection.WallExclusion exclusion
+    ) {
         if (isRoom(exclusion)) {
             if (northWall != null && southWall != null) {
-                return Optional.of(new Room(doorPos, new InclusiveSpace(northWall.westCorner, southWall.eastCorner)));
+                return Optional.of(new InclusiveSpace(northWall.westCorner, southWall.eastCorner));
             }
             if (westWall != null && eastWall != null) {
-                return Optional.of(new Room(doorPos, new InclusiveSpace(westWall.northCorner, eastWall.southCorner)));
+                return Optional.of(new InclusiveSpace(westWall.northCorner, eastWall.southCorner));
             }
         }
         return Optional.empty();
@@ -180,41 +187,77 @@ public class RoomHints {
 
     public Optional<Room> adjoinedTo(
             Position doorPos,
-            InclusiveSpace space
+            RoomHints space
     ) {
         if (!hasOneOpening()) {
             throw new IllegalStateException("RoomHints can only be adjoined if they have a singular opening");
         }
         if (northOpening != null) {
-            boolean joinW = space.getSouthXWall().westCorner.equals(northOpening.westCorner);
-            boolean joinE = space.getSouthXWall().eastCorner.equals(northOpening.eastCorner);
-            if (joinW && joinE) {
-                return this.asRoom(doorPos, RoomDetection.WallExclusion.allowNorthOpen())
-                        .map(r -> r.withExtraSpace(space));
+            boolean joinW = false;
+            boolean joinE = false;
+            if (space.southWall != null) {
+                joinW = space.southWall.westCorner.equals(northOpening.westCorner);
+                joinE = space.southWall.eastCorner.equals(northOpening.eastCorner);
+            }
+            if (space.southOpening != null) {
+                joinW = space.southOpening.westCorner.equals(northOpening.westCorner);
+                joinE = space.southOpening.eastCorner.equals(northOpening.eastCorner);
+            }
+            Optional<InclusiveSpace> s = space.asSpace(RoomDetection.WallExclusion.allowNorthOpen());
+            if (joinW && joinE && s.isPresent()) {
+                return this.asRoom(doorPos, RoomDetection.WallExclusion.allowSouthOpen())
+                        .map(r -> r.withExtraSpace(s.get()));
             }
         }
         if (southOpening != null) {
-            boolean joinW = space.getNorthXWall().westCorner.equals(southOpening.westCorner);
-            boolean joinE = space.getNorthXWall().eastCorner.equals(southOpening.eastCorner);
-            if (joinW && joinE) {
+            boolean joinW = false;
+            boolean joinE = false;
+            if (space.northWall != null) {
+                joinW = space.northWall.westCorner.equals(southOpening.westCorner);
+                joinE = space.northWall.eastCorner.equals(southOpening.eastCorner);
+            }
+            if (space.northOpening != null) {
+                joinW = space.northOpening.westCorner.equals(southOpening.westCorner);
+                joinE = space.northOpening.eastCorner.equals(southOpening.eastCorner);
+            }
+            Optional<InclusiveSpace> s = space.asSpace(RoomDetection.WallExclusion.allowNorthOpen());
+            if (joinW && joinE && s.isPresent()) {
                 return this.asRoom(doorPos, RoomDetection.WallExclusion.allowSouthOpen())
-                        .map(r -> r.withExtraSpace(space));
+                        .map(r -> r.withExtraSpace(s.get()));
             }
         }
         if (westOpening != null) {
-            boolean joinN = space.getEastZWall().northCorner.equals(westOpening.northCorner);
-            boolean joinS = space.getEastZWall().southCorner.equals(westOpening.southCorner);
-            if (joinN && joinS) {
+            boolean joinN = false;
+            boolean joinS = false;
+            if (space.eastWall != null) {
+                joinN = space.eastWall.northCorner.equals(westOpening.northCorner);
+                joinS = space.eastWall.southCorner.equals(westOpening.southCorner);
+            }
+            if (space.eastOpening != null) {
+                joinN = space.eastOpening.northCorner.equals(westOpening.northCorner);
+                joinS = space.eastOpening.southCorner.equals(westOpening.southCorner);
+            }
+            Optional<InclusiveSpace> s = space.asSpace(RoomDetection.WallExclusion.allowEastOpen());
+            if (joinN && joinS && s.isPresent()) {
                 return this.asRoom(doorPos, RoomDetection.WallExclusion.allowWestOpen())
-                        .map(r -> r.withExtraSpace(space));
+                        .map(r -> r.withExtraSpace(s.get()));
             }
         }
         if (eastOpening != null) {
-            boolean joinN = space.getWestZWall().northCorner.equals(eastOpening.northCorner);
-            boolean joinS = space.getWestZWall().southCorner.equals(eastOpening.southCorner);
-            if (joinN && joinS) {
+            boolean joinN = false;
+            boolean joinS = false;
+            if (space.westWall != null) {
+                joinN = space.westWall.northCorner.equals(eastOpening.northCorner);
+                joinS = space.westWall.southCorner.equals(eastOpening.southCorner);
+            }
+            if (space.westOpening != null) {
+                joinN = space.westOpening.northCorner.equals(eastOpening.northCorner);
+                joinS = space.westOpening.southCorner.equals(eastOpening.southCorner);
+            }
+            Optional<InclusiveSpace> s = space.asSpace(RoomDetection.WallExclusion.allowWestOpen());
+            if (joinN && joinS && s.isPresent()) {
                 return this.asRoom(doorPos, RoomDetection.WallExclusion.allowEastOpen())
-                        .map(r -> r.withExtraSpace(space));
+                        .map(r -> r.withExtraSpace(s.get()));
             }
         }
         return Optional.empty();

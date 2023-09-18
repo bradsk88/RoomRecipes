@@ -9,13 +9,13 @@ import net.minecraft.world.level.block.Block;
 import java.util.Map;
 import java.util.Objects;
 
-public class RoomRecipeMatch {
-    private final Room room;
+public class RoomRecipeMatch<ROOM extends Room> {
+    public final ROOM room;
     private final ResourceLocation recipeID; // TODO: Make this optional?
     private final ImmutableMap<BlockPos, Block> containedBlocks;
 
     public RoomRecipeMatch(
-            Room room,
+            ROOM room,
             ResourceLocation recipeID,
             Iterable<Map.Entry<BlockPos, Block>> containedBlocks
     ) {
@@ -44,7 +44,7 @@ public class RoomRecipeMatch {
         return Objects.hash(recipeID, containedBlocks);
     }
 
-    public boolean isSameRoomAndRecipe(RoomRecipeMatch o) {
+    public boolean isSameRoomAndRecipe(RoomRecipeMatch<ROOM> o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         return Objects.equals(room, o.room) &&

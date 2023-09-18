@@ -32,11 +32,11 @@ public class ActiveRecipesSerializer {
 
     // TODO: Serialize/Deserialize blocks map
 
-    public CompoundTag serializeNBT(ActiveRecipes<MCRoom, RoomRecipeMatch> recipes) {
+    public CompoundTag serializeNBT(ActiveRecipes<MCRoom, RoomRecipeMatch<MCRoom>> recipes) {
         CompoundTag c = new CompoundTag();
         c.putInt(NBT_NUM_ACTIVE_RECIPES, recipes.size());
         ListTag aq = new ListTag();
-        for (Map.Entry<MCRoom, RoomRecipeMatch> e : recipes.entrySet()) {
+        for (Map.Entry<MCRoom, RoomRecipeMatch<MCRoom>> e : recipes.entrySet()) {
             CompoundTag rc = new CompoundTag();
             rc.putInt(NBT_RECIPE_ROOM_DOORPOS_X, e.getKey().getDoorPos().x);
             rc.putInt(NBT_RECIPE_ROOM_DOORPOS_Z, e.getKey().getDoorPos().z);
@@ -51,8 +51,8 @@ public class ActiveRecipesSerializer {
         return c;
     }
 
-    public ActiveRecipes<MCRoom, RoomRecipeMatch> deserializeNBT(CompoundTag nbt) {
-        Map<MCRoom, RoomRecipeMatch> aqs = new HashMap<>();
+    public ActiveRecipes<MCRoom, RoomRecipeMatch<MCRoom>> deserializeNBT(CompoundTag nbt) {
+        Map<MCRoom, RoomRecipeMatch<MCRoom>> aqs = new HashMap<>();
         int num = nbt.getInt(NBT_NUM_ACTIVE_RECIPES);
         ListTag aq = nbt.getList(NBT_ACTIVE_RECIPES, Tag.TAG_COMPOUND);
         for (int i = 0; i < num; i++) {
@@ -75,7 +75,7 @@ public class ActiveRecipesSerializer {
                 RoomRecipes.LOGGER.error("Room is already present in map. This is probably a bug!");
             }
 
-            aqs.put(key, new RoomRecipeMatch(
+            aqs.put(key, new RoomRecipeMatch<>(
                     key, new ResourceLocation(compound.getString(NBT_RECIPE_ID)),
                     ImmutableList.of())
             );
