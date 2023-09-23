@@ -220,13 +220,10 @@ public class RoomHints {
         );
     }
 
-    public Optional<Room> adjoinedTo(
+    public Optional<InclusiveSpace> adjoinedTo(
             Position doorPos,
             RoomHints space
     ) {
-        if (!hasOneOpening()) {
-            throw new IllegalStateException("RoomHints can only be adjoined if they have a singular opening");
-        }
         if (northOpening != null) {
             boolean joinW = false;
             boolean joinE = false;
@@ -240,8 +237,7 @@ public class RoomHints {
             }
             Optional<InclusiveSpace> s = space.asSpace(RoomDetection.WallExclusion.allowSouthOpen());
             if (joinW && joinE && s.isPresent()) {
-                return this.asRoom(doorPos, RoomDetection.WallExclusion.allowNorthOpen())
-                        .map(r -> r.withExtraSpace(s.get()));
+                return s;
             }
         }
         if (southOpening != null) {
@@ -257,8 +253,7 @@ public class RoomHints {
             }
             Optional<InclusiveSpace> s = space.asSpace(RoomDetection.WallExclusion.allowNorthOpen());
             if (joinW && joinE && s.isPresent()) {
-                return this.asRoom(doorPos, RoomDetection.WallExclusion.allowSouthOpen())
-                        .map(r -> r.withExtraSpace(s.get()));
+                return s;
             }
         }
         if (westOpening != null) {
@@ -274,8 +269,7 @@ public class RoomHints {
             }
             Optional<InclusiveSpace> s = space.asSpace(RoomDetection.WallExclusion.allowEastOpen());
             if (joinN && joinS && s.isPresent()) {
-                return this.asRoom(doorPos, RoomDetection.WallExclusion.allowWestOpen())
-                        .map(r -> r.withExtraSpace(s.get()));
+                return s;
             }
         }
         if (eastOpening != null) {
@@ -291,8 +285,7 @@ public class RoomHints {
             }
             Optional<InclusiveSpace> s = space.asSpace(RoomDetection.WallExclusion.allowWestOpen());
             if (joinN && joinS && s.isPresent()) {
-                return this.asRoom(doorPos, RoomDetection.WallExclusion.allowEastOpen())
-                        .map(r -> r.withExtraSpace(s.get()));
+                return s;
             }
         }
         return Optional.empty();

@@ -1209,4 +1209,137 @@ class LevelRoomDetectionTest {
         InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 4));
         assertEquals(expectedCorners, room.get(onlyKey).get().getSpace());
     }
+
+    @Test
+    public void Test_DetectNarrowEntrance_E() {
+        java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
+        Configurator.setLevel(RoomRecipes.LOGGER.getName(), Level.TRACE);
+        // _ = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"W", "W", "W", "_"},
+                {"W", "_", "W", "W"},
+                {"W", "_", "_", "D"},
+                {"W", "_", "W", "W"},
+                {"W", "W", "W", "_"}
+        };
+
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
+                new Position(3, 2)
+        ), 10, WD(map));
+        assertEquals(1, room.size());
+
+        assertTrue(room.get(new Position(3, 2)).isPresent());
+
+        List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(3, 2)).get().getSpaces());
+        assertEquals(3, spaces.size());
+
+        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(0, 1), new Position(3, 3));
+        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(0, 0), new Position(2, 1));
+        InclusiveSpace expectedCorners3 = new InclusiveSpace(new Position(0, 3), new Position(2, 4));
+
+        assertEquals(expectedCorners1, spaces.get(0));
+        assertEquals(expectedCorners2, spaces.get(1));
+        assertEquals(expectedCorners3, spaces.get(2));
+    }
+    @Test
+    public void Test_DetectNarrowEntrance_W() {
+        java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
+        Configurator.setLevel(RoomRecipes.LOGGER.getName(), Level.TRACE);
+        // _ = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"_", "W", "W", "W"},
+                {"W", "W", "_", "W"},
+                {"D", "_", "_", "W"},
+                {"W", "W", "_", "W"},
+                {"_", "W", "W", "W"}
+        };
+
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
+                new Position(0, 2)
+        ), 10, WD(map));
+        assertEquals(1, room.size());
+
+        assertTrue(room.get(new Position(0, 2)).isPresent());
+
+        List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(0, 2)).get().getSpaces());
+        assertEquals(3, spaces.size());
+
+        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(0, 1), new Position(3, 3));
+        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(1, 0), new Position(3, 1));
+        InclusiveSpace expectedCorners3 = new InclusiveSpace(new Position(1, 3), new Position(3, 4));
+
+        assertEquals(expectedCorners1, spaces.get(0));
+        assertEquals(expectedCorners2, spaces.get(1));
+        assertEquals(expectedCorners3, spaces.get(2));
+    }
+    @Test
+    public void Test_DetectNarrowEntrance_S() {
+        java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
+        Configurator.setLevel(RoomRecipes.LOGGER.getName(), Level.TRACE);
+        // _ = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"W", "W", "W", "W", "W"},
+                {"W", "_", "_", "_", "W"},
+                {"W", "_", "_", "_", "W"},
+                {"W", "W", "_", "W", "W"},
+                {"_", "W", "D", "W", "_"}
+        };
+
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
+                new Position(2, 4)
+        ), 10, WD(map));
+        assertEquals(1, room.size());
+
+        assertTrue(room.get(new Position(2, 4)).isPresent());
+
+        List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(2, 4)).get().getSpaces());
+        assertEquals(3, spaces.size());
+
+        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(1, 0), new Position(3, 4));
+        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(0, 0), new Position(1, 3));
+        InclusiveSpace expectedCorners3 = new InclusiveSpace(new Position(3, 0), new Position(4, 3));
+
+        assertEquals(expectedCorners1, spaces.get(0));
+        assertEquals(expectedCorners2, spaces.get(1));
+        assertEquals(expectedCorners3, spaces.get(2));
+    }
+    @Test
+    public void Test_DetectNarrowEntrance_N() {
+        java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
+        Configurator.setLevel(RoomRecipes.LOGGER.getName(), Level.TRACE);
+        // _ = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"_", "W", "D", "W", "_"},
+                {"W", "W", "_", "W", "W"},
+                {"W", "_", "_", "_", "W"},
+                {"W", "_", "_", "_", "W"},
+                {"W", "W", "W", "W", "W"}
+        };
+
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
+                new Position(2, 0)
+        ), 10, WD(map));
+        assertEquals(1, room.size());
+
+        assertTrue(room.get(new Position(2, 0)).isPresent());
+
+        List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(2, 0)).get().getSpaces());
+        assertEquals(3, spaces.size());
+
+        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(1, 0), new Position(3, 4));
+        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(0, 1), new Position(1, 4));
+        InclusiveSpace expectedCorners3 = new InclusiveSpace(new Position(3, 1), new Position(4, 4));
+
+        assertEquals(expectedCorners1, spaces.get(0));
+        assertEquals(expectedCorners2, spaces.get(1));
+        assertEquals(expectedCorners3, spaces.get(2));
+    }
 }

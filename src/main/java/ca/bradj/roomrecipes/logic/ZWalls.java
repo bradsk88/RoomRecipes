@@ -1,5 +1,6 @@
 package ca.bradj.roomrecipes.logic;
 
+import ca.bradj.roomrecipes.core.space.Position;
 import ca.bradj.roomrecipes.logic.interfaces.WallDetector;
 import ca.bradj.roomrecipes.rooms.ZWall;
 
@@ -8,8 +9,12 @@ import java.util.Optional;
 public class ZWalls {
 
     public static boolean isConnected(ZWall wall, WallDetector wd) {
-        for (int i = wall.northCorner.z; i < wall.southCorner.z; i++) {
-            if (wd.IsWall(wall.northCorner.WithZ(i))) {
+        if (wall.northCorner.x != wall.southCorner.x) {
+            return false;
+        }
+        for (int i = wall.northCorner.z; i <= wall.southCorner.z; i++) {
+            Position shifted = wall.northCorner.WithZ(i);
+            if (wd.IsWall(shifted)) {
                 continue;
             }
             return false;

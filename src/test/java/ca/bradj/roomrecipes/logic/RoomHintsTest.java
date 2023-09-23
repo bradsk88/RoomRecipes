@@ -1,6 +1,6 @@
 package ca.bradj.roomrecipes.logic;
 
-import ca.bradj.roomrecipes.core.Room;
+import ca.bradj.roomrecipes.core.space.InclusiveSpace;
 import ca.bradj.roomrecipes.core.space.Position;
 import ca.bradj.roomrecipes.rooms.XWall;
 import ca.bradj.roomrecipes.rooms.ZWall;
@@ -87,9 +87,30 @@ class RoomHintsTest {
                 .withSouthOpening(new XWall(new Position(2, 2), new Position(4, 2)))
                 .withWestWall(new ZWall(new Position(2, 0), new Position(2, 2)))
                 .withEastWall(new ZWall(new Position(4, 0), new Position(4, 2)));
-        Optional<Room> adj = southRoomWithNorthOpening.adjoinedTo(
+        Optional<InclusiveSpace> adj = southRoomWithNorthOpening.adjoinedTo(
                 new Position(0, 1),
                 northRoomWithSouthOpening
+        );
+        Assertions.assertTrue(adj.isPresent());
+    }
+    @Test
+    void adjoinedTo_2() {
+        RoomHints roomWithNorthAndSouthOpening = RoomHints.empty()
+                .withNorthWall(new XWall(new Position(0, 1), new Position(3, 1)))
+                .withSouthWall(new XWall(new Position(0, 3), new Position(3, 3)))
+                .withWestWall(new ZWall(new Position(0, 1), new Position(0, 3)))
+                .withEastWall(new ZWall(new Position(3, 1), new Position(3, 3)))
+                .withNorthOpening(new XWall(new Position(0, 1), new Position(2, 1)))
+                .withSouthOpening(new XWall(new Position(0, 3), new Position(2, 3)));
+        RoomHints toAdjoin = RoomHints.empty()
+                .withNorthWall(new XWall(new Position(0, 0), new Position(2, 0)))
+                .withSouthWall(new XWall(new Position(0, 1), new Position(2, 1)))
+                .withSouthOpening(new XWall(new Position(0, 1), new Position(2, 1)))
+                .withWestWall(new ZWall(new Position(0, 0), new Position(0, 1)))
+                .withEastWall(new ZWall(new Position(2, 0), new Position(2, 1)));
+        Optional<InclusiveSpace> adj = roomWithNorthAndSouthOpening.adjoinedTo(
+                new Position(0, 1),
+                toAdjoin
         );
         Assertions.assertTrue(adj.isPresent());
     }

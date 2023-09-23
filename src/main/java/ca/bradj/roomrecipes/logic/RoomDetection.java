@@ -298,6 +298,10 @@ public class RoomDetection {
             int depth,
             WallDetector wd
     ) {
+        Optional<InclusiveSpace> n = Optional.empty();
+        Optional<InclusiveSpace> s = Optional.empty();
+        Optional<InclusiveSpace> e = Optional.empty();
+        Optional<InclusiveSpace> w = Optional.empty();
         if (roomHints.northOpening != null) {
             Optional<RoomHints> space = findRoomForXOpening(
                     roomHints.northOpening, maxDistFromDoor, -1,
@@ -308,8 +312,8 @@ public class RoomDetection {
                     WallExclusion.allowSouthOpen(),
                     wd
             );
-            if (space.isPresent() && roomHints.hasOneOpening()) {
-                return roomHints.adjoinedTo(doorPos, space.get());
+            if (space.isPresent()) {
+                n = roomHints.adjoinedTo(doorPos, space.get());
             }
         }
         if (roomHints.southOpening != null) {
@@ -322,8 +326,8 @@ public class RoomDetection {
                     WallExclusion.allowNorthOpen(),
                     wd
             );
-            if (space.isPresent() && roomHints.hasOneOpening()) {
-                return roomHints.adjoinedTo(doorPos, space.get());
+            if (space.isPresent()) {
+                s = roomHints.adjoinedTo(doorPos, space.get());
             }
         }
         if (roomHints.westOpening != null) {
@@ -336,8 +340,8 @@ public class RoomDetection {
                     WallExclusion.allowEastOpen(),
                     wd
             );
-            if (space.isPresent() && roomHints.hasOneOpening()) { // TODO: Add test for multi-opening
-                return roomHints.adjoinedTo(doorPos, space.get());
+            if (space.isPresent()) {
+                w = roomHints.adjoinedTo(doorPos, space.get());
             }
         }
         if (roomHints.eastOpening != null) {
@@ -350,10 +354,41 @@ public class RoomDetection {
                     WallExclusion.allowWestOpen(),
                     wd
             );
-            if (space.isPresent() && roomHints.hasOneOpening()) {
-                return roomHints.adjoinedTo(doorPos, space.get());
+            if (space.isPresent()) {
+                e = roomHints.adjoinedTo(doorPos, space.get());
             }
         }
+
+        if (roomHints.northOpening != null && roomHints.southOpening != null && n.isPresent() && s.isPresent()) {
+            final InclusiveSpace nn = n.get();
+            final InclusiveSpace ss = s.get();
+            return roomHints.asRoom(doorPos, new WallExclusion(false, false, true, true))
+                    .map(v -> v.withExtraSpace(nn).withExtraSpace(ss));
+        }
+        if (roomHints.northOpening != null && n.isPresent()) {
+            final InclusiveSpace nn = n.get();
+            return roomHints.asRoom(doorPos, WallExclusion.allowNorthOpen()).map(v -> v.withExtraSpace(nn));
+        }
+        if (roomHints.southOpening != null && s.isPresent()) {
+            final InclusiveSpace ss = s.get();
+            return roomHints.asRoom(doorPos, WallExclusion.allowSouthOpen()).map(v -> v.withExtraSpace(ss));
+        }
+
+        if (roomHints.westOpening != null && roomHints.eastOpening != null && w.isPresent() && e.isPresent()) {
+            final InclusiveSpace ww = w.get();
+            final InclusiveSpace ee = e.get();
+            return roomHints.asRoom(doorPos, new WallExclusion(true, true, false, false))
+                    .map(v -> v.withExtraSpace(ww).withExtraSpace(ee));
+        }
+        if (roomHints.westOpening != null && w.isPresent()) {
+            final InclusiveSpace ww = w.get();
+            return roomHints.asRoom(doorPos, WallExclusion.allowWestOpen()).map(v -> v.withExtraSpace(ww));
+        }
+        if (roomHints.eastOpening != null && e.isPresent()) {
+            final InclusiveSpace ee = e.get();
+            return roomHints.asRoom(doorPos, WallExclusion.allowEastOpen()).map(v -> v.withExtraSpace(ee));
+        }
+
         return Optional.empty();
     }
 
