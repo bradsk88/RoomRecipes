@@ -90,4 +90,8 @@ public class XWall {
         }
         return true;
     }
+
+    public boolean isLargerThan(XWall xWall) {
+        return eastCorner.x - westCorner.x > xWall.eastCorner.x - xWall.westCorner.x;
+    }
 }

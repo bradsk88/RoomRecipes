@@ -268,9 +268,13 @@ public class RoomDetection {
         }
         RoomHints roomHints = RoomHints.empty();
         for (int i = 1; i < maxDistFromDoor; i++) {
-            roomHints = findRoomFromWestToEastCenterLine(
+            RoomHints rh = findRoomFromWestToEastCenterLine(
                     midWall, i, exclusion, roomHints, wd
             );
+            if (rh.equals(roomHints)) {
+                break;
+            }
+            roomHints = rh;
             if (roomHints.isRoom(exclusion)) {
                 return roomHints.asRoom(doorPos, exclusion);
             }
@@ -512,6 +516,21 @@ public class RoomDetection {
                         hints = hints.withSouthOpening(opening.get());
                     }
                     hints = hints.withSouthOpening(opening.get());
+                    if (hints.southOpening != null && hints.southOpening.isLargerThan(opening.get())) {
+                        hints = hints.withSouthOpening(opening.get());
+                        hints = hints.withSouthWall(pSouthWall);
+                        hints = hints.withWestWall(null);
+                        hints = hints.withEastWall(null);
+                    } else if (opening.get().sameWidth(pSouthWall)) {
+                        hints = hints.withSouthOpening(opening.get());
+                        hints = hints.withWestWall(null);
+                        hints = hints.withEastWall(null);
+                    } else {
+                        if (hints.southOpening == null || hints.southOpening.isSameContentAs(opening.get(), wd)) {
+                            hints = hints.withSouthWall(pSouthWall);
+                            hints = hints.withSouthOpening(opening.get());
+                        }
+                    }
                 }
             }
         }
