@@ -16,7 +16,7 @@ public class Position {
 
     @Override
     public String toString() {
-        return "DoorPos{" +
+        return "Position{" +
                 "x=" + x +
                 ", z=" + z +
                 '}';

@@ -7,6 +7,7 @@ import ca.bradj.roomrecipes.rooms.XWall;
 import ca.bradj.roomrecipes.rooms.ZWall;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class RoomHints {
@@ -185,6 +186,40 @@ public class RoomHints {
         return hasOneOpening;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RoomHints roomHints = (RoomHints) o;
+        return Objects.equals(northWall, roomHints.northWall) && Objects.equals(
+                southWall,
+                roomHints.southWall
+        ) && Objects.equals(westWall, roomHints.westWall) && Objects.equals(
+                eastWall,
+                roomHints.eastWall
+        ) && Objects.equals(northOpening, roomHints.northOpening) && Objects.equals(
+                southOpening,
+                roomHints.southOpening
+        ) && Objects.equals(westOpening, roomHints.westOpening) && Objects.equals(
+                eastOpening,
+                roomHints.eastOpening
+        );
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+                northWall,
+                southWall,
+                westWall,
+                eastWall,
+                northOpening,
+                southOpening,
+                westOpening,
+                eastOpening
+        );
+    }
+
     public Optional<Room> adjoinedTo(
             Position doorPos,
             RoomHints space
@@ -203,9 +238,9 @@ public class RoomHints {
                 joinW = space.southOpening.westCorner.equals(northOpening.westCorner);
                 joinE = space.southOpening.eastCorner.equals(northOpening.eastCorner);
             }
-            Optional<InclusiveSpace> s = space.asSpace(RoomDetection.WallExclusion.allowNorthOpen());
+            Optional<InclusiveSpace> s = space.asSpace(RoomDetection.WallExclusion.allowSouthOpen());
             if (joinW && joinE && s.isPresent()) {
-                return this.asRoom(doorPos, RoomDetection.WallExclusion.allowSouthOpen())
+                return this.asRoom(doorPos, RoomDetection.WallExclusion.allowNorthOpen())
                         .map(r -> r.withExtraSpace(s.get()));
             }
         }

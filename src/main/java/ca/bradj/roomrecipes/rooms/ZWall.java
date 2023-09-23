@@ -148,4 +148,8 @@ public class ZWall {
     public int getX() {
         return northCorner.x;
     }
+
+    public boolean isLargerThan(ZWall zWall) {
+        return southCorner.z - northCorner.z > zWall.southCorner.z - zWall.northCorner.z;
+    }
 }

@@ -1067,7 +1067,7 @@ class LevelRoomDetectionTest {
         };
 
         ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(2, 2),
+                new Position(1, 2),
                 new Position(3, 2)
         ), 10, WD(map));
         assertEquals(2, room.size());

@@ -24,7 +24,7 @@ public class InclusiveSpace {
 
     @Override
     public String toString() {
-        return "BoundingBox{" +
+        return "InclusiveSpace{" +
                 "aa=" + aa +
                 ", bb=" + bb +
                 '}';
