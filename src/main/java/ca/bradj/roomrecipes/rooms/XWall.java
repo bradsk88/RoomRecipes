@@ -1,12 +1,13 @@
 package ca.bradj.roomrecipes.rooms;
 
 import ca.bradj.roomrecipes.core.space.Position;
+import ca.bradj.roomrecipes.logic.Direction;
 import ca.bradj.roomrecipes.logic.interfaces.WallDetector;
 
 import java.util.Objects;
 
 // XWall is a wall that runs from west to east
-public class XWall {
+public class XWall implements Wall<XWall> {
     public final Position westCorner;
     public final Position eastCorner;
 
@@ -101,5 +102,65 @@ public class XWall {
 
     public boolean isLargerThan(XWall xWall) {
         return eastCorner.x - westCorner.x > xWall.eastCorner.x - xWall.westCorner.x;
+    }
+
+    @Override
+    public boolean sameLengthOnAxis(Wall<?> wall) {
+        return sameWidth(wall.toXWall());
+    }
+
+    @Override
+    public XWall shiftedNegative(int i) {
+        return shiftedNorthBy(i);
+    }
+
+    @Override
+    public XWall shiftedPositive(int i) {
+        return shiftedSouthBy(i);
+    }
+
+    @Override
+    public XWall extendNegative(int i) {
+        return extendWestEnd(i);
+    }
+
+    @Override
+    public XWall extendPositive(int i) {
+        return extendEastEnd(i);
+    }
+
+    @Override
+    public XWall toXWall() {
+        return this;
+    }
+
+    @Override
+    public ZWall toZWall() {
+        throw new IllegalStateException("Cannot convert XWall to ZWall");
+    }
+
+    @Override
+    public boolean isLargerOnAxis(Wall<?> wall) {
+        return isLargerThan(wall.toXWall());
+    }
+
+    @Override
+    public boolean isSameContentOnAxis(
+            Wall<?> w,
+            WallDetector wd
+    ) {
+        return isSameContentAs(w.toXWall(), wd);
+    }
+
+    @Override
+    public Wall<?> shifted(
+            Direction s,
+            int i
+    ) {
+        return switch (s) {
+            case NORTH -> shiftedNorthBy(i);
+            case SOUTH -> shiftedSouthBy(i);
+            default -> throw new IllegalStateException("Xwall cannot be shifted west or east");
+        };
     }
 }

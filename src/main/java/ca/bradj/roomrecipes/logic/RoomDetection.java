@@ -5,6 +5,7 @@ import ca.bradj.roomrecipes.core.Room;
 import ca.bradj.roomrecipes.core.space.InclusiveSpace;
 import ca.bradj.roomrecipes.core.space.Position;
 import ca.bradj.roomrecipes.logic.interfaces.WallDetector;
+import ca.bradj.roomrecipes.rooms.Wall;
 import ca.bradj.roomrecipes.rooms.XWall;
 import ca.bradj.roomrecipes.rooms.ZWall;
 import com.google.common.collect.ImmutableList;
@@ -510,65 +511,11 @@ public class RoomDetection {
             RoomHints roomHints,
             WallDetector wd
     ) {
+        Direction s = Direction.NORTH;
+
         RoomHints hints = roomHints.copy();
-        if (hints.northWall == null || hints.northOpening != null && hints.northOpening.sameWidth(hints.northWall)) {
-            XWall pNorthWall = midWall.shiftedNorthBy(i);
-            XWall metaNorthWall = pNorthWall.extendWestEnd(1).extendEastEnd(1);
-            if (XWalls.isConnected(pNorthWall, wd)) {
-                hints = hints.withNorthWall(metaNorthWall);
-                hints = hints.withNorthOpening(null);
-                hints = hints.withWestWall(null);
-                hints = hints.withEastWall(null);
-            } else {
-                Optional<XWall> opening = XWalls.findOpening(metaNorthWall, wd);
-                if (opening.isPresent()) {
-                    if (hints.northOpening != null && hints.northOpening.isLargerThan(opening.get())) {
-                        hints = hints.withNorthOpening(opening.get());
-                        hints = hints.withNorthWall(metaNorthWall);
-                        hints = hints.withWestWall(null);
-                        hints = hints.withEastWall(null);
-                    } else if (opening.get().sameWidth(metaNorthWall)) {
-                        hints = hints.withNorthOpening(opening.get());
-                        hints = hints.withWestWall(null);
-                        hints = hints.withEastWall(null);
-                    } else {
-                        if (hints.northOpening == null || hints.northOpening.isSameContentAs(opening.get(), wd)) {
-                            hints = hints.withNorthWall(pNorthWall);
-                            hints = hints.withNorthOpening(opening.get());
-                        }
-                    }
-                }
-            }
-        }
-        if (hints.southWall == null || hints.southOpening != null && hints.southOpening.sameWidth(hints.southWall)) {
-            XWall pSouthWall = midWall.shiftedSouthBy(i);
-            XWall metaSouthWall = pSouthWall.extendWestEnd(1).extendEastEnd(1);
-            if (XWalls.isConnected(pSouthWall, wd)) {
-                hints = hints.withSouthWall(metaSouthWall);
-                hints = hints.withSouthOpening(null);
-                hints = hints.withWestWall(null);
-                hints = hints.withEastWall(null);
-            } else {
-                Optional<XWall> opening = XWalls.findOpening(metaSouthWall, wd);
-                if (opening.isPresent()) {
-                    if (hints.southOpening != null && hints.southOpening.isLargerThan(opening.get())) {
-                        hints = hints.withSouthOpening(opening.get());
-                        hints = hints.withSouthWall(metaSouthWall);
-                        hints = hints.withWestWall(null);
-                        hints = hints.withEastWall(null);
-                    } else if (opening.get().sameWidth(metaSouthWall)) {
-                        hints = hints.withSouthOpening(opening.get());
-                        hints = hints.withWestWall(null);
-                        hints = hints.withEastWall(null);
-                    } else {
-                        if (hints.southOpening == null || hints.southOpening.isSameContentAs(opening.get(), wd)) {
-                            hints = hints.withSouthWall(pSouthWall);
-                            hints = hints.withSouthOpening(opening.get());
-                        }
-                    }
-                }
-            }
-        }
+        hints = getRoomHints(midWall, i, wd, hints, Direction.NORTH);
+        hints = getRoomHints(midWall, i, wd, hints, Direction.SOUTH);
 
         if (
                 (hints.northWall == null && hints.northOpening == null)
@@ -595,6 +542,46 @@ public class RoomDetection {
             hints = hints.withEastWall(pEastWall.extendSouthEnd(1).extendNorthEnd(1));
             if (hints.isRoom(exclusion)) {
                 return hints;
+            }
+        }
+        return hints;
+    }
+
+    private static <W extends Wall<W>> RoomHints getRoomHints(
+            W midWall,
+            int i,
+            WallDetector wd,
+            RoomHints hints,
+            Direction s
+    ) {
+        Wall<?> opening1 = hints.getOpening(s);
+        if (hints.getWall(s) == null || opening1 != null && opening1.sameLengthOnAxis(hints.getWall(s))) {
+            Wall<?> pNorthWall = midWall.shifted(s, i);
+            Wall<?> metaNorthWall = pNorthWall.extendNegative(1).extendPositive(1);
+            if (Walls.isConnected(s, pNorthWall, wd)) {
+                hints = hints.withWall(s, metaNorthWall);
+                hints = hints.withOpening(s, null);
+                hints = hints.withWall(s.ccw(), null);
+                hints = hints.withWall(s.cw(), null);
+            } else {
+                Optional<Wall<?>> opening = Walls.findOpening(s, metaNorthWall, wd);
+                if (opening.isPresent()) {
+                    if (opening1 != null && opening1.isLargerOnAxis(opening.get())) {
+                        hints = hints.withOpening(s, opening.get());
+                        hints = hints.withWall(s, metaNorthWall);
+                        hints = hints.withWall(s.ccw(), null);
+                        hints = hints.withWall(s.cw(), null);
+                    } else if (opening.get().sameLengthOnAxis(metaNorthWall)) {
+                        hints = hints.withOpening(s, opening.get());
+                        hints = hints.withWall(s.ccw(), null);
+                        hints = hints.withWall(s.cw(), null);
+                    } else {
+                        if (hints.getOpening(s) == null || hints.getOpening(s).isSameContentOnAxis(opening.get(), wd)) {
+                            hints = hints.withWall(s, pNorthWall);
+                            hints = hints.withOpening(s, opening.get());
+                        }
+                    }
+                }
             }
         }
         return hints;

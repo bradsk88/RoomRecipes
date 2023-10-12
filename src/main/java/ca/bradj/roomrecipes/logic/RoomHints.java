@@ -3,6 +3,7 @@ package ca.bradj.roomrecipes.logic;
 import ca.bradj.roomrecipes.core.Room;
 import ca.bradj.roomrecipes.core.space.InclusiveSpace;
 import ca.bradj.roomrecipes.core.space.Position;
+import ca.bradj.roomrecipes.rooms.Wall;
 import ca.bradj.roomrecipes.rooms.XWall;
 import ca.bradj.roomrecipes.rooms.ZWall;
 import org.jetbrains.annotations.Nullable;
@@ -321,5 +322,47 @@ public class RoomHints {
 
     public boolean hasAnyOpenings() {
         return northOpening != null || southOpening != null || westOpening != null || eastOpening != null;
+    }
+
+    public Wall<?> getWall(Direction d) {
+        return switch (d) {
+            case NORTH -> northWall;
+            case SOUTH -> southWall;
+            case WEST -> westWall;
+            case EAST -> eastWall;
+        };
+    }
+
+    public Wall<?> getOpening(Direction d) {
+        return switch (d) {
+            case NORTH -> northOpening;
+            case SOUTH -> southOpening;
+            case WEST -> westOpening;
+            case EAST -> eastOpening;
+        };
+    }
+
+    public RoomHints withWall(
+            Direction n,
+            @Nullable Wall<?> w
+    ) {
+        return switch (n) {
+            case NORTH -> w == null ? withNorthWall(null) : withNorthWall(w.toXWall());
+            case SOUTH -> w == null ? withSouthWall(null) : withSouthWall(w.toXWall());
+            case WEST -> w == null ? withWestWall(null) : withWestWall(w.toZWall());
+            case EAST -> w == null ? withEastWall(null) : withEastWall(w.toZWall());
+        };
+    }
+
+    public RoomHints withOpening(
+            Direction n,
+            @Nullable Wall<?> w
+    ) {
+        return switch (n) {
+            case NORTH -> w == null ? withNorthOpening(null) : withNorthOpening(w.toXWall());
+            case SOUTH -> w == null ? withSouthOpening(null) : withSouthOpening(w.toXWall());
+            case WEST -> w == null ? withWestOpening(null) : withWestOpening(w.toZWall());
+            case EAST -> w == null ? withEastOpening(null) : withEastOpening(w.toZWall());
+        };
     }
 }
