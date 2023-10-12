@@ -65,6 +65,13 @@ class InclusiveSpacesTest {
         InclusiveSpace space4 = new InclusiveSpace(new Position(-2, -2), new Position(2, 2));
         double expectedArea4 = 25;
         assertEquals(expectedArea4, InclusiveSpaces.calculateArea(space4), 0.001);
+
+        // Test a collection of simple 2x2 spaces
+        ImmutableList<InclusiveSpace> spaces = ImmutableList.of(
+                new InclusiveSpace(new Position(0, 0), new Position(1, 1)),
+                new InclusiveSpace(new Position(1, 1), new Position(2, 2))
+        );
+        assertEquals(8, InclusiveSpaces.calculateArea(spaces), 0.001);
     }
 
     @Test

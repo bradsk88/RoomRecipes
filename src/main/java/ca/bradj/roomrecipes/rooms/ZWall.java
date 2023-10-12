@@ -91,6 +91,13 @@ public class ZWall {
         return new ZWall(northCorner.WithZ(northCorner.z + i), southCorner);
     }
 
+    public ZWall extendSouthEnd(int i) {
+        return shortenSouthEnd(-i);
+    }
+    public ZWall extendNorthEnd(int i) {
+        return shortenNorthEnd(-i);
+    }
+
     public ZWall shiftedWest(int i) {
         return shiftedEast(-i);
     }

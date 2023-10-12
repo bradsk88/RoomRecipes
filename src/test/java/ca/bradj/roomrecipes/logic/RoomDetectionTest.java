@@ -126,30 +126,6 @@ class RoomDetectionTest {
     }
 
     @Test
-    public void Test_DetectIncompleteRoom() {
-
-        // A = air
-        // W = wall
-        // D = door
-        String[][] map = {
-                {"W", "D", "W", "A"},
-                {"W", "A", "W", "A"},
-                {"W", "W", "A", "A"}
-        };
-
-        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(1, 0), 4, 0, (Position dp) -> {
-            if (dp.x < 0 || dp.z < 0) {
-                return false;
-            }
-            if (dp.x >= map[0].length || dp.z >= map.length) {
-                return false;
-            }
-            return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
-        });
-        assertFalse(room.isPresent());
-    }
-
-    @Test
     public void Test_DetectSimpleRoomDestroyed() {
         // A = air
         // W = wall
@@ -161,8 +137,8 @@ class RoomDetectionTest {
         };
         String[][] map2 = {
                 {"W", "D", "W", "A"},
-                {"W", "A", "W", "A"},
-                {"W", "W", "A", "A"}
+                {"W", "A", "A", "A"},
+                {"W", "W", "W", "A"}
         };
 
         Function<String[][], Predicate<Position>> wdFn = (String[][] map) -> (Position dp) -> {
@@ -303,6 +279,34 @@ class RoomDetectionTest {
     }
 
     @Test
+    public void Test_DetectShapeLikeLetterA_NoCorners() {
+
+        // A = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"A", "D", "A"},
+                {"W", "A", "W"},
+                {"W", "W", "W"},
+                {"W", "A", "W"},
+        };
+
+        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(1, 0), 5, 0, (Position dp) -> {
+            if (dp.x < 0 || dp.z < 0) {
+                return false;
+            }
+            if (dp.x >= map[0].length || dp.z >= map.length) {
+                return false;
+            }
+            return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
+        });
+        assertTrue(room.isPresent());
+
+        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        assertEquals(expectedCorners, room.get().getSpace());
+    }
+
+    @Test
     public void Test_DetectShapeLikeLetterA_90() {
 
         // A = air
@@ -415,6 +419,36 @@ class RoomDetectionTest {
     }
 
     @Test
+    public void Test_DetectSimpleRoomWithSeparateWestWall_EquidistantToEast_NoCorners() {
+
+        // A = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"_", "_", "_", "_", "_", "_", "_"},
+                {"W", "_", "_", "W", "W", "W", "_"},
+                {"W", "_", "W", "_", "_", "_", "W"},
+                {"W", "_", "_", "D", "W", "W", "_"},
+                {"_", "_", "_", "_", "_", "_", "_"}
+        };
+
+        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(3, 3), 10, 0, (Position dp) -> {
+            if (dp.x < 0 || dp.z < 0) {
+                return false;
+            }
+            if (dp.x >= map[0].length || dp.z >= map.length) {
+                return false;
+            }
+            return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
+        });
+        assertTrue(room.isPresent());
+
+        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(2, 1), new Position(6, 3));
+        assertEquals(expectedCorners, room.get().getSpace());
+
+    }
+
+    @Test
     public void Test_DetectSimpleRoomWithSeparateEastWall_EquidistantToWest() {
 
         // A = air
@@ -507,4 +541,145 @@ class RoomDetectionTest {
         assertEquals(expectedCorners, room.get().getSpace());
 
     }
+
+    @Test
+    public void Test_DetectSimpleRoomWithSeparateSouthWall_EquidistantToNorth_NoCorners() {
+
+        // A = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"_", "_", "W", "W", "_", "_", "_"},
+                {"_", "W", "_", "_", "W", "_", "_"},
+                {"_", "W", "_", "_", "W", "_", "_"},
+                {"_", "D", "_", "_", "W", "_", "_"},
+                {"_", "_", "W", "W", "_", "_", "_"},
+                {"_", "_", "_", "_", "_", "_", "_"},
+                {"_", "W", "W", "W", "W", "_", "_"},
+        };
+
+        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(1, 3), 10, 0, (Position dp) -> {
+            if (dp.x < 0 || dp.z < 0) {
+                return false;
+            }
+            if (dp.x >= map[0].length || dp.z >= map.length) {
+                return false;
+            }
+            return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
+        });
+        assertTrue(room.isPresent());
+
+        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(1, 0), new Position(4, 4));
+        assertEquals(expectedCorners, room.get().getSpace());
+
+    }
+
+
+    @Test
+    public void Test_DetectSimpleRoom_WithNoCorners_N() {
+        // _ = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"_", "D", "_", "_"},
+                {"W", "_", "W", "_"},
+                {"_", "W", "_", "_"}
+        };
+
+        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(1, 0), 4, 0, (Position dp) -> {
+            if (dp.x < 0 || dp.z < 0) {
+                return false;
+            }
+            if (dp.x >= map[0].length || dp.z >= map.length) {
+                return false;
+            }
+            return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
+        });
+        assertTrue(room.isPresent());
+
+        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        assertEquals(expectedCorners, room.get().getSpace());
+    }
+
+    @Test
+    public void Test_DetectSimpleRoom_WithNoCorners_E() {
+        // _ = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"_", "W", "_", "_"},
+                {"W", "_", "D", "_"},
+                {"_", "W", "_", "_"}
+        };
+
+        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(1, 0), 4, 0, (Position dp) -> {
+            if (dp.x < 0 || dp.z < 0) {
+                return false;
+            }
+            if (dp.x >= map[0].length || dp.z >= map.length) {
+                return false;
+            }
+            return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
+        });
+        assertTrue(room.isPresent());
+
+        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        assertEquals(expectedCorners, room.get().getSpace());
+
+    }
+
+    @Test
+    public void Test_DetectSimpleRoom_WithNoCorners_S() {
+        // _ = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"_", "W", "_", "_"},
+                {"W", "_", "W", "_"},
+                {"_", "D", "_", "_"}
+        };
+
+        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(1, 0), 4, 0, (Position dp) -> {
+            if (dp.x < 0 || dp.z < 0) {
+                return false;
+            }
+            if (dp.x >= map[0].length || dp.z >= map.length) {
+                return false;
+            }
+            return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
+        });
+        assertTrue(room.isPresent());
+
+        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        assertEquals(expectedCorners, room.get().getSpace());
+
+    }
+
+    @Test
+    public void Test_DetectSimpleRoom_WithNoCorners_W() {
+        // _ = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"_", "W", "_", "_"},
+                {"D", "_", "W", "_"},
+                {"_", "W", "_", "_"}
+        };
+
+        Optional<Room> room = RoomDetection.findRoomForDoor(new Position(1, 0), 4, 0, (Position dp) -> {
+            if (dp.x < 0 || dp.z < 0) {
+                return false;
+            }
+            if (dp.x >= map[0].length || dp.z >= map.length) {
+                return false;
+            }
+            return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
+        });
+        assertTrue(room.isPresent());
+
+        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        assertEquals(expectedCorners, room.get().getSpace());
+
+    }
+
 }

@@ -36,6 +36,14 @@ public class XWall {
         return new XWall(this.westCorner, this.eastCorner.WithX(this.eastCorner.x - i));
     }
 
+    public XWall extendWestEnd(int i) {
+        return shortenWestEnd(-i);
+    }
+
+    public XWall extendEastEnd(int i) {
+        return shortenEastEnd(-i);
+    }
+
     public XWall shiftedNorthBy(int i) {
         return shiftedSouthBy(-i);
     }

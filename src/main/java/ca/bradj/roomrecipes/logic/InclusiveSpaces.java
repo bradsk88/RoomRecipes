@@ -47,6 +47,10 @@ public class InclusiveSpaces {
         return Math.max(0, (double) length * width);
     }
 
+    public static double calculateArea(Collection<? extends InclusiveSpace> spaces) {
+        return spaces.stream().mapToDouble(InclusiveSpaces::calculateArea).sum();
+    }
+
     public static Position getRandomEnclosedPosition(
             InclusiveSpace space,
             Random random
