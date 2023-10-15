@@ -1,5 +1,6 @@
 package ca.bradj.roomrecipes.rooms;
 
+import ca.bradj.roomrecipes.core.space.Position;
 import ca.bradj.roomrecipes.logic.Direction;
 import ca.bradj.roomrecipes.logic.interfaces.WallDetector;
 
@@ -27,4 +28,12 @@ public interface Wall<W extends Wall<W>> {
             Direction s,
             int i
     );
+
+    Position negativeCorner();
+    Position positiveCorner();
+
+    W shortenNegative(int i);
+    W shortenPositive(int i);
+
+    int getLengthOnAxis();
 }

@@ -1,6 +1,5 @@
 package ca.bradj.roomrecipes.logic;
 
-import ca.bradj.roomrecipes.RoomRecipes;
 import ca.bradj.roomrecipes.core.Room;
 import ca.bradj.roomrecipes.core.space.InclusiveSpace;
 import ca.bradj.roomrecipes.core.space.Position;
@@ -203,94 +202,43 @@ public class RoomDetection {
         int diffX = Math.max(doorPos.x, wallPos.x) - Math.min(doorPos.x, wallPos.x);
         int diffZ = Math.max(doorPos.z, wallPos.z) - Math.min(doorPos.z, wallPos.z);
         if (diffZ > diffX) {
-            return findRoomWithNorthOrSouthDoor(doorPos, wallPos, maxDistFromDoor, exclusion, depth + 1, wd);
+            return findRoomWithDoor(Direction.NORTH, doorPos, wallPos, maxDistFromDoor, exclusion, depth + 1, wd, ZWall::new, XWall::new);
         }
-        return findRoomWithWestOrEastDoor(doorPos, wallPos, maxDistFromDoor, exclusion, depth + 1, wd);
+        return findRoomWithDoor(Direction.WEST, doorPos, wallPos, maxDistFromDoor, exclusion, depth + 1, wd, XWall::new, ZWall::new);
     }
 
-    private static Optional<Room> findRoomWithNorthOrSouthDoor(
+    private static <W extends Wall<W>, W2 extends Wall<W2>> Optional<Room> findRoomWithDoor(
+            Direction doorSide,
             Position doorPos,
             Position wallPos,
             int maxDistFromDoor,
             WallExclusion exclusion,
             int depth,
-            WallDetector wd
+            WallDetector wd,
+            WallFactory<W> midWallFactory,
+            WallFactory<W2> endWallsFactory
     ) {
         if (doorPos.x != wallPos.x && doorPos.z != wallPos.z) {
             return Optional.empty();
         }
-        ZWall midWall = new ZWall(doorPos, wallPos);
+        W midWall = midWallFactory.makeWall(doorPos, wallPos);
 
-        int initialLength = midWall.getLength();
+        int initialLength = midWall.getLengthOnAxis();
         if (initialLength > 1) {
-            midWall = midWall.shortenNorthEnd(1).shortenSouthEnd(1);
-        } else if (exclusion.allowOpenSouthWall) {
-            midWall = midWall.shortenNorthEnd(1);
-        } else if (exclusion.allowOpenNorthWall) {
-            midWall = midWall.shortenSouthEnd(1);
+            midWall = midWall.shortenNegative(1).shortenPositive(1);
+        } else if (exclusion.allowOpenSouthWall || exclusion.allowOpenEastWall) {
+            midWall = midWall.shortenNegative(1);
+        } else if (exclusion.allowOpenNorthWall || exclusion.allowOpenWestWall) {
+            midWall = midWall.shortenPositive(1);
         }
 
-        if (ZWalls.isConnected(midWall, wd)) {
+        if (Walls.isConnected(doorSide.cw(), midWall, wd)) {
             return Optional.empty();
         }
         RoomHints roomHints = RoomHints.empty();
         for (int i = 1; i < maxDistFromDoor; i++) {
-            RoomHints rh = findRoomFromNorthToSouthCenterLine(
-                    midWall, i, exclusion, roomHints, initialLength, wd
-            );
-            if (rh.equals(roomHints)) {
-                break;
-            }
-            roomHints = rh;
-            if (roomHints.isRoom(exclusion)) {
-                return roomHints.asRoom(doorPos, exclusion);
-            }
-        }
-        if (roomHints.hasAnyOpenings()) {
-            Optional<Room> adjoined = findAdjoiningRoom(
-                    roomHints, doorPos, maxDistFromDoor, depth + 1, wd
-            );
-
-            if (adjoined.isPresent()) {
-                return adjoined;
-            }
-        }
-        return Optional.empty();
-    }
-
-    private static Optional<Room> findRoomWithWestOrEastDoor(
-            Position doorPos,
-            Position wallPos,
-            int maxDistFromDoor,
-            WallExclusion exclusion,
-            int depth,
-            WallDetector wd
-    ) {
-        if (depth > maxDistFromDoor) {
-            RoomRecipes.LOGGER.error("Reached detection limit for room between {} and {}", doorPos, wallPos);
-            return Optional.empty();
-        }
-        if (doorPos.x != wallPos.x && doorPos.z != wallPos.z) {
-            return Optional.empty();
-        }
-        XWall midWall = new XWall(doorPos, wallPos);
-
-        int initialLength = midWall.getLength();
-        if (initialLength > 1) {
-            midWall = midWall.shortenWestEnd(1).shortenEastEnd(1);
-        } else if (exclusion.allowOpenEastWall) {
-            midWall = midWall.shortenWestEnd(1);
-        } else if (exclusion.allowOpenWestWall) {
-            midWall = midWall.shortenEastEnd(1);
-        }
-
-        if (XWalls.isConnected(midWall, wd)) {
-            return Optional.empty();
-        }
-        RoomHints roomHints = RoomHints.empty();
-        for (int i = 1; i < maxDistFromDoor; i++) {
-            RoomHints rh = findRoomFromWestToEastCenterLine(
-                    midWall, i, exclusion, roomHints, initialLength, wd
+            RoomHints rh = findRoomFromCenterLine(
+                    midWall, doorSide, i, exclusion, roomHints, initialLength, wd, endWallsFactory
             );
             if (rh.equals(roomHints)) {
                 break;
@@ -522,90 +470,56 @@ public class RoomDetection {
         return Optional.empty();
     }
 
-    private static RoomHints findRoomFromWestToEastCenterLine(
-            XWall midWall,
-            int i,
-            // Distance from midpoint
-            WallExclusion exclusion,
-            RoomHints roomHints,
-            int initialLength,
-            WallDetector wd
-    ) {
-        RoomHints hints = roomHints.copy();
-        hints = getRoomHints(midWall, i, initialLength, exclusion, wd, hints, Direction.NORTH);
-        hints = getRoomHints(midWall, i, initialLength, exclusion, wd, hints, Direction.SOUTH);
-
-        if (
-                (hints.northWall == null && hints.northOpening == null)
-                        || (hints.southWall == null && hints.southOpening == null)
-        ) {
-            return hints;
-        }
-        Position nw = hints.northWall != null ? hints.northWall.westCorner : hints.northOpening.westCorner;
-        Position ne = hints.northWall != null ? hints.northWall.eastCorner : hints.northOpening.eastCorner;
-        Position sw = hints.southWall != null ? hints.southWall.westCorner : hints.southOpening.westCorner;
-        Position se = hints.southWall != null ? hints.southWall.eastCorner : hints.southOpening.eastCorner;
-
-        ZWall pWestWall = new ZWall(nw, sw);
-        pWestWall = pWestWall.shortenNorthEnd(1).shortenSouthEnd(1);
-        if (hints.westWall == null && ZWalls.isConnected(pWestWall, wd)) {
-            hints = hints.withWestWall(pWestWall.extendSouthEnd(1).extendNorthEnd(1));
-            if (hints.isRoom(exclusion)) {
-                return hints;
-            }
-        }
-        ZWall pEastWall = new ZWall(ne, se);
-        pEastWall = pEastWall.shortenNorthEnd(1).shortenSouthEnd(1);
-        if (hints.eastWall == null && ZWalls.isConnected(pEastWall, wd)) {
-            hints = hints.withEastWall(pEastWall.extendSouthEnd(1).extendNorthEnd(1));
-            if (hints.isRoom(exclusion)) {
-                return hints;
-            }
-        }
-        return hints;
+    private interface WallFactory<W extends Wall<W>> {
+        W makeWall(Position p, Position p2);
     }
 
-    private static RoomHints findRoomFromNorthToSouthCenterLine(
-            ZWall midWall,
+    private static <W extends Wall<W>, W2 extends Wall<W2>> RoomHints findRoomFromCenterLine(
+            W midWall,
+            Direction doorWall,
             int i,
             // Distance from midpoint
             WallExclusion exclusion,
             RoomHints roomHints,
             int initialLength,
-            WallDetector wd
+            WallDetector wd,
+            WallFactory<W2> wf
     ) {
+        Direction wallA = doorWall.ccw();
+        Direction wallB = wallA.opp();
+        Direction backWall = doorWall.opp();
+
         RoomHints hints = roomHints.copy();
-        hints = getRoomHints(midWall, i, initialLength, exclusion, wd, hints, Direction.WEST);
-        hints = getRoomHints(midWall, i, initialLength, exclusion, wd, hints, Direction.EAST);
+        hints = getRoomHints(midWall, i, initialLength, exclusion, wd, hints, wallA);
+        hints = getRoomHints(midWall, i, initialLength, exclusion, wd, hints, wallB);
 
         if (
-                (hints.westWall == null && hints.westOpening == null)
-                        || (hints.eastWall == null && hints.eastOpening == null)
+                (hints.getWall(wallA) == null && hints.getOpening(wallA) == null)
+                        || (hints.getWall(wallB) == null && hints.getOpening(wallB) == null)
         ) {
             return hints;
         }
-        Position nw = hints.westWall != null ? hints.westWall.northCorner : hints.westOpening.northCorner;
-        Position sw = hints.westWall != null ? hints.westWall.southCorner : hints.westOpening.southCorner;
-        Position ne = hints.eastWall != null ? hints.eastWall.northCorner : hints.eastOpening.northCorner;
-        Position se = hints.eastWall != null ? hints.eastWall.southCorner : hints.eastOpening.southCorner;
+        Position nw = hints.getWall(wallA) != null ? hints.getWall(wallA).negativeCorner() : hints.getOpening(wallA).negativeCorner();
+        Position ne = hints.getWall(wallA) != null ? hints.getWall(wallA).positiveCorner() : hints.getOpening(wallA).positiveCorner();
+        Position sw = hints.getWall(wallB) != null ? hints.getWall(wallB).negativeCorner() : hints.getOpening(wallB).negativeCorner();
+        Position se = hints.getWall(wallB) != null ? hints.getWall(wallB).positiveCorner() : hints.getOpening(wallB).positiveCorner();
 
-        XWall pNorthWall = new XWall(nw, ne);
-        pNorthWall = pNorthWall.shortenWestEnd(1).shortenEastEnd(1);
-        if (hints.northWall == null && XWalls.isConnected(pNorthWall, wd)) {
-            hints = hints.withNorthWall(pNorthWall.extendEastEnd(1).extendWestEnd(1));
+        W2 pWestWall = wf.makeWall(nw, sw);
+        pWestWall = pWestWall.shortenNegative(1).shortenPositive(1);
+        if (hints.getWall(doorWall) == null && Walls.isConnected(doorWall, pWestWall, wd)) {
+            hints = hints.withWall(doorWall, pWestWall.extendNegative(1).extendPositive(1));
             if (hints.isRoom(exclusion)) {
                 return hints;
             }
         }
-        XWall pSouthWall = new XWall(sw, se);
-        pSouthWall = pSouthWall.shortenWestEnd(1).shortenEastEnd(1);
-        if (hints.southWall == null && XWalls.isConnected(pSouthWall, wd)) {
-            hints = hints.withSouthWall(pSouthWall.extendEastEnd(1).extendWestEnd(1));
+        W2 pEastWall = wf.makeWall(ne, se);
+        pEastWall = pEastWall.shortenNegative(1).shortenPositive(1);
+        if (hints.getWall(backWall) == null && Walls.isConnected(backWall, pEastWall, wd)) {
+            hints = hints.withWall(backWall, pEastWall.extendNegative(1).extendPositive(1));
             if (hints.isRoom(exclusion)) {
                 return hints;
             }
         }
-
         return hints;
     }
 

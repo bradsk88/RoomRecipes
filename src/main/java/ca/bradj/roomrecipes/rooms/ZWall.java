@@ -220,4 +220,29 @@ public class ZWall implements Wall<ZWall> {
             case EAST -> shiftedEast(i);
         };
     }
+
+    @Override
+    public Position negativeCorner() {
+        return northCorner;
+    }
+
+    @Override
+    public Position positiveCorner() {
+        return southCorner;
+    }
+
+    @Override
+    public ZWall shortenNegative(int i) {
+        return shortenNorthEnd(i);
+    }
+
+    @Override
+    public ZWall shortenPositive(int i) {
+        return shortenSouthEnd(i);
+    }
+
+    @Override
+    public int getLengthOnAxis() {
+        return getLength();
+    }
 }

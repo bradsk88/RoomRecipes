@@ -163,4 +163,29 @@ public class XWall implements Wall<XWall> {
             default -> throw new IllegalStateException("Xwall cannot be shifted west or east");
         };
     }
+
+    @Override
+    public Position negativeCorner() {
+        return westCorner;
+    }
+
+    @Override
+    public Position positiveCorner() {
+        return eastCorner;
+    }
+
+    @Override
+    public XWall shortenNegative(int i) {
+        return shortenWestEnd(i);
+    }
+
+    @Override
+    public XWall shortenPositive(int i) {
+        return shortenEastEnd(i);
+    }
+
+    @Override
+    public int getLengthOnAxis() {
+        return getLength();
+    }
 }
