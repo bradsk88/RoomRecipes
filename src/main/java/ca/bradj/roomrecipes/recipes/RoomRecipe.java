@@ -18,7 +18,6 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.crafting.conditions.ICondition;
-import net.minecraftforge.registries.ForgeRegistryEntry;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -130,7 +129,7 @@ public class RoomRecipe implements Recipe<Container>, Comparable<RoomRecipe> {
         return compare;
     }
 
-    public static class Serializer extends ForgeRegistryEntry<RecipeSerializer<?>> implements RecipeSerializer<RoomRecipe> {
+    public static class Serializer implements RecipeSerializer<RoomRecipe> {
 
         @Override
         public RoomRecipe fromJson(
