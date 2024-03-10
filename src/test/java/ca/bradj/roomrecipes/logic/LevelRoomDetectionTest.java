@@ -1375,4 +1375,26 @@ class LevelRoomDetectionTest {
         assertEquals(expectedCorners2, spaces.get(1));
         assertEquals(expectedCorners3, spaces.get(2));
     }
+    @Test
+    public void Test_DetectNoDoor_N() { // TODO: East,South,West
+        java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
+        Configurator.setLevel(RoomRecipes.LOGGER.getName(), Level.TRACE);
+        // _ = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"W", "W", "_", "W", "W"},
+                {"W", "_", "_", "_", "W"},
+                {"W", "_", "_", "_", "W"},
+                {"W", "W", "_", "W", "W"},
+                {"W", "_", "W", "_", "W"}
+        };
+
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
+                new Position(2, 0)
+        ), 10, WD(map));
+        assertEquals(1, room.size());
+
+        assertFalse(room.get(new Position(2, 0)).isPresent());
+    }
 }

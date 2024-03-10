@@ -20,6 +20,7 @@ public class LevelRoomDetector {
     private int doorIteration = 0;
     private int iteration = 0;
     private int maxIterations;
+    private boolean done;
 
     public LevelRoomDetector(
             Collection<Position> currentDoors,
@@ -34,12 +35,18 @@ public class LevelRoomDetector {
         this.checker = checker;
     }
 
+    public boolean isDone() {
+        return done;
+    }
+
     public @Nullable ImmutableMap<Position, Optional<Room>> proceed() {
         iteration++;
         if (iteration > maxIterations) {
+            RoomRecipes.LOGGER.error("Failed to detect rooms after {} iterations", maxIterations);
             return giveUp();
         }
         if (doorsToProcess.isEmpty()) {
+            this.done = true;
             if (processedRooms.isEmpty()) {
                 return giveUp();
             }
@@ -75,8 +82,6 @@ public class LevelRoomDetector {
     }
 
     private ImmutableMap<Position, Optional<Room>> giveUp() {
-        RoomRecipes.LOGGER.error("Failed to detect rooms after {} iterations", maxIterations);
-
         ImmutableMap.Builder<Position, Optional<Room>> b = ImmutableMap.builder();
         initialDoors.forEach(v -> b.put(v, Optional.empty()));
         return b.build();

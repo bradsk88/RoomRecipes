@@ -117,6 +117,10 @@ public class RoomDetection {
             int depth,
             WallDetector wd
     ) {
+        if (!wd.IsWall(doorPos)) {
+            return Optional.empty();
+        }
+
         Function<Position, Optional<Room>> findFromBackWall = (Position wallPos) ->
                 findRoomFromBackWall(
                         doorPos,

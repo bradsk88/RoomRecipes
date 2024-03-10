@@ -5,7 +5,7 @@ import ca.bradj.roomrecipes.core.space.Position;
 import com.google.common.collect.ImmutableList;
 
 import java.util.Collection;
-import java.util.Random;
+import java.util.function.Function;
 
 public class InclusiveSpaces {
 
@@ -53,7 +53,7 @@ public class InclusiveSpaces {
 
     public static Position getRandomEnclosedPosition(
             InclusiveSpace space,
-            Random random
+            Function<Integer, Integer> randomInt
     ) {
         int minX = space.getWestX() + 1;
         int maxX = space.getEastX();
@@ -61,7 +61,7 @@ public class InclusiveSpaces {
         int maxZ = space.getSouthZ();
         int width = maxX - minX;
         int height = maxZ - minZ;
-        return new Position(minX + random.nextInt(width), minZ + random.nextInt(height));
+        return new Position(minX + randomInt.apply(width), minZ + randomInt.apply(height));
     }
 
     public static Collection<Position> getAllEnclosedPositions(InclusiveSpace space) {
