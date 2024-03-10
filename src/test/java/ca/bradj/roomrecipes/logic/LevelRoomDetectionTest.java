@@ -1342,4 +1342,37 @@ class LevelRoomDetectionTest {
         assertEquals(expectedCorners2, spaces.get(1));
         assertEquals(expectedCorners3, spaces.get(2));
     }
+    @Test
+    public void Test_DetectInsetCorners_N() { // TODO: East,South,West
+        java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
+        Configurator.setLevel(RoomRecipes.LOGGER.getName(), Level.TRACE);
+        // _ = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"W", "W", "D", "W", "W"},
+                {"W", "W", "_", "W", "W"},
+                {"W", "_", "_", "_", "W"},
+                {"W", "W", "_", "W", "W"},
+                {"W", "W", "W", "W", "W"}
+        };
+
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
+                new Position(2, 0)
+        ), 10, WD(map));
+        assertEquals(1, room.size());
+
+        assertTrue(room.get(new Position(2, 0)).isPresent());
+
+        List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(2, 0)).get().getSpaces());
+        assertEquals(3, spaces.size());
+
+        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(1, 0), new Position(3, 4));
+        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(0, 1), new Position(1, 4));
+        InclusiveSpace expectedCorners3 = new InclusiveSpace(new Position(3, 1), new Position(4, 4));
+
+        assertEquals(expectedCorners1, spaces.get(0));
+        assertEquals(expectedCorners2, spaces.get(1));
+        assertEquals(expectedCorners3, spaces.get(2));
+    }
 }
