@@ -27,7 +27,8 @@ public class LevelRoomDetection {
                 currentDoors,
                 maxDistanceFromDoor,
                 1000,
-                checker
+                checker,
+                false
         );
         for (int i = 0; i < 2000; i++) {
             @Nullable ImmutableMap<Position, Optional<Room>> result = d.proceed();

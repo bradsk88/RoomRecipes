@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 public class LevelRoomDetector {
     private final Queue<Position> doorsToProcess = new LinkedBlockingQueue<>();
     private final ImmutableList<Position> initialDoors;
+    private final boolean enableDebugArt;
     private Map<Position, Optional<Room>> processedRooms = new HashMap<>();
     private final int maxDistanceFromDoor;
     private final WallDetector checker;
@@ -23,22 +24,35 @@ public class LevelRoomDetector {
     private int iteration = 0;
     private int maxIterations;
     private boolean done;
+    private final Map<Position, String[][]> debugArt = new HashMap<>();
 
     public LevelRoomDetector(
             Collection<Position> currentDoors,
             int maxDistanceFromDoor,
             int maxIterations,
-            WallDetector checker
+            WallDetector checker,
+            boolean enableDebugArt
     ) {
         doorsToProcess.addAll(currentDoors);
         this.initialDoors = ImmutableList.copyOf(currentDoors);
         this.maxDistanceFromDoor = maxDistanceFromDoor;
         this.maxIterations = maxIterations;
         this.checker = checker;
+        this.enableDebugArt = enableDebugArt;
+        if (enableDebugArt) {
+            currentDoors.forEach(door -> {
+                debugArt.put(door, new String[(maxDistanceFromDoor * 2) + 1][(maxDistanceFromDoor * 2) + 1]);
+                debugArt.get(door)[maxDistanceFromDoor][maxDistanceFromDoor] = "D";
+            });
+        }
     }
 
     public boolean isDone() {
         return done;
+    }
+
+    public int iterationsUsed() {
+        return iteration;
     }
 
     public @Nullable ImmutableMap<Position, Optional<Room>> proceed() {
@@ -66,11 +80,24 @@ public class LevelRoomDetector {
             this.doorIteration = 0;
             return null;
         }
+
+        String[][] art = debugArt.get(nextDoor);
+
         Optional<Room> roomForDoor = RoomDetection.findRoomForDoorIteration(
                 nextDoor,
                 doorIteration + 2,
                 maxDistanceFromDoor,
-                checker
+                p -> {
+                    boolean b = checker.IsWall(p);
+                    if (enableDebugArt) {
+                        int zOffset = p.z - nextDoor.z;
+                        int xOffset = p.x - nextDoor.x;
+                        if (art[maxDistanceFromDoor + zOffset][maxDistanceFromDoor + xOffset] == null) {
+                            art[maxDistanceFromDoor + zOffset][maxDistanceFromDoor + xOffset] = b ? "W" : "_";
+                        }
+                    }
+                    return b;
+                }
         );
 
         if (roomForDoor.isEmpty()) {
@@ -202,5 +229,78 @@ public class LevelRoomDetector {
                 Optional.empty()
         ));
         return b.build();
+    }
+
+    public ImmutableMap<Position, String> getDebugArt(boolean cropNulls) {
+        if (!enableDebugArt) {
+            RoomRecipes.LOGGER.error("Debug art was not enabled in the room detector constructor");
+            return ImmutableMap.of();
+        }
+
+        ImmutableMap.Builder<Position, String> b = ImmutableMap.builder();
+        debugArt.forEach((k, v) -> {
+            if (cropNulls) {
+                v = findSmallestRectangle(v);
+            }
+            StringBuilder sb = new StringBuilder();
+            sb.append("{\n");
+            for (int i = 0; i < v.length; i++) {
+                sb.append("    {");
+                for (int j = 0; j < v[i].length; j++) {
+                    String val = v[i][j];
+                    sb.append("\"")
+                      .append(val == null ? '?' : val)
+                      .append("\"");
+                    if (j < v[i].length - 1) {
+                        sb.append(", ");
+                    }
+                }
+                sb.append("}");
+                if (i < v.length - 1) {
+                    sb.append(",\n");
+                } else {
+                    sb.append("\n");
+                }
+            }
+            sb.append("}");
+
+            b.put(k, sb.toString());
+        });
+        return b.build();
+    }
+
+    public static String[][] findSmallestRectangle(String[][] array) {
+        // Find bounds of the non-null values
+        int minRow = Integer.MAX_VALUE;
+        int maxRow = Integer.MIN_VALUE;
+        int minCol = Integer.MAX_VALUE;
+        int maxCol = Integer.MIN_VALUE;
+
+        for (int i = 0; i < array.length; i++) {
+            for (int j = 0; j < array[i].length; j++) {
+                if (array[i][j] != null) {
+                    minRow = Math.min(minRow, i);
+                    maxRow = Math.max(maxRow, i);
+                    minCol = Math.min(minCol, j);
+                    maxCol = Math.max(maxCol, j);
+                }
+            }
+        }
+
+        // Calculate the dimensions of the smallest rectangle
+        int numRows = maxRow - minRow + 1;
+        int numCols = maxCol - minCol + 1;
+
+        // Create a new 2D array to store the smallest rectangle
+        String[][] smallestRectangle = new String[numRows][numCols];
+
+        // Populate the new array with the values from the original array
+        for (int i = 0; i < numRows; i++) {
+            for (int j = 0; j < numCols; j++) {
+                smallestRectangle[i][j] = array[minRow + i][minCol + j];
+            }
+        }
+
+        return smallestRectangle;
     }
 }
