@@ -5,6 +5,7 @@ import ca.bradj.roomrecipes.core.Room;
 import ca.bradj.roomrecipes.core.space.InclusiveSpace;
 import ca.bradj.roomrecipes.core.space.Position;
 import ca.bradj.roomrecipes.logic.interfaces.WallDetector;
+import ca.bradj.roomrecipes.rooms.ZWall;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.apache.logging.log4j.Level;
@@ -12,10 +13,8 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.ConsoleHandler;
 import java.util.stream.Stream;
 
@@ -32,7 +31,8 @@ class LevelRoomDetectionTest {
             if (dp.x >= map[0].length || dp.z >= map.length) {
                 return false;
             }
-            return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
+            String v = map[dp.z][dp.x];
+            return "W".equals(v) || "D".equals(v) || "w".equals(v);
         };
     }
 
@@ -48,10 +48,11 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W", "W", "W"}
         };
 
+        LinkedBlockingQueue<String> recorder = new LinkedBlockingQueue<>();
         ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
                 new Position(1, 0),
                 new Position(3, 0)
-        ), 4, WD(map));
+        ), 4, recorder, WD(map));
         assertTrue(room.containsKey(new Position(1, 0)));
         assertTrue(room.containsKey(new Position(3, 0)));
 
@@ -1341,5 +1342,126 @@ class LevelRoomDetectionTest {
         assertEquals(expectedCorners1, spaces.get(0));
         assertEquals(expectedCorners2, spaces.get(1));
         assertEquals(expectedCorners3, spaces.get(2));
+    }
+    @Test
+    public void Test_DetectInsetCorners_N() { // TODO: East,South,West
+        java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
+        Configurator.setLevel(RoomRecipes.LOGGER.getName(), Level.TRACE);
+        // _ = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"W", "W", "D", "W", "W"},
+                {"W", "W", "_", "W", "W"},
+                {"W", "_", "_", "_", "W"},
+                {"W", "W", "_", "W", "W"},
+                {"W", "W", "W", "W", "W"}
+        };
+
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
+                new Position(2, 0)
+        ), 10, WD(map));
+        assertEquals(1, room.size());
+
+        assertTrue(room.get(new Position(2, 0)).isPresent());
+
+        List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(2, 0)).get().getSpaces());
+        assertEquals(3, spaces.size());
+
+        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(1, 0), new Position(3, 4));
+        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(0, 1), new Position(1, 4));
+        InclusiveSpace expectedCorners3 = new InclusiveSpace(new Position(3, 1), new Position(4, 4));
+
+        assertEquals(expectedCorners1, spaces.get(0));
+        assertEquals(expectedCorners2, spaces.get(1));
+        assertEquals(expectedCorners3, spaces.get(2));
+    }
+    @Test
+    public void Test_DetectNoDoor_N() { // TODO: East,South,West
+        java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
+        Configurator.setLevel(RoomRecipes.LOGGER.getName(), Level.TRACE);
+        // _ = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"W", "W", "_", "W", "W"},
+                {"W", "_", "_", "_", "W"},
+                {"W", "_", "_", "_", "W"},
+                {"W", "W", "_", "W", "W"},
+                {"W", "_", "W", "_", "W"}
+        };
+
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
+                new Position(2, 0)
+        ), 10, WD(map));
+        assertEquals(1, room.size());
+
+        assertFalse(room.get(new Position(2, 0)).isPresent());
+    }
+
+    @Test
+    public void Test_Regression_SkinnyRoomInsideOtherRoom() {
+        String[][] map = {
+                //0    1    2    3    4    5    6    7    8    9   10   11   12   13   14
+                {"?", "?", "?", "?", "?", "_", "_", "_", " ", "_", "_", "_", "?", "?", "?"}, // 0
+                {"?", "?", "?", "?", "?", "w", "W", "W", "W", "W", "W", "w", "?", "?", "?"}, // 1
+                {"?", "?", "?", "?", "?", "w", "W", " ", " ", " ", "_", "w", "?", "?", "?"}, // 2
+                {"?", "?", "?", "?", "?", "_", " ", "_", " ", "_", "_", "_", "w", "w", "?"}, // 3
+                {"_", "w", "w", "w", "w", "w", "W", " ", " ", " ", "W", "w", "W", "w", "?"}, // 4
+                {" ", "w", "_", "_", "_", " ", "D", " ", "_", "w", "w", "w", "W", "w", "?"}, // 5
+                {"_", "w", "W", "W", "W", "W", "W", " ", " ", "W", "_", "_", "W", "w", "?"}, // 6
+                {"?", "_", "W", " ", " ", " ", " ", " ", " ", "W", "_", "_", "w", "w", "?"}, // 7
+                {"?", "_", "W", "W", "W", "W", "W", "W", "W", "W", "w", "?", "?", "?", "?"}, // 8
+                {"?", "_", "w", "_", "_", "_", "_", "w", "w", "w", "w", "?", "?", "?", "?"}, // 9
+                {"?", "?", "?", "?", "?", "_", "_", "w", "?", "?", "?", "?", "?", "?", "?"}, // 10
+                {"?", "?", "?", "?", "?", "_", " ", "w", "?", "?", "?", "?", "?", "?", "?"}, // 11
+                {"?", "?", "?", "?", "?", "w", "w", "w", "?", "?", "?", "?", "?", "?", "?"}, // 12
+                {"?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?"}, // 13
+                {"?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?", "?"}, // 14
+        };
+        Position doorPos = new Position(6, 5);
+
+        LinkedBlockingQueue<String> flightRecorder = new LinkedBlockingQueue<>();
+
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
+                doorPos
+        ), 20, flightRecorder, WD(map));
+        assertEquals(1, room.size());
+        assertTrue(room.get(doorPos).isPresent(), () -> blackBox(flightRecorder));
+        assertTrue(room.get(doorPos).get().getBackZWall().isPresent());
+        assertEquals(
+                new ZWall(new Position(1, 4), new Position(1, 6)),
+                room.get(doorPos).get().getBackZWall().get()
+        );
+    }
+    @Test
+    public void Test_Regression_SkinnyRoom() {
+        String[][] map = {
+                //0    1    2    3    4    5    6
+                {" ", " ", " ", " ", "_", " ", " "}, // 0
+                {"W", "W", "W", "w", "w", "W", " "}, // 1
+                {"W", " ", "_", "_", " ", "D", " "}, // 2
+                {"W", "W", "W", "W", "W", "W", " "}, // 3
+                {" ", " ", " ", " ", " ", " ", " "}, // 4
+        };
+        Position doorPos = new Position(5, 2);
+
+        LinkedBlockingQueue<String> flightRecorder = new LinkedBlockingQueue<>();
+
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
+                doorPos
+        ), 20, flightRecorder, WD(map));
+        assertEquals(1, room.size());
+        assertTrue(room.get(doorPos).isPresent(), () -> blackBox(flightRecorder));
+        assertTrue(room.get(doorPos).get().getBackZWall().isPresent());
+    }
+
+    private String blackBox(LinkedBlockingQueue<String> flightRecorder) {
+        StringBuilder b = new StringBuilder();
+        flightRecorder.forEach(v -> {
+            b.append(v);
+            b.append("\n");
+        });
+        return b.toString();
     }
 }

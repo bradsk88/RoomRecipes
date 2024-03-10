@@ -11,8 +11,10 @@ import ca.bradj.roomrecipes.rooms.XWall;
 import ca.bradj.roomrecipes.rooms.ZWall;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Stream;
 
 public class LevelRoomDetection {
@@ -22,81 +24,30 @@ public class LevelRoomDetection {
             int maxDistanceFromDoor,
             WallDetector checker
     ) {
-        // TODO: Implement early exit.
-        //  Take a snapshot of the town. If nothing has changed, return.
-        Map<Position, Optional<Room>> detectedRooms = new HashMap<>();
-        for (Position doorPos : ImmutableList.copyOf(currentDoors)) {
-            detectedRooms.put(doorPos, RoomDetection.findRoomForDoor(
-                    doorPos, maxDistanceFromDoor, Optional.empty(), 0, checker
-            ));
-        }
-        detectedRooms.values().forEach(r -> RoomRecipes.LOGGER.trace("Detected room: " + r));
-        int attempts = 0;
-        int corrections = 1;
-        while (corrections > 0 && attempts <= 3) {
-            attempts++;
-            Stream<Optional<Room>> onlyPresent = detectedRooms.values().stream().filter(Optional::isPresent);
-            List<Room> rooms = onlyPresent.map(Optional::get).toList();
-            corrections = 0;
-            for (Room r1 : rooms) {
-                if (corrections > 0) {
-                    break;
-                }
-                for (Room r2 : rooms) {
-                    if (r1.equals(r2)) {
-                        continue;
-                    }
-                    if (r1.getSpace().equals(r2.getSpace())) {
-                        final Optional<Room> alternate = RoomDetection.findRoomForDoor(
-                                r2.getDoorPos(), maxDistanceFromDoor, Optional.of(r1.getSpace()), 0, checker
-                        );
-                        if (alternate.isPresent()) {
-                            if (rooms.stream().anyMatch(v -> v.getSpace().equals(alternate.get().getSpace()))) {
-                                detectedRooms.put(r2.getDoorPos(), Optional.empty());
-                                corrections++;
-                                break;
-                            }
-                            RoomRecipes.LOGGER.trace("Using alternate room: " + alternate.get());
-                            detectedRooms.put(r2.getDoorPos(), alternate);
-                            corrections++;
-                            break;
-                        }
-                        Optional<Room> alternate2 = RoomDetection.findRoomForDoor(
-                                r1.getDoorPos(), maxDistanceFromDoor, Optional.of(r2.getSpace()), 0, checker
-                        );
-                        if (alternate2.isPresent()) {
-                            detectedRooms.put(r1.getDoorPos(), alternate2);
-                            corrections++;
-                            RoomRecipes.LOGGER.trace("Using alternate room: " + alternate2.get());
-                            break;
-                        }
-                        detectedRooms.put(r2.getDoorPos(), Optional.empty());
-                        corrections++;
-                        break;
-                    } else {
-                        if (InclusiveSpaces.overlapOnXZPlane(r1.getSpace(), r2.getSpace())) {
-                            double a1 = InclusiveSpaces.calculateArea(r1.getSpace());
-                            double a2 = InclusiveSpaces.calculateArea(r2.getSpace());
-                            if (a1 > a2) {
-                                RoomRecipes.LOGGER.debug("Chopping " + r2 + " off of " + r1);
-                                InclusiveSpace chopped = r1.getSpace().chopOff(r2.getSpace());
-                                detectedRooms.put(r1.getDoorPos(), Optional.of(r1.withSpace(chopped)));
-                                corrections++;
-                                break;
-                            }
-                            if (a2 > a1) {
-                                RoomRecipes.LOGGER.debug("Chopping " + r1 + " off of " + r2);
-                                InclusiveSpace chopped = r2.getSpace().chopOff(r1.getSpace());
-                                detectedRooms.put(r2.getDoorPos(), Optional.of(r2.withSpace(chopped)));
-                                corrections++;
-                                break;
-                            }
-                        }
-                    }
-                }
+        return findRooms(currentDoors, maxDistanceFromDoor, null, checker);
+    }
+
+    public static ImmutableMap<Position, Optional<Room>> findRooms(
+            Collection<Position> currentDoors,
+            int maxDistanceFromDoor,
+            @Nullable LinkedBlockingQueue<String> fRec,
+            WallDetector checker
+    ) {
+        LevelRoomDetector d = new LevelRoomDetector(
+                currentDoors,
+                maxDistanceFromDoor,
+                1000,
+                checker,
+                false,
+                fRec
+        );
+        for (int i = 0; i < 2000; i++) {
+            @Nullable ImmutableMap<Position, Optional<Room>> result = d.proceed();
+            if (result != null) {
+                return result;
             }
         }
-        return ImmutableMap.copyOf(detectedRooms);
+        throw new IllegalStateException("Room detector should self-close");
     }
 
     private static Optional<RoomSplit> splitRooms(
@@ -112,25 +63,42 @@ public class LevelRoomDetection {
             eastDP = doorPos1;
         }
         int xDoorDiff = eastDP.x - westDP.x;
-        int zDoorDiff = Math.max(doorPos1.z, doorPos2.z) - Math.min(doorPos1.z, doorPos2.z);
+        int zDoorDiff = Math.max(
+                doorPos1.z,
+                doorPos2.z
+        ) - Math.min(
+                doorPos1.z,
+                doorPos2.z
+        );
         if (xDoorDiff >= zDoorDiff) {
             ZWall westWall = space.getWestZWall();
             ZWall eastWall = space.getEastZWall();
-            Optional<ZWall> middleWall = findMiddleZWall(westDP.x, eastDP.x, space, wd);
+            Optional<ZWall> middleWall = findMiddleZWall(
+                    westDP.x,
+                    eastDP.x,
+                    space,
+                    wd
+            );
             if (middleWall.isPresent()) {
                 return Optional.of(new RoomSplit(
-                        new Room(westDP, Positions.getInclusiveSpace(ImmutableList.of(
-                                westWall.northCorner,
-                                middleWall.get().northCorner,
-                                middleWall.get().southCorner,
-                                westWall.southCorner
-                        ))),
-                        new Room(eastDP, Positions.getInclusiveSpace(ImmutableList.of(
-                                middleWall.get().northCorner,
-                                eastWall.northCorner,
-                                eastWall.southCorner,
-                                middleWall.get().southCorner
-                        )))
+                        new Room(
+                                westDP,
+                                Positions.getInclusiveSpace(ImmutableList.of(
+                                        westWall.northCorner,
+                                        middleWall.get().northCorner,
+                                        middleWall.get().southCorner,
+                                        westWall.southCorner
+                                ))
+                        ),
+                        new Room(
+                                eastDP,
+                                Positions.getInclusiveSpace(ImmutableList.of(
+                                        middleWall.get().northCorner,
+                                        eastWall.northCorner,
+                                        eastWall.southCorner,
+                                        middleWall.get().southCorner
+                                ))
+                        )
                 ));
             }
         }
@@ -142,21 +110,32 @@ public class LevelRoomDetection {
         }
         XWall northWall = space.getNorthXWall();
         XWall southWall = space.getSouthXWall();
-        Optional<XWall> middleWall = findMiddleXWall(northDP.z, southDP.z, space, wd);
+        Optional<XWall> middleWall = findMiddleXWall(
+                northDP.z,
+                southDP.z,
+                space,
+                wd
+        );
         if (middleWall.isPresent()) {
             return Optional.of(new RoomSplit(
-                    new Room(northDP, Positions.getInclusiveSpace(ImmutableList.of(
-                            northWall.westCorner,
-                            northWall.eastCorner,
-                            middleWall.get().eastCorner,
-                            middleWall.get().westCorner
-                    ))),
-                    new Room(southDP, Positions.getInclusiveSpace(ImmutableList.of(
-                            middleWall.get().westCorner,
-                            middleWall.get().eastCorner,
-                            southWall.eastCorner,
-                            southWall.westCorner
-                    )))
+                    new Room(
+                            northDP,
+                            Positions.getInclusiveSpace(ImmutableList.of(
+                                    northWall.westCorner,
+                                    northWall.eastCorner,
+                                    middleWall.get().eastCorner,
+                                    middleWall.get().westCorner
+                            ))
+                    ),
+                    new Room(
+                            southDP,
+                            Positions.getInclusiveSpace(ImmutableList.of(
+                                    middleWall.get().westCorner,
+                                    middleWall.get().eastCorner,
+                                    southWall.eastCorner,
+                                    southWall.westCorner
+                            ))
+                    )
             ));
         }
         return Optional.empty();
@@ -170,10 +149,19 @@ public class LevelRoomDetection {
     ) {
         for (int i = 1; i < eastX - westX; i++) {
             ZWall middleWall = new ZWall(
-                    new Position(westX + i, space.getNorthZ()),
-                    new Position(westX + i, space.getSouthZ())
+                    new Position(
+                            westX + i,
+                            space.getNorthZ()
+                    ),
+                    new Position(
+                            westX + i,
+                            space.getSouthZ()
+                    )
             );
-            if (ZWalls.isConnected(middleWall, wd)) {
+            if (ZWalls.isConnected(
+                    middleWall,
+                    wd
+            )) {
                 return Optional.of(middleWall);
             }
         }
@@ -188,10 +176,19 @@ public class LevelRoomDetection {
     ) {
         for (int i = 1; i < southZ - northZ; i++) {
             XWall middleWall = new XWall(
-                    new Position(space.getWestX(), northZ + i),
-                    new Position(space.getEastX(), northZ + i)
+                    new Position(
+                            space.getWestX(),
+                            northZ + i
+                    ),
+                    new Position(
+                            space.getEastX(),
+                            northZ + i
+                    )
             );
-            if (XWalls.isConnected(middleWall, wd)) {
+            if (XWalls.isConnected(
+                    middleWall,
+                    wd
+            )) {
                 return Optional.of(middleWall);
             }
         }

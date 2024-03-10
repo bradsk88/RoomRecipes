@@ -107,7 +107,7 @@ class InclusiveSpacesTest {
         Position pos = InclusiveSpaces.getRandomEnclosedPosition(new InclusiveSpace(
                 new Position(0, 0),
                 new Position(2, 2)
-        ), bound -> new Random().nextInt(bound));
+        ), new Random()::nextInt);
         Assertions.assertTrue(pos.x == 1 || pos.z == 1);
     }
 
