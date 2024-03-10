@@ -26,6 +26,10 @@ public class ZWalls {
             ZWall zWall,
             WallDetector wd
     ) {
+        if (!wd.IsWall(zWall.northCorner) || !wd.IsWall(zWall.southCorner)) {
+            return Optional.empty();
+        }
+
         boolean wasWall = true;
         int zTop = 0;
         for (int i = zWall.northCorner.z; i <= zWall.southCorner.z; i++) {

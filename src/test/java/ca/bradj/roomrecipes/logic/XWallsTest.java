@@ -36,6 +36,29 @@ class XWallsTest {
         assertEquals(new Position(1, 0), opening.get().westCorner);
         assertEquals(new Position(4, 0), opening.get().eastCorner);
     }
+    @Test
+    public void Test_DetectOpening_NegPos() {
+        // A = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"_", "_", "_", "_", "W"},
+        };
+
+        Optional<XWall> opening = XWalls.findOpening(
+                new XWall(new Position(10003, -10002), new Position(10015, -10002)),
+                (Position dp) -> {
+                    if (dp.x < 0 || dp.z < 0) {
+                        return false;
+                    }
+                    if (dp.x >= map[0].length || dp.z >= map.length) {
+                        return false;
+                    }
+                    return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
+                }
+        );
+        assertTrue(opening.isPresent());
+    }
 
     @Test
     public void Test_DetectGarbage() {

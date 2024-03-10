@@ -86,14 +86,19 @@ public class LevelRoomDetector {
         Optional<Room> roomForDoor = RoomDetection.findRoomForDoorIteration(
                 nextDoor,
                 doorIteration + 2,
-                maxDistanceFromDoor,
+                maxDistanceFromDoor - 3,
                 p -> {
                     boolean b = checker.IsWall(p);
                     if (enableDebugArt) {
                         int zOffset = p.z - nextDoor.z;
                         int xOffset = p.x - nextDoor.x;
-                        if (art[maxDistanceFromDoor + zOffset][maxDistanceFromDoor + xOffset] == null) {
-                            art[maxDistanceFromDoor + zOffset][maxDistanceFromDoor + xOffset] = b ? "W" : "_";
+                        try {
+                            if (art[maxDistanceFromDoor + zOffset][maxDistanceFromDoor + xOffset] == null) {
+                                art[maxDistanceFromDoor + zOffset][maxDistanceFromDoor + xOffset] = b ? "W" : " ";
+                            }
+                        } catch (Exception e) {
+                            RoomRecipes.LOGGER.error("Failed to register art pixel for {} around door {}", p.getUIString(), nextDoor.getUIString());
+                            RoomRecipes.LOGGER.error("Exception", e);
                         }
                     }
                     return b;
@@ -242,6 +247,7 @@ public class LevelRoomDetector {
             if (cropNulls) {
                 v = findSmallestRectangle(v);
             }
+            // TODO[ASAP]: Fill "?" squares
             StringBuilder sb = new StringBuilder();
             sb.append("{\n");
             for (int i = 0; i < v.length; i++) {
