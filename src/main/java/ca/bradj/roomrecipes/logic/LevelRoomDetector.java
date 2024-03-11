@@ -41,7 +41,7 @@ public class LevelRoomDetector {
         this.enableDebugArt = enableDebugArt;
         if (enableDebugArt) {
             currentDoors.forEach(door -> {
-                debugArt.put(door, new String[(maxDistanceFromDoor * 2) + 1][(maxDistanceFromDoor * 2) + 1]);
+                debugArt.put(door, new String[(maxDistanceFromDoor * 2) + 2][(maxDistanceFromDoor * 2) + 2]);
                 debugArt.get(door)[maxDistanceFromDoor][maxDistanceFromDoor] = "D";
             });
         }
@@ -86,20 +86,12 @@ public class LevelRoomDetector {
         Optional<Room> roomForDoor = RoomDetection.findRoomForDoorIteration(
                 nextDoor,
                 doorIteration + 2,
-                maxDistanceFromDoor - 3,
+                maxDistanceFromDoor - 2,
                 p -> {
                     boolean b = checker.IsWall(p);
                     if (enableDebugArt) {
-                        int zOffset = p.z - nextDoor.z;
-                        int xOffset = p.x - nextDoor.x;
-                        try {
-                            if (art[maxDistanceFromDoor + zOffset][maxDistanceFromDoor + xOffset] == null) {
-                                art[maxDistanceFromDoor + zOffset][maxDistanceFromDoor + xOffset] = b ? "W" : " ";
-                            }
-                        } catch (Exception e) {
-                            RoomRecipes.LOGGER.error("Failed to register art pixel for {} around door {}", p.getUIString(), nextDoor.getUIString());
-                            RoomRecipes.LOGGER.error("Exception", e);
-                        }
+                        captureAsArtPixel(p, nextDoor, art, b, "W", " ");
+                        captureSurroundingAsArtPixels(p, nextDoor, art, "w", "_");
                     }
                     return b;
                 }
@@ -116,6 +108,49 @@ public class LevelRoomDetector {
                 roomForDoor
         );
         return null;
+    }
+
+    private void captureSurroundingAsArtPixels(
+            Position p,
+            Position nextDoor,
+            String[][] art,
+            String w, String a
+    ) {
+        for (int i = -1; i < 2; i++) {
+            for (int j = -1; j < 2; j++) {
+                Position op = p.offset(i, j);
+                boolean b2 = checker.IsWall(op);
+                captureAsArtPixel(op, nextDoor, art, b2, w, a);
+            }
+        }
+    }
+
+    private void captureAsArtPixel(
+            Position p,
+            Position nextDoor,
+            String[][] art,
+            boolean b, String w, String a
+    ) {
+        int zOffset = p.z - nextDoor.z;
+        int xOffset = p.x - nextDoor.x;
+        int zzz = maxDistanceFromDoor + zOffset;
+        int xxx = maxDistanceFromDoor + xOffset;
+        if (zzz >= art.length || xxx >= art[0].length || zzz < 0 || xxx < 0) {
+            return;
+        }
+
+        try {
+            String v = art[zzz][xxx];
+            if (v == null || art[zzz][xxx].equals("w") || art[zzz][xxx].equals("_")) {
+                art[zzz][xxx] = b ? w : a;
+            }
+        } catch (Exception e) {
+            RoomRecipes.LOGGER.error(
+                    "Failed to register art pixel for {} around door {}", p.getUIString(),
+                    nextDoor.getUIString()
+            );
+            RoomRecipes.LOGGER.error("Exception", e);
+        }
     }
 
     private ImmutableMap<Position, Optional<Room>> removeOverlaps(
@@ -247,7 +282,6 @@ public class LevelRoomDetector {
             if (cropNulls) {
                 v = findSmallestRectangle(v);
             }
-            // TODO[ASAP]: Fill "?" squares
             StringBuilder sb = new StringBuilder();
             sb.append("{\n");
             for (int i = 0; i < v.length; i++) {
