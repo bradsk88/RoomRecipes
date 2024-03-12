@@ -14,6 +14,7 @@ import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Stream;
 
 public class LevelRoomDetection {
@@ -21,6 +22,7 @@ public class LevelRoomDetection {
     public static ImmutableMap<Position, Optional<Room>> findRooms(
             Collection<Position> currentDoors,
             int maxDistanceFromDoor,
+            LinkedBlockingQueue<String> fRec,
             WallDetector checker
     ) {
         LevelRoomDetector d = new LevelRoomDetector(
@@ -28,7 +30,8 @@ public class LevelRoomDetection {
                 maxDistanceFromDoor,
                 1000,
                 checker,
-                false
+                false,
+                fRec
         );
         for (int i = 0; i < 2000; i++) {
             @Nullable ImmutableMap<Position, Optional<Room>> result = d.proceed();

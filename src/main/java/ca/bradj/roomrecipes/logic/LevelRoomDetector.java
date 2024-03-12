@@ -17,6 +17,7 @@ public class LevelRoomDetector {
     private final Queue<Position> doorsToProcess = new LinkedBlockingQueue<>();
     private final ImmutableList<Position> initialDoors;
     private final boolean enableDebugArt;
+    private final LinkedBlockingQueue<String> flightRecorder;
     private Map<Position, Optional<Room>> processedRooms = new HashMap<>();
     private final int maxDistanceFromDoor;
     private final WallDetector checker;
@@ -31,7 +32,8 @@ public class LevelRoomDetector {
             int maxDistanceFromDoor,
             int maxIterations,
             WallDetector checker,
-            boolean enableDebugArt
+            boolean enableDebugArt,
+            LinkedBlockingQueue<String> flightRecorder
     ) {
         doorsToProcess.addAll(currentDoors);
         this.initialDoors = ImmutableList.copyOf(currentDoors);
@@ -45,6 +47,7 @@ public class LevelRoomDetector {
                 debugArt.get(door)[maxDistanceFromDoor][maxDistanceFromDoor] = "D";
             });
         }
+        this.flightRecorder = flightRecorder;
     }
 
     public boolean isDone() {
@@ -87,6 +90,7 @@ public class LevelRoomDetector {
                 nextDoor,
                 doorIteration + 2,
                 maxDistanceFromDoor - 2,
+                flightRecorder,
                 p -> {
                     boolean b = checker.IsWall(p);
                     if (enableDebugArt) {

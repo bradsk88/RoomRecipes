@@ -11,6 +11,7 @@ import com.google.common.collect.ImmutableList;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Function;
 
 public class RoomDetection {
@@ -64,6 +65,7 @@ public class RoomDetection {
             Position nextDoor,
             int i,
             int maxDistanceFromDoor,
+            LinkedBlockingQueue<String> flightRecorder,
             WallDetector checker
     ) {
         return findRoomForDoorIteration(
@@ -74,6 +76,7 @@ public class RoomDetection {
                 Optional.empty(),
                 RoomDetection.WallExclusion.mustHaveAllWalls(),
                 0,
+                flightRecorder,
                 checker
         );
     }
@@ -115,11 +118,14 @@ public class RoomDetection {
             // TODO: Is this needed anymore
             WallExclusion exclusion,
             int depth,
+            LinkedBlockingQueue<String> flightRecorder,
             WallDetector wd
     ) {
         if (!wd.IsWall(doorPos)) {
             return Optional.empty();
         }
+
+        record(flightRecorder, "Started from door position %s", doorPos.getUIString());
 
         Function<Position, Optional<Room>> findFromBackWall = (Position wallPos) ->
                 findRoomFromBackWall(
@@ -139,6 +145,7 @@ public class RoomDetection {
                     0
             );
             if (range.maxEastZ == null || offset.x <= range.maxEastZ) {
+                record(flightRecorder, "Found a valid coordinate for the east back wall at %s", offset.getUIString());
                 foundRoom = findFromBackWall.apply(offset);
                 if (foundRoom.isPresent()) {
                     return foundRoom;
@@ -151,6 +158,7 @@ public class RoomDetection {
                     0
             );
             if (range.minWestZ == null || offset.x >= range.minWestZ) {
+                record(flightRecorder, "Found a valid coordinate for the west back wall at %s", offset.getUIString());
                 foundRoom = findFromBackWall.apply(offset);
                 if (foundRoom.isPresent()) {
                     return foundRoom;
@@ -162,6 +170,7 @@ public class RoomDetection {
                 i
         );
         if (range.maxSouthZ == null || offset.z <= range.maxSouthZ) {
+            record(flightRecorder, "Found a valid coordinate for the south back wall at %s", offset.getUIString());
             foundRoom = findFromBackWall.apply(offset);
             if (foundRoom.isPresent()) {
                 return foundRoom;
@@ -172,12 +181,24 @@ public class RoomDetection {
                 -i
         );
         if (range.minNorthZ == null || offset.z >= range.minNorthZ) {
+            record(flightRecorder, "Found a valid coordinate for the north back wall at %s", offset.getUIString());
             foundRoom = findFromBackWall.apply(offset);
             if (foundRoom.isPresent()) {
                 return foundRoom;
             }
         }
         return Optional.empty();
+    }
+
+    private static void record(
+            LinkedBlockingQueue<String> flightRecorder,
+            String s,
+            String uiString
+    ) {
+        if (flightRecorder == null) {
+            return;
+        }
+        flightRecorder.add(String.format(s, uiString));
     }
 
     public static Optional<Room> findRoomForDoor(
@@ -199,6 +220,7 @@ public class RoomDetection {
                     findAlternativeTo,
                     exclusion,
                     depth,
+                    null, // FIXME: Keep recording
                     wd
             );
             if (res.isPresent()) {

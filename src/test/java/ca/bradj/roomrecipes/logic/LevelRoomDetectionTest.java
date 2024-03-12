@@ -12,10 +12,8 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.ConsoleHandler;
 import java.util.stream.Stream;
 
@@ -48,10 +46,11 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W", "W", "W"}
         };
 
+        LinkedBlockingQueue<String> recorder = new LinkedBlockingQueue<>();
         ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
                 new Position(1, 0),
                 new Position(3, 0)
-        ), 4, WD(map));
+        ), 4, recorder, WD(map));
         assertTrue(room.containsKey(new Position(1, 0)));
         assertTrue(room.containsKey(new Position(3, 0)));
 
@@ -1419,9 +1418,11 @@ class LevelRoomDetectionTest {
         };
         Position doorPos = new Position(6, 5);
 
+        LinkedBlockingQueue<String> flightRecorder = new LinkedBlockingQueue<>();
+
         ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
                 doorPos
-        ), 20, WD(map));
+        ), 20, flightRecorder, WD(map));
         assertEquals(1, room.size());
         assertTrue(room.get(doorPos).isPresent());
         assertTrue(room.get(doorPos).get().getBackZWall().isPresent());
