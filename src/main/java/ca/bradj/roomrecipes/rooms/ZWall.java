@@ -245,4 +245,9 @@ public class ZWall implements Wall<ZWall> {
     public int getLengthOnAxis() {
         return getLength();
     }
+
+    @Override
+    public String toShortString() {
+        return String.format("%s->%s", northCorner.getUIString(), southCorner.getUIString());
+    }
 }

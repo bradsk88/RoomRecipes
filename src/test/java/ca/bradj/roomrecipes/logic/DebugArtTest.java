@@ -41,7 +41,7 @@ class DebugArtTest {
                 20,
                 1000,
                 WD(map),
-                true
+                true, null
         );
         for (int i = 0; i < 1000; i++) {
             d.proceed();
@@ -62,6 +62,7 @@ class DebugArtTest {
         );
 
     }
+
     @Test
     public void Test_Room_N() {
 
@@ -82,7 +83,8 @@ class DebugArtTest {
                 20,
                 1000,
                 WD(map),
-                true
+                true,
+                null
         );
         for (int i = 0; i < 1000; i++) {
             d.proceed();

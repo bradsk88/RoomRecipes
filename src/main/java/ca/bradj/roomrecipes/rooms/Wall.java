@@ -36,4 +36,6 @@ public interface Wall<W extends Wall<W>> {
     W shortenPositive(int i);
 
     int getLengthOnAxis();
+
+    String toShortString();
 }

@@ -22,7 +22,15 @@ public class LevelRoomDetection {
     public static ImmutableMap<Position, Optional<Room>> findRooms(
             Collection<Position> currentDoors,
             int maxDistanceFromDoor,
-            LinkedBlockingQueue<String> fRec,
+            WallDetector checker
+    ) {
+        return findRooms(currentDoors, maxDistanceFromDoor, null, checker);
+    }
+
+    public static ImmutableMap<Position, Optional<Room>> findRooms(
+            Collection<Position> currentDoors,
+            int maxDistanceFromDoor,
+            @Nullable LinkedBlockingQueue<String> fRec,
             WallDetector checker
     ) {
         LevelRoomDetector d = new LevelRoomDetector(
