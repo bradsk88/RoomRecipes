@@ -204,10 +204,10 @@ publish {
     }
 }
 
-// Uncomment these when using [jar]
+// // Uncomment these when using [jar]
 jar.finalizedBy('reobfJar')
 publish.finalizedBy('reobfJar')
-// Uncomment this when using [publishToMavenLocal]
+// // Uncomment this when using [publishToMavenLocal]
 //publish.dependsOn('reobfJar')
 
 publishing {

@@ -21,7 +21,7 @@ public class LevelRoomDetector {
     private Map<Position, Optional<Room>> processedRooms = new HashMap<>();
     private final int maxDistanceFromDoor;
     private final WallDetector checker;
-    private int doorIteration = 0;
+    private Map<Position, Integer> doorIteration = new HashMap<>();
     private int iteration = 0;
     private int maxIterations;
     private boolean done;
@@ -79,8 +79,7 @@ public class LevelRoomDetector {
         // TODO: Implement early exit.
         //  Accept a snapshot of the town. If nothing has changed, return.
 
-        if (this.doorIteration > maxDistanceFromDoor - 2) {
-            this.doorIteration = 0;
+        if (this.doorIteration.getOrDefault(nextDoor, 0) > maxDistanceFromDoor - 2) {
             return null;
         }
 
@@ -88,7 +87,7 @@ public class LevelRoomDetector {
 
         Optional<Room> roomForDoor = RoomDetection.findRoomForDoorIteration(
                 nextDoor,
-                doorIteration + 2,
+                this.doorIteration.getOrDefault(nextDoor, 0) + 2,
                 maxDistanceFromDoor - 2,
                 flightRecorder,
                 p -> {
@@ -103,7 +102,7 @@ public class LevelRoomDetector {
 
         if (roomForDoor.isEmpty()) {
             doorsToProcess.add(nextDoor);
-            doorIteration++;
+            doorIteration.compute(nextDoor, (pos, cur) -> cur == null ? 1 : cur + 1);
             return null;
         }
 
