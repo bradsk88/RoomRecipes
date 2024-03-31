@@ -1,5 +1,7 @@
 # RoomRecipes
 
+[![codecov](https://codecov.io/github/bradsk88/RoomRecipes/graph/badge.svg?token=133C4539RT)](https://codecov.io/github/bradsk88/RoomRecipes)
+
 A core mod for Minecraft that adds the ability to detect "Rooms" of different
 types based on their contents
 
