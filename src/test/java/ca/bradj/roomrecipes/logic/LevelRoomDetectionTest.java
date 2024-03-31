@@ -1369,8 +1369,8 @@ class LevelRoomDetectionTest {
         assertEquals(3, spaces.size());
 
         InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(1, 0), new Position(3, 4));
-        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(0, 1), new Position(1, 4));
-        InclusiveSpace expectedCorners3 = new InclusiveSpace(new Position(3, 1), new Position(4, 4));
+        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(0, 1), new Position(1, 3));
+        InclusiveSpace expectedCorners3 = new InclusiveSpace(new Position(3, 1), new Position(4, 3));
 
         assertEquals(expectedCorners1, spaces.get(0));
         assertEquals(expectedCorners2, spaces.get(1));

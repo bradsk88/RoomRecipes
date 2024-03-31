@@ -11,6 +11,7 @@ apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
+apply plugin: 'jacoco'
 
 group = 'ca.bradj' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'roomrecipes'
@@ -174,6 +175,15 @@ def getVersion() {
 }
 
 version = getVersion();
+
+jacocoTestReport {
+    reports {
+        xml.required = true
+        html.required = false
+    }
+}
+
+check.dependsOn jacocoTestReport
 
 // Example for how to get properties into the manifest for reading by the runtime..
 jar {
