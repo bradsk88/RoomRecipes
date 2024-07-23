@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.Block;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 public class RecipeDetection {
 
@@ -46,6 +47,14 @@ public class RecipeDetection {
 
     public static ImmutableMap<BlockPos, Block> getBlocksInRoom(
             Level level,
+            MCRoom room,
+            boolean includeWallBlocks
+    ) {
+        return getBlocksInRoomV2((bp) -> level.getBlockState(bp).getBlock(), room, includeWallBlocks);
+    }
+
+    public static ImmutableMap<BlockPos, Block> getBlocksInRoomV2(
+            Function<BlockPos, Block> level,
             MCRoom room,
             boolean includeWallBlocks
     ) {
@@ -82,7 +91,7 @@ public class RecipeDetection {
                         int yMax = Math.max(pos1.getY(), pos2.getY());
                         for (int blockY = yMin; blockY <= yMax; blockY++) {
                             BlockPos blockPos = new BlockPos(blockX, blockY, blockZ);
-                            Block block = level.getBlockState(blockPos).getBlock();
+                            Block block = level.apply(blockPos);
                             b.put(blockPos, block);
                         }
                     }

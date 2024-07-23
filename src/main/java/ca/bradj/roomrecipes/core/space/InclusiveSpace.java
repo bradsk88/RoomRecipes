@@ -10,6 +10,10 @@ import java.util.Objects;
 // cube between the two positions, up to the outermost corner of those corner blocks.
 public class InclusiveSpace {
 
+    // TODO: Make package-private
+    /**
+     * @deprecated Use InclusiveSpaces.from(...).to(...)
+     */
     public InclusiveSpace(
             Position aa,
             Position bb

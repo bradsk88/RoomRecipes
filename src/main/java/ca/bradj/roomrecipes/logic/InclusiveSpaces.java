@@ -9,6 +9,34 @@ import java.util.function.Function;
 
 public class InclusiveSpaces {
 
+    public static class ISBuilder {
+
+        private final int fromX;
+        private final int fromZ;
+
+        public ISBuilder(
+                int x,
+                int z
+        ) {
+            this.fromX = x;
+            this.fromZ = z;
+        }
+
+        public InclusiveSpace to(
+                int x,
+                int z
+        ) {
+            return new InclusiveSpace(new Position(fromX, fromZ), new Position(x, z));
+        }
+    }
+
+    public static ISBuilder from(
+            int x,
+            int z
+    ) {
+        return new ISBuilder(x, z);
+    }
+
     public static boolean overlapOnXZPlane(
             InclusiveSpace space1,
             InclusiveSpace space2
@@ -88,7 +116,10 @@ public class InclusiveSpaces {
         return new Position(leftInside + halfWidth, northInside + halfHeight);
     }
 
-    public static boolean contains(Iterable<? extends InclusiveSpace> spaces, Position pos) {
+    public static boolean contains(
+            Iterable<? extends InclusiveSpace> spaces,
+            Position pos
+    ) {
         for (InclusiveSpace space : spaces) {
             if (pos.x < space.getWestX() + 1) {
                 continue;
