@@ -94,9 +94,9 @@ public class InclusiveSpaces {
 
     public static Collection<Position> getAllEnclosedPositions(InclusiveSpace space) {
         int minX = space.getWestX() + 1;
-        int maxX = space.getEastX();
+        int maxX = space.getEastX() - 1;
         int minZ = space.getNorthZ() + 1;
-        int maxZ = space.getSouthZ();
+        int maxZ = space.getSouthZ() - 1;
         ImmutableList.Builder<Position> b = ImmutableList.builder();
         for (int z = minZ; z <= maxZ; z++) {
             for (int x = minX; x <= maxX; x++) {

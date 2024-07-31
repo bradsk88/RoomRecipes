@@ -6,9 +6,13 @@ import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Collection;
 import java.util.Random;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -75,30 +79,44 @@ class InclusiveSpacesTest {
         assertEquals(8, InclusiveSpaces.calculateArea(spaces), 0.001);
     }
 
-    @Disabled("Update assertions")
-    @Test
-    void getAllEnclosedPositions() {
 
-        InclusiveSpace space = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
-        Collection<Position> posz = InclusiveSpaces.getAllEnclosedPositions(space);
-        Assertions.assertEquals(ImmutableList.of(
-                new Position(1, 1)
-        ), ImmutableList.copyOf(posz));
-
+    static Stream<Arguments> provideEnclosedPositions() {
+        return Stream.of(
+                Arguments.of(
+                        InclusiveSpaces.from(0, 0).to(2, 2),
+                        ImmutableList.of(new Position(1, 1))
+                ),
+                Arguments.of(
+                        InclusiveSpaces.from(0, 0).to(3, 3),
+                        ImmutableList.of(
+                                new Position(1, 1),
+                                new Position(2, 1),
+                                new Position(1, 2),
+                                new Position(2, 2)
+                        )
+                ),
+                Arguments.of(
+                        InclusiveSpaces.from(0, 0).to(3, 1),
+                        ImmutableList.of()
+                ),
+                Arguments.of(
+                        InclusiveSpaces.from(0, 0).to(3, 2),
+                        ImmutableList.of(
+                                new Position(1, 1),
+                                new Position(2, 1)
+                        )
+                )
+        );
     }
 
-    @Disabled("Update assertions")
-    @Test
-    void getAllEnclosedPositions_2() {
-
-        InclusiveSpace space = new InclusiveSpace(new Position(0, 0), new Position(3, 3));
+    @ParameterizedTest
+    @MethodSource("provideEnclosedPositions")
+    void getAllEnclosedPositions(
+            InclusiveSpace space,
+            ImmutableList<Position> expectedPositions
+    ) {
         Collection<Position> posz = InclusiveSpaces.getAllEnclosedPositions(space);
-        Assertions.assertEquals(ImmutableList.of(
-                new Position(1, 1),
-                new Position(2, 1),
-                new Position(1, 2),
-                new Position(2, 2)
-        ), ImmutableList.copyOf(posz));
+        Assertions.assertEquals(expectedPositions, ImmutableList.copyOf(posz));
 
     }
 
