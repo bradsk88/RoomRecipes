@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Predicate;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class LevelRoomDetector {
@@ -72,6 +73,12 @@ public class LevelRoomDetector {
     }
 
     public @Nullable ImmutableMap<Position, Optional<Room>> proceed() {
+        return proceed(p -> Optional.empty());
+    }
+
+    public @Nullable ImmutableMap<Position, Optional<Room>> proceed(
+            Function<Position, Optional<Room>> existingRooms
+    ) {
         iteration++;
         if (iteration > maxIterations) {
             RoomRecipes.LOGGER.error(
@@ -89,8 +96,13 @@ public class LevelRoomDetector {
         }
         Position nextDoor = doorsToProcess.remove();
 
-        // TODO: Implement early exit.
-        //  Accept a snapshot of the town. If nothing has changed, return.
+        Optional<Room> existing = existingRooms.apply(nextDoor);
+        if (existing.isPresent() && InclusiveSpaces.isWhole(
+                existing.get().getSpace(), p -> checker.test(p, null, null)
+        )) {
+            processedRooms.put(nextDoor, existing);
+            return null;
+        }
 
         if (this.doorIteration.getOrDefault(nextDoor, 0) > maxDistanceFromDoor - 2) {
             return null;

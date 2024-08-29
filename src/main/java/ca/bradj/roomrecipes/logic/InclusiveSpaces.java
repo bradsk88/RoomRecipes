@@ -210,10 +210,10 @@ public class InclusiveSpaces {
             Predicate<Position> isWall
     ) {
 
-        return hasZWall(space, x -> {
-            Position west = new Position(x, space.getNorthZ());
-            Position east = new Position(x, space.getSouthZ());
-            return isWall.test(west) && isWall.test(east);
+        return hasXWall(space, x -> {
+            Position north = new Position(x, space.getNorthZ());
+            Position south = new Position(x, space.getSouthZ());
+            return isWall.test(north) && isWall.test(south);
         });
     }
 
