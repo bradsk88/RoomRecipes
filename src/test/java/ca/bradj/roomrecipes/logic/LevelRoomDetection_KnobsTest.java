@@ -17,15 +17,7 @@ class LevelRoomDetection_KnobsTest {
 
     private WallDetector WD(String[][] map) {
 
-        return (Position dp) -> {
-            if (dp.x < 0 || dp.z < 0) {
-                return false;
-            }
-            if (dp.x >= map[0].length || dp.z >= map.length) {
-                return false;
-            }
-            return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
-        };
+        return TestHelpers.WD(map);
     }
 
     @Test

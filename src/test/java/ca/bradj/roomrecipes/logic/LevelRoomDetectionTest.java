@@ -24,16 +24,7 @@ class LevelRoomDetectionTest {
 
     private WallDetector WD(String[][] map) {
 
-        return (Position dp) -> {
-            if (dp.x < 0 || dp.z < 0) {
-                return false;
-            }
-            if (dp.x >= map[0].length || dp.z >= map.length) {
-                return false;
-            }
-            String v = map[dp.z][dp.x];
-            return "W".equals(v) || "D".equals(v) || "w".equals(v);
-        };
+        return TestHelpers.WD(map);
     }
 
     @Test
