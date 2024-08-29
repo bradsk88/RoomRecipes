@@ -1,14 +1,19 @@
 package ca.bradj.roomrecipes.logic;
 
+import ca.bradj.roomrecipes.RoomRecipes;
 import ca.bradj.roomrecipes.core.space.InclusiveSpace;
 import ca.bradj.roomrecipes.core.space.Position;
+import ca.bradj.roomrecipes.logic.interfaces.WallDetector;
 import com.google.common.collect.ImmutableList;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 import java.util.Random;
+import java.util.logging.ConsoleHandler;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -124,5 +129,69 @@ class InclusiveSpacesTest {
     void contains() {
         InclusiveSpace space = new InclusiveSpace(new Position(107, -136), new Position(114, -132));
         InclusiveSpaces.contains(ImmutableList.of(space), new Position(110, -131));
+    }
+
+    @Test
+    public void Test_IsWhole_DetectInsetCorners_N() { // TODO: East,South,West
+        java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
+        Configurator.setLevel(RoomRecipes.LOGGER.getName(), Level.TRACE);
+        // _ = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"W", "W", "W", "W", "W"},
+                {"W", "W", "_", "W", "W"},
+                {"W", "_", "_", "_", "W"},
+                {"W", "W", "_", "W", "W"},
+                {"W", "W", "W", "W", "W"}
+        };
+
+        WallDetector wd = TestHelpers.WD(map);
+
+        InclusiveSpace space = InclusiveSpaces.from(0, 0).to(4, 4);
+        boolean result = InclusiveSpaces.isWhole(space, wd::IsWall);
+        assertTrue(result);
+    }
+    @Test
+    public void Test_IsWhole_DividedDownMiddle_Z() {
+        java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
+        Configurator.setLevel(RoomRecipes.LOGGER.getName(), Level.TRACE);
+        // _ = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"W", "W", "W", "W", "W"},
+                {"W", "_", "W", "_", "W"},
+                {"W", "_", "W", "_", "W"},
+                {"W", "_", "W", "_", "W"},
+                {"W", "W", "W", "W", "W"}
+        };
+
+        WallDetector wd = TestHelpers.WD(map);
+
+        InclusiveSpace space = InclusiveSpaces.from(0, 0).to(4, 4);
+        boolean result = InclusiveSpaces.isWhole(space, wd::IsWall);
+        assertFalse(result);
+    }
+    @Test
+    public void Test_IsWhole_DividedDownMiddle_X() {
+        java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
+        Configurator.setLevel(RoomRecipes.LOGGER.getName(), Level.TRACE);
+        // _ = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"W", "W", "W", "W", "W"},
+                {"W", "_", "_", "_", "W"},
+                {"W", "w", "W", "w", "W"},
+                {"W", "_", "_", "_", "W"},
+                {"W", "W", "W", "W", "W"}
+        };
+
+        WallDetector wd = TestHelpers.WD(map);
+
+        InclusiveSpace space = InclusiveSpaces.from(0, 0).to(4, 4);
+        boolean result = InclusiveSpaces.isWhole(space, wd::IsWall);
+        assertFalse(result);
     }
 }
