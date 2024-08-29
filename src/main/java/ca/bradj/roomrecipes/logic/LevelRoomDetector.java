@@ -7,10 +7,12 @@ import ca.bradj.roomrecipes.core.space.Position;
 import ca.bradj.roomrecipes.logic.interfaces.WallDetector;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import net.minecraftforge.common.util.TriPredicate;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class LevelRoomDetector {
@@ -20,7 +22,7 @@ public class LevelRoomDetector {
     private final @Nullable LinkedBlockingQueue<String> flightRecorder;
     private Map<Position, Optional<Room>> processedRooms = new HashMap<>();
     private final int maxDistanceFromDoor;
-    private final WallDetector checker;
+    private final TriPredicate<Position, @Nullable Position, @Nullable String[][]> checker;
     private Map<Position, Integer> doorIteration = new HashMap<>();
     private int iteration = 0;
     private int maxIterations;
@@ -39,7 +41,18 @@ public class LevelRoomDetector {
         this.initialDoors = ImmutableList.copyOf(currentDoors);
         this.maxDistanceFromDoor = maxDistanceFromDoor;
         this.maxIterations = maxIterations;
-        this.checker = checker;
+        Map<Position, Boolean> cache = new HashMap<>();
+        this.checker = (p, nextDoor, art) -> cache.compute(p, (p2, r) -> {
+            if (r != null) {
+                return r;
+            }
+            boolean b = checker.IsWall(p2);
+            if (enableDebugArt && nextDoor != null && art != null) {
+                captureAsArtPixel(p2, nextDoor, art, b, "W", " ");
+                captureSurroundingAsArtPixels(checker::IsWall, p2, nextDoor, art, "w", "_");
+            }
+            return b;
+        });
         this.enableDebugArt = enableDebugArt;
         if (enableDebugArt) {
             currentDoors.forEach(door -> {
@@ -83,21 +96,12 @@ public class LevelRoomDetector {
             return null;
         }
 
-        String[][] art = debugArt.get(nextDoor);
-
         Optional<Room> roomForDoor = RoomDetection.findRoomForDoorIteration(
                 nextDoor,
                 this.doorIteration.getOrDefault(nextDoor, 0) + 2,
                 maxDistanceFromDoor - 2,
                 flightRecorder,
-                p -> {
-                    boolean b = checker.IsWall(p);
-                    if (enableDebugArt) {
-                        captureAsArtPixel(p, nextDoor, art, b, "W", " ");
-                        captureSurroundingAsArtPixels(p, nextDoor, art, "w", "_");
-                    }
-                    return b;
-                }
+                p -> checker.test(p, nextDoor, debugArt.get(nextDoor))
         );
 
         if (roomForDoor.isEmpty()) {
@@ -114,15 +118,17 @@ public class LevelRoomDetector {
     }
 
     private void captureSurroundingAsArtPixels(
+            Predicate<Position> isWall,
             Position p,
             Position nextDoor,
             String[][] art,
-            String w, String a
+            String w,
+            String a
     ) {
         for (int i = -1; i < 2; i++) {
             for (int j = -1; j < 2; j++) {
                 Position op = p.offset(i, j);
-                boolean b2 = checker.IsWall(op);
+                boolean b2 = isWall.test(op);
                 captureAsArtPixel(op, nextDoor, art, b2, w, a);
             }
         }
@@ -132,7 +138,9 @@ public class LevelRoomDetector {
             Position p,
             Position nextDoor,
             String[][] art,
-            boolean b, String w, String a
+            boolean b,
+            String w,
+            String a
     ) {
         int zOffset = p.z - nextDoor.z;
         int xOffset = p.x - nextDoor.x;
@@ -184,7 +192,7 @@ public class LevelRoomDetector {
                                 maxDistanceFromDoor,
                                 Optional.of(r1.getSpace()),
                                 0,
-                                checker
+                                this::checkWithoutArt
                         );
                         if (alternate.isPresent()) {
                             if (rooms.stream()
@@ -211,7 +219,7 @@ public class LevelRoomDetector {
                                 maxDistanceFromDoor,
                                 Optional.of(r2.getSpace()),
                                 0,
-                                checker
+                                this::checkWithoutArt
                         );
                         if (alternate2.isPresent()) {
                             detectedRooms.put(
@@ -263,6 +271,10 @@ public class LevelRoomDetector {
             }
         }
         return ImmutableMap.copyOf(detectedRooms);
+    }
+
+    private boolean checkWithoutArt(Position p) {
+        return checker.test(p, null, null);
     }
 
     private ImmutableMap<Position, Optional<Room>> giveUp() {
