@@ -4,6 +4,7 @@ import ca.bradj.roomrecipes.core.Room;
 import ca.bradj.roomrecipes.core.space.Position;
 import com.google.common.collect.MapDifference;
 import com.google.common.collect.Maps;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -45,6 +46,10 @@ public class ActiveRooms<ROOM extends Room> {
 
     public Collection<ROOM> getAll() {
         return rooms.values();
+    }
+
+    public @Nullable ROOM get(Position p) {
+        return rooms.get(p);
     }
 
     public interface ChangeListener<ROOM extends Room> {

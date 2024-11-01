@@ -169,7 +169,7 @@ class InclusiveSpacesTest {
 
         WallDetector wd = TestHelpers.WD(map);
 
-        InclusiveSpace space = InclusiveSpaces.from(0, 0).to(4, 4);
+        InclusiveSpace space = InclusiveSpace.from(0, 0).to(4, 4);
         boolean result = InclusiveSpaces.isWhole(space, wd::IsWall);
         assertFalse(result);
     }
