@@ -8,7 +8,7 @@ import net.minecraft.world.level.block.Block;
 import java.util.Map;
 import java.util.Objects;
 
-public class RoomRecipeMatch<ROOM> extends RoomWithBlocks<ROOM, BlockPos, Block> {
+public class RoomRecipeMatch<ROOM> extends RoomWithBlocks<ROOM, BlockPos, Block> implements IRoomRecipeMatch<ROOM, ResourceLocation, BlockPos, Block> {
     private final ResourceLocation recipeID;
 
     public RoomRecipeMatch(
@@ -41,13 +41,17 @@ public class RoomRecipeMatch<ROOM> extends RoomWithBlocks<ROOM, BlockPos, Block>
         return Objects.hash(super.hashCode(), recipeID);
     }
 
+    @Override
     public ResourceLocation getRecipeID() {
         return recipeID;
     }
 
-    /**
-     * @deprecated Just access the containedBlocks field directly
-     */
+    @Override
+    public ROOM getRoom() {
+        return room;
+    }
+
+    @Override
     public ImmutableMap<BlockPos, Block> getContainedBlocks() {
         return containedBlocks;
     }
