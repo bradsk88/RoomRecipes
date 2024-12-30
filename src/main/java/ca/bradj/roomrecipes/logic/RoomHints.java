@@ -136,10 +136,10 @@ public class RoomHints {
     ) {
         if (isRoom(exclusion)) {
             if (northWall != null && southWall != null) {
-                return Optional.of(new InclusiveSpace(northWall.westCorner, southWall.eastCorner));
+                return Optional.of(InclusiveSpace.from(northWall.westCorner).to(southWall.eastCorner));
             }
             if (westWall != null && eastWall != null) {
-                return Optional.of(new InclusiveSpace(westWall.northCorner, eastWall.southCorner));
+                return Optional.of(InclusiveSpace.from(westWall.northCorner).to(eastWall.southCorner));
             }
         }
         return Optional.empty();

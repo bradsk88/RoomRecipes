@@ -7,39 +7,10 @@ import com.google.common.collect.ImmutableList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class InclusiveSpaces {
-
-    public static class ISBuilder {
-
-        private final int fromX;
-        private final int fromZ;
-
-        public ISBuilder(
-                int x,
-                int z
-        ) {
-            this.fromX = x;
-            this.fromZ = z;
-        }
-
-        public InclusiveSpace to(
-                int x,
-                int z
-        ) {
-            return new InclusiveSpace(new Position(fromX, fromZ), new Position(x, z));
-        }
-    }
-
-    public static ISBuilder from(
-            int x,
-            int z
-    ) {
-        return new ISBuilder(x, z);
-    }
 
     public static boolean overlapOnXZPlane(
             InclusiveSpace space1,

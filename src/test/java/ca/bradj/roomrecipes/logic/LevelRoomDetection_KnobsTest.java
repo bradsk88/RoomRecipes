@@ -43,10 +43,10 @@ class LevelRoomDetection_KnobsTest {
         assertTrue(room.get(new Position(1, 0)).isPresent());
         assertTrue(room.get(new Position(3, 0)).isPresent());
 
-        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(2, 2);
         assertEquals(expectedCorners, room.get(new Position(1, 0)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(2, 0), new Position(4, 2));
+        expectedCorners = InclusiveSpace.from(2, 0).to(4, 2);
         assertEquals(expectedCorners, room.get(new Position(3, 0)).get().getSpace());
 
     }
@@ -75,10 +75,10 @@ class LevelRoomDetection_KnobsTest {
         assertTrue(room.get(new Position(2, 1)).isPresent());
         assertTrue(room.get(new Position(2, 3)).isPresent());
 
-        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(2, 2);
         assertEquals(expectedCorners, room.get(new Position(2, 1)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(0, 2), new Position(2, 4));
+        expectedCorners = InclusiveSpace.from(0, 2).to(2, 4);
         assertEquals(expectedCorners, room.get(new Position(2, 3)).get().getSpace());
 
     }
@@ -105,10 +105,10 @@ class LevelRoomDetection_KnobsTest {
         assertTrue(room.get(new Position(1, 2)).isPresent());
         assertTrue(room.get(new Position(3, 2)).isPresent());
 
-        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(2, 2);
         assertEquals(expectedCorners, room.get(new Position(1, 2)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(2, 0), new Position(4, 2));
+        expectedCorners = InclusiveSpace.from(2, 0).to(4, 2);
         assertEquals(expectedCorners, room.get(new Position(3, 2)).get().getSpace());
 
     }
@@ -137,10 +137,10 @@ class LevelRoomDetection_KnobsTest {
         assertTrue(room.get(new Position(0, 1)).isPresent());
         assertTrue(room.get(new Position(0, 3)).isPresent());
 
-        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(2, 2);
         assertEquals(expectedCorners, room.get(new Position(0, 1)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(0, 2), new Position(2, 4));
+        expectedCorners = InclusiveSpace.from(0, 2).to(2, 4);
         assertEquals(expectedCorners, room.get(new Position(0, 3)).get().getSpace());
 
     }

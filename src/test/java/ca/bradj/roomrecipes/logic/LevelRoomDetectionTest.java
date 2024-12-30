@@ -50,10 +50,10 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(1, 0)).isPresent());
         assertTrue(room.get(new Position(3, 0)).isPresent());
 
-        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(2, 2);
         assertEquals(expectedCorners, room.get(new Position(1, 0)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(2, 0), new Position(4, 2));
+        expectedCorners = InclusiveSpace.from(2, 0).to(4, 2);
         assertEquals(expectedCorners, room.get(new Position(3, 0)).get().getSpace());
 
     }
@@ -80,10 +80,10 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(1, 0)).isPresent());
         assertTrue(room.get(new Position(4, 0)).isPresent());
 
-        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(2, 2);
         assertEquals(expectedCorners, room.get(new Position(1, 0)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(2, 0), new Position(5, 2));
+        expectedCorners = InclusiveSpace.from(2, 0).to(5, 2);
         assertEquals(expectedCorners, room.get(new Position(4, 0)).get().getSpace());
 
     }
@@ -112,10 +112,10 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(2, 1)).isPresent());
         assertTrue(room.get(new Position(2, 3)).isPresent());
 
-        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(2, 2);
         assertEquals(expectedCorners, room.get(new Position(2, 1)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(0, 2), new Position(2, 4));
+        expectedCorners = InclusiveSpace.from(0, 2).to(2, 4);
         assertEquals(expectedCorners, room.get(new Position(2, 3)).get().getSpace());
 
     }
@@ -145,10 +145,10 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(2, 1)).isPresent());
         assertTrue(room.get(new Position(2, 4)).isPresent());
 
-        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(2, 2);
         assertEquals(expectedCorners, room.get(new Position(2, 1)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(0, 2), new Position(2, 5));
+        expectedCorners = InclusiveSpace.from(0, 2).to(2, 5);
         assertEquals(expectedCorners, room.get(new Position(2, 4)).get().getSpace());
 
     }
@@ -175,10 +175,10 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(1, 2)).isPresent());
         assertTrue(room.get(new Position(3, 2)).isPresent());
 
-        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(2, 2);
         assertEquals(expectedCorners, room.get(new Position(1, 2)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(2, 0), new Position(4, 2));
+        expectedCorners = InclusiveSpace.from(2, 0).to(4, 2);
         assertEquals(expectedCorners, room.get(new Position(3, 2)).get().getSpace());
 
     }
@@ -207,10 +207,10 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(0, 1)).isPresent());
         assertTrue(room.get(new Position(0, 3)).isPresent());
 
-        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(2, 2);
         assertEquals(expectedCorners, room.get(new Position(0, 1)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(0, 2), new Position(2, 4));
+        expectedCorners = InclusiveSpace.from(0, 2).to(2, 4);
         assertEquals(expectedCorners, room.get(new Position(0, 3)).get().getSpace());
 
     }
@@ -237,10 +237,10 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(1, 0)).isPresent());
         assertTrue(room.get(new Position(3, 2)).isPresent());
 
-        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(2, 2);
         assertEquals(expectedCorners, room.get(new Position(1, 0)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(2, 0), new Position(4, 2));
+        expectedCorners = InclusiveSpace.from(2, 0).to(4, 2);
         assertEquals(expectedCorners, room.get(new Position(3, 2)).get().getSpace());
 
     }
@@ -269,10 +269,10 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(2, 1)).isPresent());
         assertTrue(room.get(new Position(0, 3)).isPresent());
 
-        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(2, 2);
         assertEquals(expectedCorners, room.get(new Position(2, 1)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(0, 2), new Position(2, 4));
+        expectedCorners = InclusiveSpace.from(0, 2).to(2, 4);
         assertEquals(expectedCorners, room.get(new Position(0, 3)).get().getSpace());
 
     }
@@ -299,10 +299,10 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(1, 2)).isPresent());
         assertTrue(room.get(new Position(3, 0)).isPresent());
 
-        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(2, 2);
         assertEquals(expectedCorners, room.get(new Position(1, 2)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(2, 0), new Position(4, 2));
+        expectedCorners = InclusiveSpace.from(2, 0).to(4, 2);
         assertEquals(expectedCorners, room.get(new Position(3, 0)).get().getSpace());
 
     }
@@ -331,10 +331,10 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(0, 1)).isPresent());
         assertTrue(room.get(new Position(2, 3)).isPresent());
 
-        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(2, 2);
         assertEquals(expectedCorners, room.get(new Position(0, 1)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(0, 2), new Position(2, 4));
+        expectedCorners = InclusiveSpace.from(0, 2).to(2, 4);
         assertEquals(expectedCorners, room.get(new Position(2, 3)).get().getSpace());
 
     }
@@ -361,10 +361,10 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(2, 1)).isPresent());
         assertTrue(room.get(new Position(4, 1)).isPresent());
 
-        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(2, 2);
         assertEquals(expectedCorners, room.get(new Position(2, 1)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(2, 0), new Position(4, 2));
+        expectedCorners = InclusiveSpace.from(2, 0).to(4, 2);
         assertEquals(expectedCorners, room.get(new Position(4, 1)).get().getSpace());
 
     }
@@ -393,10 +393,10 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(1, 0)).isPresent());
         assertTrue(room.get(new Position(1, 2)).isPresent());
 
-        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(2, 2);
         assertEquals(expectedCorners, room.get(new Position(1, 0)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(0, 2), new Position(2, 4));
+        expectedCorners = InclusiveSpace.from(0, 2).to(2, 4);
         assertEquals(expectedCorners, room.get(new Position(1, 2)).get().getSpace());
 
     }
@@ -423,10 +423,10 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(0, 1)).isPresent());
         assertTrue(room.get(new Position(2, 1)).isPresent());
 
-        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(2, 2);
         assertEquals(expectedCorners, room.get(new Position(0, 1)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(2, 0), new Position(4, 2));
+        expectedCorners = InclusiveSpace.from(2, 0).to(4, 2);
         assertEquals(expectedCorners, room.get(new Position(2, 1)).get().getSpace());
 
     }
@@ -455,10 +455,10 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(1, 2)).isPresent());
         assertTrue(room.get(new Position(1, 4)).isPresent());
 
-        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(2, 2);
         assertEquals(expectedCorners, room.get(new Position(1, 2)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(0, 2), new Position(2, 4));
+        expectedCorners = InclusiveSpace.from(0, 2).to(2, 4);
         assertEquals(expectedCorners, room.get(new Position(1, 4)).get().getSpace());
     }
 
@@ -484,10 +484,10 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(2, 1)).isPresent());
         assertTrue(room.get(new Position(1, 2)).isPresent());
 
-        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(2, 0), new Position(4, 2));
+        InclusiveSpace expectedCorners = InclusiveSpace.from(2, 0).to(4, 2);
         assertEquals(expectedCorners, room.get(new Position(2, 1)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        expectedCorners = InclusiveSpace.from(0, 0).to(2, 2);
         assertEquals(expectedCorners, room.get(new Position(1, 2)).get().getSpace());
 
     }
@@ -516,10 +516,10 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(2, 3)).isPresent());
         assertTrue(room.get(new Position(1, 2)).isPresent());
 
-        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 2), new Position(2, 4));
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 2).to(2, 4);
         assertEquals(expectedCorners, room.get(new Position(2, 3)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        expectedCorners = InclusiveSpace.from(0, 0).to(2, 2);
         assertEquals(expectedCorners, room.get(new Position(1, 2)).get().getSpace());
 
     }
@@ -546,10 +546,10 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(3, 0)).isPresent());
         assertTrue(room.get(new Position(2, 1)).isPresent());
 
-        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(2, 0), new Position(4, 2));
+        InclusiveSpace expectedCorners = InclusiveSpace.from(2, 0).to(4, 2);
         assertEquals(expectedCorners, room.get(new Position(3, 0)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        expectedCorners = InclusiveSpace.from(0, 0).to(2, 2);
         assertEquals(expectedCorners, room.get(new Position(2, 1)).get().getSpace());
 
     }
@@ -578,10 +578,10 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(0, 1)).isPresent());
         assertTrue(room.get(new Position(1, 2)).isPresent());
 
-        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(2, 2);
         assertEquals(expectedCorners, room.get(new Position(0, 1)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(0, 2), new Position(2, 4));
+        expectedCorners = InclusiveSpace.from(0, 2).to(2, 4);
         assertEquals(expectedCorners, room.get(new Position(1, 2)).get().getSpace());
     }
 
@@ -613,13 +613,13 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(1, 4)).isPresent());
         assertTrue(room.get(new Position(3, 4)).isPresent());
 
-        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(2, 2);
         assertEquals(expectedCorners, room.get(new Position(0, 1)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(0, 2), new Position(2, 4));
+        expectedCorners = InclusiveSpace.from(0, 2).to(2, 4);
         assertEquals(expectedCorners, room.get(new Position(1, 4)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(2, 2), new Position(4, 4));
+        expectedCorners = InclusiveSpace.from(2, 2).to(4, 4);
         assertEquals(expectedCorners, room.get(new Position(3, 4)).get().getSpace());
     }
 
@@ -651,13 +651,13 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(1, 4)).isPresent());
         assertTrue(room.get(new Position(3, 4)).isPresent());
 
-        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(2, 2);
         assertEquals(expectedCorners, room.get(new Position(0, 1)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(0, 2), new Position(2, 4));
+        expectedCorners = InclusiveSpace.from(0, 2).to(2, 4);
         assertEquals(expectedCorners, room.get(new Position(1, 4)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(2, 2), new Position(5, 4));
+        expectedCorners = InclusiveSpace.from(2, 2).to(5, 4);
         assertEquals(expectedCorners, room.get(new Position(3, 4)).get().getSpace());
     }
 
@@ -686,8 +686,8 @@ class LevelRoomDetectionTest {
         List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(1, 4)).get().getSpaces());
         assertEquals(2, spaces.size());
 
-        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(0, 0), new Position(2, 4));
-        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(2, 2), new Position(4, 4));
+        InclusiveSpace expectedCorners1 = InclusiveSpace.from(0, 0).to(2, 4);
+        InclusiveSpace expectedCorners2 = InclusiveSpace.from(2, 2).to(4, 4);
 
         assertEquals(expectedCorners1, spaces.get(0));
         assertEquals(expectedCorners2, spaces.get(1));
@@ -718,8 +718,8 @@ class LevelRoomDetectionTest {
         List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(2, 1)).get().getSpaces());
         assertEquals(2, spaces.size());
 
-        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
-        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(0, 2), new Position(4, 4));
+        InclusiveSpace expectedCorners1 = InclusiveSpace.from(0, 0).to(2, 2);
+        InclusiveSpace expectedCorners2 = InclusiveSpace.from(0, 2).to(4, 4);
 
         assertEquals(expectedCorners1, spaces.get(0));
         assertEquals(expectedCorners2, spaces.get(1));
@@ -773,8 +773,8 @@ class LevelRoomDetectionTest {
         List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(0, 1)).get().getSpaces());
         assertEquals(2, spaces.size());
 
-        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(0, 0), new Position(4, 2));
-        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(0, 2), new Position(2, 4));
+        InclusiveSpace expectedCorners1 = InclusiveSpace.from(0, 0).to(4, 2);
+        InclusiveSpace expectedCorners2 = InclusiveSpace.from(0, 2).to(2, 4);
 
         assertEquals(expectedCorners1, spaces.get(0));
         assertEquals(expectedCorners2, spaces.get(1));
@@ -804,8 +804,8 @@ class LevelRoomDetectionTest {
         List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(3, 2)).get().getSpaces());
         assertEquals(2, spaces.size());
 
-        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(2, 0), new Position(4, 2));
-        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(0, 0), new Position(2, 4));
+        InclusiveSpace expectedCorners1 = InclusiveSpace.from(2, 0).to(4, 2);
+        InclusiveSpace expectedCorners2 = InclusiveSpace.from(0, 0).to(2, 4);
 
         assertEquals(expectedCorners1, spaces.get(0));
         assertEquals(expectedCorners2, spaces.get(1));
@@ -836,8 +836,8 @@ class LevelRoomDetectionTest {
         List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(3, 0)).get().getSpaces());
         assertEquals(2, spaces.size());
 
-        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(2, 0), new Position(4, 4));
-        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace expectedCorners1 = InclusiveSpace.from(2, 0).to(4, 4);
+        InclusiveSpace expectedCorners2 = InclusiveSpace.from(0, 0).to(2, 2);
 
         assertEquals(expectedCorners1, spaces.get(0));
         assertEquals(expectedCorners2, spaces.get(1));
@@ -868,8 +868,8 @@ class LevelRoomDetectionTest {
         List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(2, 3)).get().getSpaces());
         assertEquals(2, spaces.size());
 
-        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(2, 2), new Position(4, 4));
-        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(0, 0), new Position(4, 2));
+        InclusiveSpace expectedCorners1 = InclusiveSpace.from(2, 2).to(4, 4);
+        InclusiveSpace expectedCorners2 = InclusiveSpace.from(0, 0).to(4, 2);
 
         assertEquals(expectedCorners1, spaces.get(0));
         assertEquals(expectedCorners2, spaces.get(1));
@@ -900,8 +900,8 @@ class LevelRoomDetectionTest {
         List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(4, 3)).get().getSpaces());
         assertEquals(2, spaces.size());
 
-        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(0, 2), new Position(4, 4));
-        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(2, 0), new Position(4, 2));
+        InclusiveSpace expectedCorners1 = InclusiveSpace.from(0, 2).to(4, 4);
+        InclusiveSpace expectedCorners2 = InclusiveSpace.from(2, 0).to(4, 2);
 
         assertEquals(expectedCorners1, spaces.get(0));
         assertEquals(expectedCorners2, spaces.get(1));
@@ -932,8 +932,8 @@ class LevelRoomDetectionTest {
         List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(1, 2)).get().getSpaces());
         assertEquals(2, spaces.size());
 
-        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(0, 2), new Position(2, 4));
-        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(2, 0), new Position(4, 4));
+        InclusiveSpace expectedCorners1 = InclusiveSpace.from(0, 2).to(2, 4);
+        InclusiveSpace expectedCorners2 = InclusiveSpace.from(2, 0).to(4, 4);
 
         assertEquals(expectedCorners1, spaces.get(0));
         assertEquals(expectedCorners2, spaces.get(1));
@@ -966,8 +966,8 @@ class LevelRoomDetectionTest {
         List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(1, 5)).get().getSpaces());
         assertEquals(2, spaces.size());
 
-        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(0, 0), new Position(2, 5));
-        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(2, 2), new Position(4, 5));
+        InclusiveSpace expectedCorners1 = InclusiveSpace.from(0, 0).to(2, 5);
+        InclusiveSpace expectedCorners2 = InclusiveSpace.from(2, 2).to(4, 5);
 
         assertEquals(expectedCorners1, spaces.get(0));
         assertEquals(expectedCorners2, spaces.get(1));
@@ -999,8 +999,8 @@ class LevelRoomDetectionTest {
         List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(0, 1)).get().getSpaces());
         assertEquals(2, spaces.size());
 
-        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(0, 0), new Position(5, 2));
-        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(0, 2), new Position(3, 4));
+        InclusiveSpace expectedCorners1 = InclusiveSpace.from(0, 0).to(5, 2);
+        InclusiveSpace expectedCorners2 = InclusiveSpace.from(0, 2).to(3, 4);
 
         assertEquals(expectedCorners1, spaces.get(0));
         assertEquals(expectedCorners2, spaces.get(1));
@@ -1033,8 +1033,8 @@ class LevelRoomDetectionTest {
         List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(3, 0)).get().getSpaces());
         assertEquals(2, spaces.size());
 
-        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(2, 0), new Position(4, 5));
-        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(0, 0), new Position(2, 3));
+        InclusiveSpace expectedCorners1 = InclusiveSpace.from(2, 0).to(4, 5);
+        InclusiveSpace expectedCorners2 = InclusiveSpace.from(0, 0).to(2, 3);
 
         assertEquals(expectedCorners1, spaces.get(0));
         assertEquals(expectedCorners2, spaces.get(1));
@@ -1066,8 +1066,8 @@ class LevelRoomDetectionTest {
         List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(5, 3)).get().getSpaces());
         assertEquals(2, spaces.size());
 
-        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(0, 2), new Position(5, 4));
-        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(2, 0), new Position(5, 2));
+        InclusiveSpace expectedCorners1 = InclusiveSpace.from(0, 2).to(5, 4);
+        InclusiveSpace expectedCorners2 = InclusiveSpace.from(2, 0).to(5, 2);
 
         assertEquals(expectedCorners1, spaces.get(0));
         assertEquals(expectedCorners2, spaces.get(1));
@@ -1099,10 +1099,10 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(3, 2)).isPresent());
         assertFalse(room.get(new Position(2, 1)).isPresent());
 
-        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(2, 2);
         assertEquals(expectedCorners, room.get(new Position(1, 2)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(2, 0), new Position(4, 2));
+        expectedCorners = InclusiveSpace.from(2, 0).to(4, 2);
         assertEquals(expectedCorners, room.get(new Position(3, 2)).get().getSpace());
     }
     @Test
@@ -1133,10 +1133,10 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(2, 3)).isPresent());
         assertFalse(room.get(new Position(1, 2)).isPresent());
 
-        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 2));
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(2, 2);
         assertEquals(expectedCorners, room.get(new Position(2, 1)).get().getSpace());
 
-        expectedCorners = new InclusiveSpace(new Position(0, 2), new Position(2, 4));
+        expectedCorners = InclusiveSpace.from(0, 2).to(2, 4);
         assertEquals(expectedCorners, room.get(new Position(2, 3)).get().getSpace());
     }
 
@@ -1167,7 +1167,7 @@ class LevelRoomDetectionTest {
 
         Object onlyKey = present.get(0).getKey();
 
-        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(4, 2));
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(4, 2);
         assertEquals(expectedCorners, room.get(onlyKey).get().getSpace());
     }
     @Test
@@ -1198,7 +1198,7 @@ class LevelRoomDetectionTest {
         assertEquals(1, present.size());
 
         Object onlyKey = present.get(0).getKey();
-        InclusiveSpace expectedCorners = new InclusiveSpace(new Position(0, 0), new Position(2, 4));
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(2, 4);
         assertEquals(expectedCorners, room.get(onlyKey).get().getSpace());
     }
 
@@ -1227,9 +1227,9 @@ class LevelRoomDetectionTest {
         List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(3, 2)).get().getSpaces());
         assertEquals(3, spaces.size());
 
-        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(0, 1), new Position(3, 3));
-        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(0, 0), new Position(2, 1));
-        InclusiveSpace expectedCorners3 = new InclusiveSpace(new Position(0, 3), new Position(2, 4));
+        InclusiveSpace expectedCorners1 = InclusiveSpace.from(0, 1).to(3, 3);
+        InclusiveSpace expectedCorners2 = InclusiveSpace.from(0, 0).to(2, 1);
+        InclusiveSpace expectedCorners3 = InclusiveSpace.from(0, 3).to(2, 4);
 
         assertEquals(expectedCorners1, spaces.get(0));
         assertEquals(expectedCorners2, spaces.get(1));
@@ -1260,9 +1260,9 @@ class LevelRoomDetectionTest {
         List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(0, 2)).get().getSpaces());
         assertEquals(3, spaces.size());
 
-        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(0, 1), new Position(3, 3));
-        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(1, 0), new Position(3, 1));
-        InclusiveSpace expectedCorners3 = new InclusiveSpace(new Position(1, 3), new Position(3, 4));
+        InclusiveSpace expectedCorners1 = InclusiveSpace.from(0, 1).to(3, 3);
+        InclusiveSpace expectedCorners2 = InclusiveSpace.from(1, 0).to(3, 1);
+        InclusiveSpace expectedCorners3 = InclusiveSpace.from(1, 3).to(3, 4);
 
         assertEquals(expectedCorners1, spaces.get(0));
         assertEquals(expectedCorners2, spaces.get(1));
@@ -1293,9 +1293,9 @@ class LevelRoomDetectionTest {
         List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(2, 4)).get().getSpaces());
         assertEquals(3, spaces.size());
 
-        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(1, 0), new Position(3, 4));
-        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(0, 0), new Position(1, 3));
-        InclusiveSpace expectedCorners3 = new InclusiveSpace(new Position(3, 0), new Position(4, 3));
+        InclusiveSpace expectedCorners1 = InclusiveSpace.from(1, 0).to(3, 4);
+        InclusiveSpace expectedCorners2 = InclusiveSpace.from(0, 0).to(1, 3);
+        InclusiveSpace expectedCorners3 = InclusiveSpace.from(3, 0).to(4, 3);
 
         assertEquals(expectedCorners1, spaces.get(0));
         assertEquals(expectedCorners2, spaces.get(1));
@@ -1326,9 +1326,9 @@ class LevelRoomDetectionTest {
         List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(2, 0)).get().getSpaces());
         assertEquals(3, spaces.size());
 
-        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(1, 0), new Position(3, 4));
-        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(0, 1), new Position(1, 4));
-        InclusiveSpace expectedCorners3 = new InclusiveSpace(new Position(3, 1), new Position(4, 4));
+        InclusiveSpace expectedCorners1 = InclusiveSpace.from(1, 0).to(3, 4);
+        InclusiveSpace expectedCorners2 = InclusiveSpace.from(0, 1).to(1, 4);
+        InclusiveSpace expectedCorners3 = InclusiveSpace.from(3, 1).to(4, 4);
 
         assertEquals(expectedCorners1, spaces.get(0));
         assertEquals(expectedCorners2, spaces.get(1));
@@ -1359,9 +1359,9 @@ class LevelRoomDetectionTest {
         List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(2, 0)).get().getSpaces());
         assertEquals(3, spaces.size());
 
-        InclusiveSpace expectedCorners1 = new InclusiveSpace(new Position(1, 0), new Position(3, 4));
-        InclusiveSpace expectedCorners2 = new InclusiveSpace(new Position(0, 1), new Position(1, 3));
-        InclusiveSpace expectedCorners3 = new InclusiveSpace(new Position(3, 1), new Position(4, 3));
+        InclusiveSpace expectedCorners1 = InclusiveSpace.from(1, 0).to(3, 4);
+        InclusiveSpace expectedCorners2 = InclusiveSpace.from(0, 1).to(1, 3);
+        InclusiveSpace expectedCorners3 = InclusiveSpace.from(3, 1).to(4, 3);
 
         assertEquals(expectedCorners1, spaces.get(0));
         assertEquals(expectedCorners2, spaces.get(1));

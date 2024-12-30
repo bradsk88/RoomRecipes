@@ -306,10 +306,7 @@ public class RoomDetection {
                              .getEastZWall();
                 return new Room(
                         v.getDoorPos(),
-                        new InclusiveSpace(
-                                nww.northCorner,
-                                eww.southCorner
-                        )
+                        InclusiveSpace.from(nww.northCorner).to(eww.southCorner)
                 );
             }
         }
