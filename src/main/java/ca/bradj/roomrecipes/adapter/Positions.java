@@ -48,7 +48,7 @@ public class Positions {
             }
         }
 
-        return new InclusiveSpace(new Position(minX, minZ), new Position(maxX, maxZ));
+        return InclusiveSpace.from(minX, minZ).to(maxX, maxZ);
     }
 
     public static Position FromBlockPos(BlockPos blockPos) {

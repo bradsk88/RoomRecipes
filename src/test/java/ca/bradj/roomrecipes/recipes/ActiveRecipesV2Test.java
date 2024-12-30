@@ -21,7 +21,7 @@ public class ActiveRecipesV2Test {
 
     @Test
     public void testCreateRecipe() {
-        Room room = new Room(new Position(0, 0), new InclusiveSpace(new Position(0, 0), new Position(1, 1)));
+        Room room = new Room(new Position(0, 0), InclusiveSpace.from(0, 0).to(1, 1));
         int recipeId = 1;
 
         activeRecipes.update(room, recipeId);
@@ -31,7 +31,7 @@ public class ActiveRecipesV2Test {
 
     @Test
     public void testChangeRecipe() {
-        Room room = new Room(new Position(0, 0), new InclusiveSpace(new Position(0, 0), new Position(1, 1)));
+        Room room = new Room(new Position(0, 0), InclusiveSpace.from(0, 0).to(1, 1));
         int oldRecipeId = 1;
         int newRecipeId = 2;
 
@@ -44,7 +44,7 @@ public class ActiveRecipesV2Test {
 
     @Test
     public void testUnchangedRecipe() {
-        Room room = new Room(new Position(0, 0), new InclusiveSpace(new Position(0, 0), new Position(1, 1)));
+        Room room = new Room(new Position(0, 0), InclusiveSpace.from(0, 0).to(1, 1));
         int sameRecipeId = 1;
 
         activeRecipes.update(room, sameRecipeId);
@@ -57,7 +57,7 @@ public class ActiveRecipesV2Test {
 
     @Test
     public void testDestroyRecipe() {
-        Room room = new Room(new Position(0, 0), new InclusiveSpace(new Position(0, 0), new Position(1, 1)));
+        Room room = new Room(new Position(0, 0), InclusiveSpace.from(0, 0).to(1, 1));
         int recipeId = 1;
 
         activeRecipes.update(room, recipeId);
@@ -69,7 +69,7 @@ public class ActiveRecipesV2Test {
 
     @Test
     public void testDestroyNonexistentRecipe() {
-        Room room = new Room(new Position(0, 0), new InclusiveSpace(new Position(0, 0), new Position(1, 1)));
+        Room room = new Room(new Position(0, 0), InclusiveSpace.from(0, 0).to(1, 1));
         int recipeId = 1;
 
         activeRecipes.update(room, null);

@@ -37,7 +37,7 @@ public class RoomSerializer {
         Position doorPos = new Position(x, z);
         Position aa = new Position(nbt.getInt(NBT_SPACE_AA_X), nbt.getInt(NBT_SPACE_AA_Z));
         Position bb = new Position(nbt.getInt(NBT_SPACE_BB_X), nbt.getInt(NBT_SPACE_BB_Z));
-        InclusiveSpace space = new InclusiveSpace(aa, bb);
+        InclusiveSpace space = InclusiveSpace.from(aa).to(bb);
         return new Room(doorPos, space);
     }
 }

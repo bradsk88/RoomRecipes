@@ -42,7 +42,7 @@ class LevelRoomDetectorTest {
                 false,
                 null
         );
-        Room currentRoom = new Room(doorPos1, InclusiveSpaces.from(1, 1).to(10, 3));
+        Room currentRoom = new Room(doorPos1, InclusiveSpace.from(1, 1).to(10, 3));
         Function<Position, Optional<Room>> currentState = p -> Optional.of(currentRoom);
 
         @Nullable ImmutableMap<Position, Optional<Room>> res = d.proceed(currentState);
@@ -80,7 +80,7 @@ class LevelRoomDetectorTest {
                 false,
                 null
         );
-        Room currentRoom = new Room(doorPos1, InclusiveSpaces.from(1, 1).to(10, 3));
+        Room currentRoom = new Room(doorPos1, InclusiveSpace.from(1, 1).to(10, 3));
         Function<Position, Optional<Room>> currentState = p -> Optional.of(currentRoom);
 
         @Nullable ImmutableMap<Position, Optional<Room>> res = d.proceed(currentState);
@@ -125,7 +125,7 @@ class LevelRoomDetectorTest {
                 false,
                 null
         );
-        Room currentRoom = new Room(doorPos1, InclusiveSpaces.from(1, 1).to(3, 10));
+        Room currentRoom = new Room(doorPos1, InclusiveSpace.from(1, 1).to(3, 10));
         Function<Position, Optional<Room>> currentState = p -> Optional.of(currentRoom);
 
         @Nullable ImmutableMap<Position, Optional<Room>> res = d.proceed(currentState);
@@ -170,7 +170,7 @@ class LevelRoomDetectorTest {
                 false,
                 null
         );
-        Room currentRoom = new Room(doorPos1, InclusiveSpaces.from(1, 1).to(3, 10));
+        Room currentRoom = new Room(doorPos1, InclusiveSpace.from(1, 1).to(3, 10));
         Function<Position, Optional<Room>> currentState = p -> Optional.of(currentRoom);
 
         @Nullable ImmutableMap<Position, Optional<Room>> res = d.proceed(currentState);
@@ -209,7 +209,7 @@ class LevelRoomDetectorTest {
                 false,
                 null
         );
-        InclusiveSpace oldSpace = InclusiveSpaces.from(1, 1).to(5, 3); // Only half the width
+        InclusiveSpace oldSpace = InclusiveSpace.from(1, 1).to(5, 3); // Only half the width
         Room currentRoom = new Room(doorPos1, oldSpace);
         Function<Position, Optional<Room>> currentState = p -> Optional.of(currentRoom);
 
@@ -251,7 +251,7 @@ class LevelRoomDetectorTest {
                 false,
                 null
         );
-        InclusiveSpace oldSpace = InclusiveSpaces.from(1, 1).to(5, 3); // Only half the width
+        InclusiveSpace oldSpace = InclusiveSpace.from(1, 1).to(5, 3); // Only half the width
         Room currentRoom = new Room(doorPos1, oldSpace);
         Function<Position, Optional<Room>> currentState = p -> Optional.of(currentRoom);
 

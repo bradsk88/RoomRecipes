@@ -1,19 +1,21 @@
 package ca.bradj.roomrecipes.recipes;
 
 import ca.bradj.roomrecipes.RoomRecipes;
+import ca.bradj.roomrecipes.core.Room;
+import ca.bradj.roomrecipes.core.space.Position;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 // ActiveRecipes is a unit testable module for the active recipes of a town
-public class ActiveRecipes<ROOM, KEY> {
+public class ActiveRecipes<ROOM extends Room, KEY> implements RoomAnnouncing {
 
     protected final Map<ROOM, KEY> activeRecipes = new HashMap<>();
 
     // TODO: Support multiple?
     private ChangeListener<ROOM, KEY> changeListener;
+
+    private final Stack<Position> roomsToSkipInitialAnnounce = new Stack<>();
 
     public ActiveRecipes() {
         this(Set.of());
@@ -52,7 +54,11 @@ public class ActiveRecipes<ROOM, KEY> {
             }
 
             this.activeRecipes.put(newRoom, recipe);
-            this.changeListener.roomRecipeCreated(newRoom, recipe);
+            if (newRoom != null && roomsToSkipInitialAnnounce.contains(newRoom.doorPos)) {
+                roomsToSkipInitialAnnounce.remove(newRoom.doorPos);
+            } else {
+                this.changeListener.roomRecipeCreated(newRoom, recipe);
+            }
             return;
         }
 
@@ -68,6 +74,11 @@ public class ActiveRecipes<ROOM, KEY> {
                     oldRoom, newRoom, recipe
             );
         }
+    }
+
+    @Override
+    public void skipAnnounceOnFirstDetect(Collection<Position> roomsToSkip) {
+        this.roomsToSkipInitialAnnounce.addAll(roomsToSkip);
     }
 
     public void addChangeListener(ChangeListener<ROOM, KEY> cl) {

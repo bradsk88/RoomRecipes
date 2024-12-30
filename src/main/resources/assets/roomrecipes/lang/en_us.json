@@ -1,6 +1,3 @@
 {
-  "itemGroup.roomrecipes": "RoomRecipes",
-  "messages.building.room_created": "%s created at location %s",
-  "messages.building.room_destroyed": "%s destroyed at location %s",
-  "messages.building.room_changed": "%s became %s at location %s"
+  "itemGroup.roomrecipes": "RoomRecipes"
 }

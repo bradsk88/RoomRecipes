@@ -10,13 +10,50 @@ import java.util.Objects;
 // cube between the two positions, up to the outermost corner of those corner blocks.
 public class InclusiveSpace {
 
-    public InclusiveSpace(
+    InclusiveSpace(
             Position aa,
             Position bb
     ) {
         // TODO: Ensure space corners are aligned correctly.
         this.aa = new Position(Math.min(aa.x, bb.x), Math.min(aa.z, bb.z));
         this.bb = new Position(Math.max(aa.x, bb.x), Math.max(aa.z, bb.z));
+    }
+
+    public static class ISBuilder {
+
+        private final int fromX;
+        private final int fromZ;
+
+        public ISBuilder(
+                int x,
+                int z
+        ) {
+            this.fromX = x;
+            this.fromZ = z;
+        }
+
+        public InclusiveSpace to(
+                int x,
+                int z
+        ) {
+            return new InclusiveSpace(new Position(fromX, fromZ), new Position(x, z));
+        }
+        public InclusiveSpace to(
+                Position corner
+        ) {
+            return new InclusiveSpace(new Position(fromX, fromZ), corner);
+        }
+    }
+
+    public static ISBuilder from(
+            int x,
+            int z
+    ) {
+        return new ISBuilder(x, z);
+    }
+
+    public static ISBuilder from(Position northCorner) {
+        return new ISBuilder(northCorner.x, northCorner.z);
     }
 
     private final Position aa;
