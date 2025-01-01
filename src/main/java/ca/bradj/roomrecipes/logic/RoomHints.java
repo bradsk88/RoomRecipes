@@ -108,6 +108,9 @@ public class RoomHints {
     }
 
     public boolean isRoom(RoomDetection.WallExclusion exclusion) {
+        if (equals(empty())) {
+            return false;
+        }
         if ((northOpening != null || northWall == null) && !exclusion.allowOpenNorthWall) {
             return false;
         }
@@ -135,17 +138,16 @@ public class RoomHints {
             RoomDetection.WallExclusion exclusion
     ) {
         if (isRoom(exclusion)) {
-            XWall nPart = northOpening == null ? northWall : northOpening;
-            XWall sPart = southOpening == null ? southWall : southOpening;
-            ZWall wPart = westOpening == null ? westWall : westOpening;
-            ZWall ePart = eastOpening == null ? eastWall : eastOpening;
+            XWall nPart = northWall == null ? northOpening : northWall;
+            XWall sPart = southWall == null ? southOpening : southWall;
+            ZWall wPart = westWall == null ? westOpening : westWall;
+            ZWall ePart = eastWall == null ? eastOpening : eastWall;
             if (nPart != null && sPart != null) {
                 return Optional.of(InclusiveSpace.from(nPart.westCorner).to(sPart.eastCorner));
             }
             if (wPart != null && ePart != null) {
                 return Optional.of(InclusiveSpace.from(wPart.northCorner).to(ePart.southCorner));
             }
-            return Optional.of(InclusiveSpace.from(nPart.westCorner).to(sPart.eastCorner));
         }
         return Optional.empty();
     }
@@ -163,8 +165,9 @@ public class RoomHints {
             return Optional.empty();
         }
         if (northWall == null) {
-            return Optional.of(new RoomHints(new XWall(
-                    westWall.northCorner, eastWall.northCorner), null, null, null
+            return Optional.of(new RoomHints(
+                    new XWall(
+                            westWall.northCorner, eastWall.northCorner), null, null, null
             ));
         }
         if (southWall == null) {
@@ -384,42 +387,45 @@ public class RoomHints {
     }
 
     public String toShortString() {
+        String inclusiveSpace = asSpace(RoomDetection.WallExclusion.allowAllOpen())
+                .map(InclusiveSpace::toString)
+                .orElse(null);
         if (!hasAnyOpenings()) {
-            return "[]";
+            return "[] " + inclusiveSpace;
         }
         if (northOpening != null && southOpening != null) {
             if (westOpening != null && eastOpening != null) {
-                return "-";
+                return "- " + inclusiveSpace;
             }
             if (westOpening != null) {
-                return "-|";
+                return "-| " + inclusiveSpace;
             }
             if (eastOpening != null) {
-                return "|-";
+                return "|- " + inclusiveSpace;
             }
-            return "|-|";
+            return "|-| " + inclusiveSpace;
         }
         if (northOpening != null) {
             if (westOpening != null && eastOpening != null) {
-                return "_";
+                return "_ " + inclusiveSpace;
             }
             if (westOpening != null) {
-                return "_|";
+                return "_| " + inclusiveSpace;
             }
             if (eastOpening != null) {
-                return "|_";
+                return "|_ " + inclusiveSpace;
             }
-            return "|_|";
+            return "|_| " + inclusiveSpace;
         }
         if (westOpening != null && eastOpening != null) {
-            return "^";
+            return "^ " + inclusiveSpace;
         }
         if (westOpening != null) {
-            return "^|";
+            return "^| " + inclusiveSpace;
         }
         if (eastOpening != null) {
-            return "|^";
+            return "|^ " + inclusiveSpace;
         }
-        return "|^|";
+        return "|^| " + inclusiveSpace;
     }
 }
