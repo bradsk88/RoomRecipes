@@ -40,10 +40,12 @@ class LevelRoomDetectionTest {
         };
 
         LinkedBlockingQueue<String> recorder = new LinkedBlockingQueue<>();
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(1, 0),
-                new Position(3, 0)
-        ), 4, recorder, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(1, 0),
+                        new Position(3, 0)
+                ), 4, recorder, WD(map)
+        );
         assertTrue(room.containsKey(new Position(1, 0)));
         assertTrue(room.containsKey(new Position(3, 0)));
 
@@ -70,10 +72,12 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W", "W", "W", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(1, 0),
-                new Position(4, 0)
-        ), 5, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(1, 0),
+                        new Position(4, 0)
+                ), 5, WD(map)
+        );
         assertTrue(room.containsKey(new Position(1, 0)));
         assertTrue(room.containsKey(new Position(4, 0)));
 
@@ -102,10 +106,12 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(2, 1),
-                new Position(2, 3)
-        ), 4, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(2, 1),
+                        new Position(2, 3)
+                ), 4, WD(map)
+        );
         assertTrue(room.containsKey(new Position(2, 1)));
         assertTrue(room.containsKey(new Position(2, 3)));
 
@@ -135,10 +141,12 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(2, 1),
-                new Position(2, 4)
-        ), 5, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(2, 1),
+                        new Position(2, 4)
+                ), 5, WD(map)
+        );
         assertTrue(room.containsKey(new Position(2, 1)));
         assertTrue(room.containsKey(new Position(2, 4)));
 
@@ -165,10 +173,12 @@ class LevelRoomDetectionTest {
                 {"W", "D", "W", "D", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(1, 2),
-                new Position(3, 2)
-        ), 4, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(1, 2),
+                        new Position(3, 2)
+                ), 4, WD(map)
+        );
         assertTrue(room.containsKey(new Position(1, 2)));
         assertTrue(room.containsKey(new Position(3, 2)));
 
@@ -197,10 +207,12 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(0, 1),
-                new Position(0, 3)
-        ), 4, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(0, 1),
+                        new Position(0, 3)
+                ), 4, WD(map)
+        );
         assertTrue(room.containsKey(new Position(0, 1)));
         assertTrue(room.containsKey(new Position(0, 3)));
 
@@ -227,10 +239,12 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W", "D", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(1, 0),
-                new Position(3, 2)
-        ), 4, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(1, 0),
+                        new Position(3, 2)
+                ), 4, WD(map)
+        );
         assertTrue(room.containsKey(new Position(1, 0)));
         assertTrue(room.containsKey(new Position(3, 2)));
 
@@ -259,10 +273,12 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(2, 1),
-                new Position(0, 3)
-        ), 4, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(2, 1),
+                        new Position(0, 3)
+                ), 4, WD(map)
+        );
         assertTrue(room.containsKey(new Position(2, 1)));
         assertTrue(room.containsKey(new Position(0, 3)));
 
@@ -289,10 +305,12 @@ class LevelRoomDetectionTest {
                 {"W", "D", "W", "W", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(1, 2),
-                new Position(3, 0)
-        ), 4, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(1, 2),
+                        new Position(3, 0)
+                ), 4, WD(map)
+        );
         assertTrue(room.containsKey(new Position(1, 2)));
         assertTrue(room.containsKey(new Position(3, 0)));
 
@@ -321,10 +339,12 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(0, 1),
-                new Position(2, 3)
-        ), 4, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(0, 1),
+                        new Position(2, 3)
+                ), 4, WD(map)
+        );
         assertTrue(room.containsKey(new Position(0, 1)));
         assertTrue(room.containsKey(new Position(2, 3)));
 
@@ -351,10 +371,12 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W", "W", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(2, 1),
-                new Position(4, 1)
-        ), 4, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(2, 1),
+                        new Position(4, 1)
+                ), 4, WD(map)
+        );
         assertTrue(room.containsKey(new Position(2, 1)));
         assertTrue(room.containsKey(new Position(4, 1)));
 
@@ -383,10 +405,12 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(1, 0),
-                new Position(1, 2)
-        ), 4, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(1, 0),
+                        new Position(1, 2)
+                ), 4, WD(map)
+        );
         assertTrue(room.containsKey(new Position(1, 0)));
         assertTrue(room.containsKey(new Position(1, 2)));
 
@@ -413,10 +437,12 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W", "W", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(0, 1),
-                new Position(2, 1)
-        ), 4, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(0, 1),
+                        new Position(2, 1)
+                ), 4, WD(map)
+        );
         assertTrue(room.containsKey(new Position(0, 1)));
         assertTrue(room.containsKey(new Position(2, 1)));
 
@@ -445,10 +471,12 @@ class LevelRoomDetectionTest {
                 {"W", "D", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(1, 2),
-                new Position(1, 4)
-        ), 4, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(1, 2),
+                        new Position(1, 4)
+                ), 4, WD(map)
+        );
         assertTrue(room.containsKey(new Position(1, 2)));
         assertTrue(room.containsKey(new Position(1, 4)));
 
@@ -462,7 +490,7 @@ class LevelRoomDetectionTest {
         assertEquals(expectedCorners, room.get(new Position(1, 4)).get().getSpace());
     }
 
-@Test
+    @Test
     public void Test_DetectEndToEndRooms_E_RotateOne() {
 
         // A = air
@@ -474,10 +502,12 @@ class LevelRoomDetectionTest {
                 {"W", "D", "W", "W", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(2, 1),
-                new Position(1, 2)
-        ), 4, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(2, 1),
+                        new Position(1, 2)
+                ), 4, WD(map)
+        );
         assertTrue(room.containsKey(new Position(2, 1)));
         assertTrue(room.containsKey(new Position(1, 2)));
 
@@ -506,10 +536,12 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(2, 3),
-                new Position(1, 2)
-        ), 4, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(2, 3),
+                        new Position(1, 2)
+                ), 4, WD(map)
+        );
         assertTrue(room.containsKey(new Position(2, 3)));
         assertTrue(room.containsKey(new Position(1, 2)));
 
@@ -536,10 +568,12 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W", "W", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(3, 0),
-                new Position(2, 1)
-        ), 4, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(3, 0),
+                        new Position(2, 1)
+                ), 4, WD(map)
+        );
         assertTrue(room.containsKey(new Position(3, 0)));
         assertTrue(room.containsKey(new Position(2, 1)));
 
@@ -568,10 +602,12 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(0, 1),
-                new Position(1, 2)
-        ), 4, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(0, 1),
+                        new Position(1, 2)
+                ), 4, WD(map)
+        );
         assertTrue(room.containsKey(new Position(0, 1)));
         assertTrue(room.containsKey(new Position(1, 2)));
 
@@ -600,11 +636,13 @@ class LevelRoomDetectionTest {
                 {"W", "D", "W", "D", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(0, 1),
-                new Position(1, 4),
-                new Position(3, 4)
-        ), 10, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(0, 1),
+                        new Position(1, 4),
+                        new Position(3, 4)
+                ), 10, WD(map)
+        );
         assertTrue(room.containsKey(new Position(0, 1)));
         assertTrue(room.containsKey(new Position(1, 4)));
         assertTrue(room.containsKey(new Position(3, 4)));
@@ -638,11 +676,13 @@ class LevelRoomDetectionTest {
                 {"W", "D", "W", "D", "W", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(0, 1),
-                new Position(1, 4),
-                new Position(3, 4)
-        ), 10, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(0, 1),
+                        new Position(1, 4),
+                        new Position(3, 4)
+                ), 10, WD(map)
+        );
         assertTrue(room.containsKey(new Position(0, 1)));
         assertTrue(room.containsKey(new Position(1, 4)));
         assertTrue(room.containsKey(new Position(3, 4)));
@@ -676,9 +716,11 @@ class LevelRoomDetectionTest {
                 {"W", "D", "W", "W", "W", "_"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(1, 4)
-        ), 10, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(1, 4)
+                ), 10, WD(map)
+        );
         assertTrue(room.containsKey(new Position(1, 4)));
 
         assertTrue(room.get(new Position(1, 4)).isPresent());
@@ -708,9 +750,11 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W", "W", "W", "_"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(2, 1)
-        ), 10, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(2, 1)
+                ), 10, WD(map)
+        );
         assertTrue(room.containsKey(new Position(2, 1)));
 
         assertTrue(room.get(new Position(2, 1)).isPresent());
@@ -740,9 +784,11 @@ class LevelRoomDetectionTest {
                 {"W", "D", "W", "W", "W", "_"}
         }; // Missing inside corner
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(1, 4)
-        ), 10, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(1, 4)
+                ), 10, WD(map)
+        );
         assertTrue(room.containsKey(new Position(1, 4)));
 
         assertFalse(room.get(new Position(1, 4)).isPresent());
@@ -763,9 +809,11 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W", "_", "_", "_"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(0, 1)
-        ), 10, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(0, 1)
+                ), 10, WD(map)
+        );
         assertTrue(room.containsKey(new Position(0, 1)));
 
         assertTrue(room.get(new Position(0, 1)).isPresent());
@@ -779,6 +827,7 @@ class LevelRoomDetectionTest {
         assertEquals(expectedCorners1, spaces.get(0));
         assertEquals(expectedCorners2, spaces.get(1));
     }
+
     @Test
     public void Test_Detect_OpenLShape_E2() {
         java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
@@ -794,9 +843,11 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W", "_", "_", "_"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(3, 2)
-        ), 10, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(3, 2)
+                ), 10, WD(map)
+        );
         assertTrue(room.containsKey(new Position(3, 2)));
 
         assertTrue(room.get(new Position(3, 2)).isPresent());
@@ -826,9 +877,11 @@ class LevelRoomDetectionTest {
                 {"_", "_", "W", "W", "W", "_"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(3, 0)
-        ), 10, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(3, 0)
+                ), 10, WD(map)
+        );
         assertTrue(room.containsKey(new Position(3, 0)));
 
         assertTrue(room.get(new Position(3, 0)).isPresent());
@@ -858,9 +911,11 @@ class LevelRoomDetectionTest {
                 {"_", "_", "W", "W", "W", "_"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(2, 3)
-        ), 10, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(2, 3)
+                ), 10, WD(map)
+        );
         assertTrue(room.containsKey(new Position(2, 3)));
 
         assertTrue(room.get(new Position(2, 3)).isPresent());
@@ -890,9 +945,11 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W", "W", "W", "_"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(4, 3)
-        ), 10, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(4, 3)
+                ), 10, WD(map)
+        );
         assertTrue(room.containsKey(new Position(4, 3)));
 
         assertTrue(room.get(new Position(4, 3)).isPresent());
@@ -922,9 +979,11 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W", "W", "W", "_"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(1, 2)
-        ), 10, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(1, 2)
+                ), 10, WD(map)
+        );
         assertTrue(room.containsKey(new Position(1, 2)));
 
         assertTrue(room.get(new Position(1, 2)).isPresent());
@@ -956,9 +1015,11 @@ class LevelRoomDetectionTest {
                 {"W", "D", "W", "W", "W", "_"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(1, 5)
-        ), 10, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(1, 5)
+                ), 10, WD(map)
+        );
         assertTrue(room.containsKey(new Position(1, 5)));
 
         assertTrue(room.get(new Position(1, 5)).isPresent());
@@ -989,9 +1050,11 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W", "W", "_", "_"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(0, 1)
-        ), 10, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(0, 1)
+                ), 10, WD(map)
+        );
         assertTrue(room.containsKey(new Position(0, 1)));
 
         assertTrue(room.get(new Position(0, 1)).isPresent());
@@ -1023,9 +1086,11 @@ class LevelRoomDetectionTest {
                 {"_", "_", "W", "W", "W", "_"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(3, 0)
-        ), 10, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(3, 0)
+                ), 10, WD(map)
+        );
         assertTrue(room.containsKey(new Position(3, 0)));
 
         assertTrue(room.get(new Position(3, 0)).isPresent());
@@ -1056,9 +1121,11 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W", "W", "W", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(5, 3)
-        ), 10, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(5, 3)
+                ), 10, WD(map)
+        );
         assertTrue(room.containsKey(new Position(5, 3)));
 
         assertTrue(room.get(new Position(5, 3)).isPresent());
@@ -1086,11 +1153,13 @@ class LevelRoomDetectionTest {
                 {"W", "D", "W", "D", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(1, 2),
-                new Position(3, 2),
-                new Position(2, 1)
-        ), 10, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(1, 2),
+                        new Position(3, 2),
+                        new Position(2, 1)
+                ), 10, WD(map)
+        );
         assertTrue(room.containsKey(new Position(1, 2)));
         assertTrue(room.containsKey(new Position(3, 2)));
         assertTrue(room.containsKey(new Position(2, 1)));
@@ -1105,6 +1174,7 @@ class LevelRoomDetectionTest {
         expectedCorners = InclusiveSpace.from(2, 0).to(4, 2);
         assertEquals(expectedCorners, room.get(new Position(3, 2)).get().getSpace());
     }
+
     @Test
     public void Test_DetectJoiningDoor_E() {
         java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
@@ -1120,11 +1190,13 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(2, 1),
-                new Position(1, 2),
-                new Position(2, 3)
-        ), 10, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(2, 1),
+                        new Position(1, 2),
+                        new Position(2, 3)
+                ), 10, WD(map)
+        );
         assertTrue(room.containsKey(new Position(2, 1)));
         assertTrue(room.containsKey(new Position(2, 3)));
         assertTrue(room.containsKey(new Position(1, 2)));
@@ -1153,16 +1225,18 @@ class LevelRoomDetectionTest {
                 {"W", "D", "W", "D", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(1, 2),
-                new Position(3, 2)
-        ), 10, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(1, 2),
+                        new Position(3, 2)
+                ), 10, WD(map)
+        );
         assertEquals(2, room.size());
 
         // Hard to know which door it will choose
         List<Map.Entry<Position, Optional<Room>>> present = room.entrySet()
-                .stream()
-                .filter(v -> v.getValue().isPresent()).toList();
+                                                                .stream()
+                                                                .filter(v -> v.getValue().isPresent()).toList();
         assertEquals(1, present.size());
 
         Object onlyKey = present.get(0).getKey();
@@ -1170,6 +1244,7 @@ class LevelRoomDetectionTest {
         InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(4, 2);
         assertEquals(expectedCorners, room.get(onlyKey).get().getSpace());
     }
+
     @Test
     public void Test_DetectDoubleEntrance_E() {
         java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
@@ -1185,16 +1260,18 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(2, 1),
-                new Position(2, 3)
-        ), 10, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(2, 1),
+                        new Position(2, 3)
+                ), 10, WD(map)
+        );
         assertEquals(2, room.size());
 
         // Hard to know which door it will choose
         List<Map.Entry<Position, Optional<Room>>> present = room.entrySet()
-                .stream()
-                .filter(v -> v.getValue().isPresent()).toList();
+                                                                .stream()
+                                                                .filter(v -> v.getValue().isPresent()).toList();
         assertEquals(1, present.size());
 
         Object onlyKey = present.get(0).getKey();
@@ -1217,9 +1294,11 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W", "_"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(3, 2)
-        ), 10, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(3, 2)
+                ), 10, WD(map)
+        );
         assertEquals(1, room.size());
 
         assertTrue(room.get(new Position(3, 2)).isPresent());
@@ -1235,6 +1314,7 @@ class LevelRoomDetectionTest {
         assertEquals(expectedCorners2, spaces.get(1));
         assertEquals(expectedCorners3, spaces.get(2));
     }
+
     @Test
     public void Test_DetectNarrowEntrance_W() {
         java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
@@ -1250,9 +1330,11 @@ class LevelRoomDetectionTest {
                 {"_", "W", "W", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(0, 2)
-        ), 10, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(0, 2)
+                ), 10, WD(map)
+        );
         assertEquals(1, room.size());
 
         assertTrue(room.get(new Position(0, 2)).isPresent());
@@ -1268,6 +1350,7 @@ class LevelRoomDetectionTest {
         assertEquals(expectedCorners2, spaces.get(1));
         assertEquals(expectedCorners3, spaces.get(2));
     }
+
     @Test
     public void Test_DetectNarrowEntrance_S() {
         java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
@@ -1283,9 +1366,11 @@ class LevelRoomDetectionTest {
                 {"_", "W", "D", "W", "_"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(2, 4)
-        ), 10, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(2, 4)
+                ), 10, WD(map)
+        );
         assertEquals(1, room.size());
 
         assertTrue(room.get(new Position(2, 4)).isPresent());
@@ -1301,6 +1386,7 @@ class LevelRoomDetectionTest {
         assertEquals(expectedCorners2, spaces.get(1));
         assertEquals(expectedCorners3, spaces.get(2));
     }
+
     @Test
     public void Test_DetectNarrowEntrance_N() {
         java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
@@ -1316,9 +1402,11 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W", "W", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(2, 0)
-        ), 10, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(2, 0)
+                ), 10, WD(map)
+        );
         assertEquals(1, room.size());
 
         assertTrue(room.get(new Position(2, 0)).isPresent());
@@ -1334,6 +1422,7 @@ class LevelRoomDetectionTest {
         assertEquals(expectedCorners2, spaces.get(1));
         assertEquals(expectedCorners3, spaces.get(2));
     }
+
     @Test
     public void Test_DetectInsetCorners_N() { // TODO: East,South,West
         java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
@@ -1349,9 +1438,11 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W", "W", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(2, 0)
-        ), 10, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(2, 0)
+                ), 10, WD(map)
+        );
         assertEquals(1, room.size());
 
         assertTrue(room.get(new Position(2, 0)).isPresent());
@@ -1367,6 +1458,7 @@ class LevelRoomDetectionTest {
         assertEquals(expectedCorners2, spaces.get(1));
         assertEquals(expectedCorners3, spaces.get(2));
     }
+
     @Test
     public void Test_DetectNoDoor_N() { // TODO: East,South,West
         java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
@@ -1382,9 +1474,11 @@ class LevelRoomDetectionTest {
                 {"W", "_", "W", "_", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                new Position(2, 0)
-        ), 10, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        new Position(2, 0)
+                ), 10, WD(map)
+        );
         assertEquals(1, room.size());
 
         assertFalse(room.get(new Position(2, 0)).isPresent());
@@ -1414,9 +1508,11 @@ class LevelRoomDetectionTest {
 
         LinkedBlockingQueue<String> flightRecorder = new LinkedBlockingQueue<>();
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                doorPos
-        ), 20, flightRecorder, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        doorPos
+                ), 20, flightRecorder, WD(map)
+        );
         assertEquals(1, room.size());
         assertTrue(room.get(doorPos).isPresent(), () -> blackBox(flightRecorder));
         assertTrue(room.get(doorPos).get().getBackZWall().isPresent());
@@ -1425,6 +1521,7 @@ class LevelRoomDetectionTest {
                 room.get(doorPos).get().getBackZWall().get()
         );
     }
+
     @Test
     public void Test_Regression_SkinnyRoom() {
         String[][] map = {
@@ -1439,9 +1536,11 @@ class LevelRoomDetectionTest {
 
         LinkedBlockingQueue<String> flightRecorder = new LinkedBlockingQueue<>();
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                doorPos
-        ), 20, flightRecorder, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        doorPos
+                ), 20, flightRecorder, WD(map)
+        );
         assertEquals(1, room.size());
         assertTrue(room.get(doorPos).isPresent(), () -> blackBox(flightRecorder));
         assertTrue(room.get(doorPos).get().getBackZWall().isPresent());
@@ -1454,5 +1553,30 @@ class LevelRoomDetectionTest {
             b.append("\n");
         });
         return b.toString();
+    }
+
+
+    @Test
+    public void Test_Regression_InfiniteSpiral() {
+        String[][] map = {
+                //0    1    2    3    4    5    6
+                {" ", " ", " ", " ", "_", " ", " "}, // 0
+                {" ", "W", "W", "w", "w", "W", " "}, // 1
+                {" ", "W", " ", " ", " ", "W", " "}, // 2
+                {" ", "W", " ", "W", " ", "W", " "}, // 3
+                {" ", "W", " ", " ", " ", "D", " "}, // 4
+                {" ", "W", "W", "W", "W", "W", " "}, // 5
+                {" ", " ", " ", " ", " ", " ", " "}, // 6
+        };
+        Position doorPos = new Position(5, 4);
+
+        LinkedBlockingQueue<String> flightRecorder = new LinkedBlockingQueue<>();
+
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
+                doorPos
+        ), 20, flightRecorder, WD(map));
+        assertEquals(1, room.size());
+        assertTrue(room.get(doorPos).isPresent(), () -> blackBox(flightRecorder));
+        assertTrue(room.get(doorPos).get().getBackZWall().isPresent());
     }
 }
