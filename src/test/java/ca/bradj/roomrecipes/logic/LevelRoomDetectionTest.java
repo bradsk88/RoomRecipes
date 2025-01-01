@@ -819,10 +819,13 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W", "_", "_", "_"}
         };
 
+
+        TestRecorder flightRecorder = new TestRecorder();
+
         ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
                 ImmutableList.of(
                         new Position(0, 1)
-                ), 10, WD(map)
+                ), 20, flightRecorder::add, WD(map)
         );
         assertTrue(room.containsKey(new Position(0, 1)));
 
@@ -1582,9 +1585,11 @@ class LevelRoomDetectionTest {
 
         TestRecorder flightRecorder = new TestRecorder();
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
-                doorPos
-        ), 20, flightRecorder::add, WD(map));
+        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+                ImmutableList.of(
+                        doorPos
+                ), 20, flightRecorder::add, WD(map)
+        );
         assertEquals(1, room.size());
         assertTrue(room.get(doorPos).isPresent(), () -> blackBox(flightRecorder));
         assertTrue(room.get(doorPos).get().getBackZWall().isPresent());

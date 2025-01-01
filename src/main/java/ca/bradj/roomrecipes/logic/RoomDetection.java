@@ -469,7 +469,8 @@ public class RoomDetection {
                 ));
             }
         }
-        if (alreadyFound(spacesFoundAlready, roomHints.asSpace(WallExclusion.allowAllOpen()).get())) {
+        Optional<InclusiveSpace> asps = roomHints.asSpace(WallExclusion.allowAllOpen());
+        if (asps.isPresent() && alreadyFound(spacesFoundAlready, asps.get())) {
             // TODO: Is this the ONLY alreadyFound check that is needed?
             flightRecorder.accept(
                     "Found adjoining room that is already accounted for. Must have gone in a circle. Stopping now.");
@@ -479,7 +480,7 @@ public class RoomDetection {
         if (roomHints.hasAnyOpenings()) {
             ImmutableList.Builder<InclusiveSpace> b = ImmutableList.builder();
             b.addAll(spacesFoundAlready);
-            b.add(roomHints.asSpace(WallExclusion.allowAllOpen()).get());
+            asps.ifPresent(b::add);
             Search<Room> adjoined = findAdjoiningRoom(
                     roomHints,
                     doorPos,
@@ -510,11 +511,12 @@ public class RoomDetection {
         Optional<InclusiveSpace> s = Optional.empty();
         Optional<InclusiveSpace> e = Optional.empty();
         Optional<InclusiveSpace> w = Optional.empty();
+        Optional<InclusiveSpace> space1 = roomHints.asSpace(WallExclusion.allowAllOpen());
         if (roomHints.northOpening != null) {
             flightRecorder.accept("An opening was detected on the north side of the room");
             ImmutableList.Builder<InclusiveSpace> b = ImmutableList.builder();
             b.addAll(spacesFoundAlready);
-            b.add(roomHints.asSpace(WallExclusion.allowAllOpen()).get());
+            space1.ifPresent(b::add);
             Search<RoomHints> space = findNewRoomForXOpening(
                     roomHints.northOpening,
                     maxDistFromDoor,
@@ -545,10 +547,13 @@ public class RoomDetection {
             }
         }
         if (roomHints.southOpening != null) {
-            flightRecorder.accept("An opening was detected on the south side of the room");
+            flightRecorder.accept(String.format(
+                    "An opening was detected on the south side of the room: %s",
+                    roomHints.toShortString()
+            ));
             ImmutableList.Builder<InclusiveSpace> b = ImmutableList.builder();
             b.addAll(spacesFoundAlready);
-            b.add(roomHints.asSpace(WallExclusion.allowAllOpen()).get());
+            space1.ifPresent(b::add);
             Search<RoomHints> space = findNewRoomForXOpening(
                     roomHints.southOpening,
                     maxDistFromDoor,
@@ -585,7 +590,7 @@ public class RoomDetection {
             ));
             ImmutableList.Builder<InclusiveSpace> b = ImmutableList.builder();
             b.addAll(spacesFoundAlready);
-            b.add(roomHints.asSpace(WallExclusion.allowAllOpen()).get());
+            space1.ifPresent(b::add);
             Search<RoomHints> space = findNewRoomForZOpening(
                     roomHints.westOpening,
                     maxDistFromDoor,
@@ -619,7 +624,7 @@ public class RoomDetection {
             flightRecorder.accept("An opening was detected on the east side of the room");
             ImmutableList.Builder<InclusiveSpace> b = ImmutableList.builder();
             b.addAll(spacesFoundAlready);
-            b.add(roomHints.asSpace(WallExclusion.allowAllOpen()).get());
+            b.add(space1.get());
             Search<RoomHints> space = findNewRoomForZOpening(
                     roomHints.eastOpening,
                     maxDistFromDoor,
@@ -677,6 +682,7 @@ public class RoomDetection {
             final InclusiveSpace ss = s.get();
             return Search.from(roomHints.asRoom(
                                                 doorPos,
+                                                // FIXME: THis causes it to use the opening as the wall
                                                 WallExclusion.allowAllOpen()
                                         )
                                         .map(v -> v.withExtraSpace(ss)));

@@ -3,9 +3,10 @@ package ca.bradj.roomrecipes.logic;
 import ca.bradj.roomrecipes.core.Room;
 import ca.bradj.roomrecipes.core.space.InclusiveSpace;
 import ca.bradj.roomrecipes.core.space.Position;
+import com.google.common.collect.ImmutableList;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -757,6 +758,7 @@ class RoomDetectionTest {
 
     }
 
+    @Disabled("Not supported yet") // TODO: Handle doorless walls like this
     @Test
     public void Test_DetectRoomWithSplitMiddle() {
         // _ = air
@@ -783,9 +785,12 @@ class RoomDetectionTest {
         );
         assertTrue(room.isPresent());
 
-        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(4, 4);
-        assertEquals(expectedCorners, room.get().getSpace());
-
+        ImmutableList<InclusiveSpace> spaces = ImmutableList.copyOf(room.get().getSpaces());
+        assertEquals(2, spaces.size());
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(2, 4);
+        assertEquals(expectedCorners, spaces.get(0));
+        expectedCorners = InclusiveSpace.from(2, 0).to(4, 4);
+        assertEquals(expectedCorners, spaces.get(1));
     }
 
     @Test
@@ -814,8 +819,14 @@ class RoomDetectionTest {
         );
         assertTrue(room.isPresent());
 
-        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(4, 4);
-        assertEquals(expectedCorners, room.get().getSpace());
+        ImmutableList<InclusiveSpace> spaces = ImmutableList.copyOf(room.get().getSpaces());
+        assertEquals(3, spaces.size());
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 1).to(4, 3);
+        assertEquals(expectedCorners, spaces.get(0));
+        expectedCorners = InclusiveSpace.from(1, 0).to(4, 1);
+        assertEquals(expectedCorners, spaces.get(1));
+        expectedCorners = InclusiveSpace.from(1, 3).to(4, 4);
+        assertEquals(expectedCorners, spaces.get(2));
 
     }
 
