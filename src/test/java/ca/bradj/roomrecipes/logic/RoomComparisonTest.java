@@ -27,7 +27,7 @@ class RoomComparisonTest {
         Optional<Room> room = RoomDetection.findRoomForDoor(
                 doorPos, 10, 0,
                 position -> wdFn.apply(roomMap).test(position)
-        );
+        ).toOptional();
         Assertions.assertTrue(room.isPresent());
         return room.get();
     }

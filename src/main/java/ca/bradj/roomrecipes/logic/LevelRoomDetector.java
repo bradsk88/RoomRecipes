@@ -12,15 +12,16 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.function.Predicate;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class LevelRoomDetector {
     private final Queue<Position> doorsToProcess = new LinkedBlockingQueue<>();
     private final ImmutableList<Position> initialDoors;
     private final boolean enableDebugArt;
-    private final @Nullable LinkedBlockingQueue<String> flightRecorder;
+    private final @Nullable Consumer<String> flightRecorder;
     private Map<Position, Optional<Room>> processedRooms = new HashMap<>();
     private final int maxDistanceFromDoor;
     private final TriPredicate<Position, @Nullable Position, @Nullable String[][]> checker;
@@ -36,24 +37,26 @@ public class LevelRoomDetector {
             int maxIterations,
             WallDetector checker,
             boolean enableDebugArt,
-            @Nullable LinkedBlockingQueue<String> flightRecorder
+            @Nullable Consumer<String> flightRecorder
     ) {
         doorsToProcess.addAll(currentDoors);
         this.initialDoors = ImmutableList.copyOf(currentDoors);
         this.maxDistanceFromDoor = maxDistanceFromDoor;
         this.maxIterations = maxIterations;
         Map<Position, Boolean> cache = new HashMap<>();
-        this.checker = (p, nextDoor, art) -> cache.compute(p, (p2, r) -> {
-            if (r != null) {
-                return r;
-            }
-            boolean b = checker.IsWall(p2);
-            if (enableDebugArt && nextDoor != null && art != null) {
-                captureAsArtPixel(p2, nextDoor, art, b, "W", " ");
-                captureSurroundingAsArtPixels(checker::IsWall, p2, nextDoor, art, "w", "_");
-            }
-            return b;
-        });
+        this.checker = (p, nextDoor, art) -> cache.compute(
+                p, (p2, r) -> {
+                    if (r != null) {
+                        return r;
+                    }
+                    boolean b = checker.IsWall(p2);
+                    if (enableDebugArt && nextDoor != null && art != null) {
+                        captureAsArtPixel(p2, nextDoor, art, b, "W", " ");
+                        captureSurroundingAsArtPixels(checker::IsWall, p2, nextDoor, art, "w", "_");
+                    }
+                    return b;
+                }
+        );
         this.enableDebugArt = enableDebugArt;
         if (enableDebugArt) {
             currentDoors.forEach(door -> {
@@ -114,7 +117,7 @@ public class LevelRoomDetector {
                 maxDistanceFromDoor - 2,
                 flightRecorder,
                 p -> checker.test(p, nextDoor, debugArt.get(nextDoor))
-        );
+        ).toOptional();
 
         if (roomForDoor.isEmpty()) {
             doorsToProcess.add(nextDoor);
@@ -205,7 +208,7 @@ public class LevelRoomDetector {
                                 Optional.of(r1.getSpace()),
                                 0,
                                 this::checkWithoutArt
-                        );
+                        ).toOptional();
                         if (alternate.isPresent()) {
                             if (rooms.stream()
                                      .anyMatch(v -> v.getSpace()
@@ -232,7 +235,7 @@ public class LevelRoomDetector {
                                 Optional.of(r2.getSpace()),
                                 0,
                                 this::checkWithoutArt
-                        );
+                        ).toOptional();
                         if (alternate2.isPresent()) {
                             detectedRooms.put(
                                     r1.getDoorPos(),

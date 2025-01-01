@@ -25,7 +25,7 @@ class RoomDetectionTest {
                 {"W", "W", "W", "A"}
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(
+        Search<Room> room = RoomDetection.findRoomForDoor(
                 new Position(1, 0), 4, 0, (Position dp) -> {
                     if (dp.x < 0 || dp.z < 0) {
                         return false;
@@ -55,7 +55,7 @@ class RoomDetectionTest {
                 {"W", "W", "W", "A"}
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(
+        Search<Room> room = RoomDetection.findRoomForDoor(
                 new Position(1, 0), 4, 0, (Position dp) -> {
                     if (dp.x < 0 || dp.z < 0) {
                         return false;
@@ -85,7 +85,7 @@ class RoomDetectionTest {
                 {"W", "D", "W", "A"}
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(
+        Search<Room> room = RoomDetection.findRoomForDoor(
                 new Position(1, 0), 4, 0, (Position dp) -> {
                     if (dp.x < 0 || dp.z < 0) {
                         return false;
@@ -115,7 +115,7 @@ class RoomDetectionTest {
                 {"W", "W", "W", "A"}
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(
+        Search<Room> room = RoomDetection.findRoomForDoor(
                 new Position(1, 0), 4, 0, (Position dp) -> {
                     if (dp.x < 0 || dp.z < 0) {
                         return false;
@@ -159,7 +159,7 @@ class RoomDetectionTest {
             return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(
+        Search<Room> room = RoomDetection.findRoomForDoor(
                 new Position(1, 0),
                 4,
                 0,
@@ -186,7 +186,7 @@ class RoomDetectionTest {
                 {"A", "A", "A", "A", "A"}
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(
+        Search<Room> room = RoomDetection.findRoomForDoor(
                 new Position(2, 1), 4, 0, (Position dp) -> {
                     if (dp.x < 0 || dp.z < 0) {
                         return false;
@@ -218,7 +218,7 @@ class RoomDetectionTest {
                 {"A", "A", "A", "A", "A", "A"}
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(
+        Search<Room> room = RoomDetection.findRoomForDoor(
                 new Position(3, 1), 4, 0, (Position dp) -> {
                     if (dp.x < 0 || dp.z < 0) {
                         return false;
@@ -250,7 +250,7 @@ class RoomDetectionTest {
                 {"A", "A", "A", "A", "A", "A"}
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(
+        Search<Room> room = RoomDetection.findRoomForDoor(
                 new Position(3, 1), 4, 0, (Position dp) -> {
                     if (dp.x < 0 || dp.z < 0) {
                         return false;
@@ -277,7 +277,7 @@ class RoomDetectionTest {
                 {"W", "A", "W"},
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(
+        Search<Room> room = RoomDetection.findRoomForDoor(
                 new Position(1, 0), 5, 0, (Position dp) -> {
                     if (dp.x < 0 || dp.z < 0) {
                         return false;
@@ -307,7 +307,7 @@ class RoomDetectionTest {
                 {"W", "A", "W"},
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(
+        Search<Room> room = RoomDetection.findRoomForDoor(
                 new Position(1, 0), 5, 0, (Position dp) -> {
                     if (dp.x < 0 || dp.z < 0) {
                         return false;
@@ -336,7 +336,7 @@ class RoomDetectionTest {
                 {"W", "W", "W", "W"},
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(
+        Search<Room> room = RoomDetection.findRoomForDoor(
                 new Position(0, 1), 5, 0, (Position dp) -> {
                     if (dp.x < 0 || dp.z < 0) {
                         return false;
@@ -366,7 +366,7 @@ class RoomDetectionTest {
                 {"W", "D", "W"},
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(
+        Search<Room> room = RoomDetection.findRoomForDoor(
                 new Position(1, 3), 5, 0, (Position dp) -> {
                     if (dp.x < 0 || dp.z < 0) {
                         return false;
@@ -395,7 +395,7 @@ class RoomDetectionTest {
                 {"W", "W", "W", "W"},
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(
+        Search<Room> room = RoomDetection.findRoomForDoor(
                 new Position(3, 1), 5, 0, (Position dp) -> {
                     if (dp.x < 0 || dp.z < 0) {
                         return false;
@@ -426,7 +426,7 @@ class RoomDetectionTest {
                 {"_", "_", "_", "_", "_", "_", "_"}
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(
+        Search<Room> room = RoomDetection.findRoomForDoor(
                 new Position(3, 3), 10, 0, (Position dp) -> {
                     if (dp.x < 0 || dp.z < 0) {
                         return false;
@@ -458,7 +458,7 @@ class RoomDetectionTest {
                 {"_", "_", "_", "_", "_", "_", "_"}
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(
+        Search<Room> room = RoomDetection.findRoomForDoor(
                 new Position(3, 3), 10, 0, (Position dp) -> {
                     if (dp.x < 0 || dp.z < 0) {
                         return false;
@@ -490,7 +490,7 @@ class RoomDetectionTest {
                 {"_", "_", "_", "_", "_", "_", "_"}
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(
+        Search<Room> room = RoomDetection.findRoomForDoor(
                 new Position(3, 3), 10, 0, (Position dp) -> {
                     if (dp.x < 0 || dp.z < 0) {
                         return false;
@@ -524,7 +524,7 @@ class RoomDetectionTest {
                 {"_", "W", "W", "W", "W", "_", "_"},
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(
+        Search<Room> room = RoomDetection.findRoomForDoor(
                 new Position(4, 3), 10, 0, (Position dp) -> {
                     if (dp.x < 0 || dp.z < 0) {
                         return false;
@@ -558,7 +558,7 @@ class RoomDetectionTest {
                 {"_", "W", "W", "W", "W", "_", "_"},
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(
+        Search<Room> room = RoomDetection.findRoomForDoor(
                 new Position(1, 3), 10, 0, (Position dp) -> {
                     if (dp.x < 0 || dp.z < 0) {
                         return false;
@@ -592,7 +592,7 @@ class RoomDetectionTest {
                 {"_", "W", "W", "W", "W", "_", "_"},
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(
+        Search<Room> room = RoomDetection.findRoomForDoor(
                 new Position(1, 3), 10, 0, (Position dp) -> {
                     if (dp.x < 0 || dp.z < 0) {
                         return false;
@@ -622,7 +622,7 @@ class RoomDetectionTest {
                 {"_", "W", "_", "_"}
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(
+        Search<Room> room = RoomDetection.findRoomForDoor(
                 new Position(1, 0), 4, 0, (Position dp) -> {
                     if (dp.x < 0 || dp.z < 0) {
                         return false;
@@ -650,7 +650,7 @@ class RoomDetectionTest {
                 {"_", "W", "_", "_"}
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(
+        Search<Room> room = RoomDetection.findRoomForDoor(
                 new Position(1, 0), 4, 0, (Position dp) -> {
                     if (dp.x < 0 || dp.z < 0) {
                         return false;
@@ -679,7 +679,7 @@ class RoomDetectionTest {
                 {"_", "D", "_", "_"}
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(
+        Search<Room> room = RoomDetection.findRoomForDoor(
                 new Position(1, 0), 4, 0, (Position dp) -> {
                     if (dp.x < 0 || dp.z < 0) {
                         return false;
@@ -708,7 +708,7 @@ class RoomDetectionTest {
                 {"_", "W", "_", "_"}
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(
+        Search<Room> room = RoomDetection.findRoomForDoor(
                 new Position(1, 0), 4, 0, (Position dp) -> {
                     if (dp.x < 0 || dp.z < 0) {
                         return false;
@@ -739,7 +739,7 @@ class RoomDetectionTest {
                 {"W", "W", "W", "W", "W"}
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(
+        Search<Room> room = RoomDetection.findRoomForDoor(
                 new Position(0, 2), 6, 0, (Position dp) -> {
                     if (dp.x < 0 || dp.z < 0) {
                         return false;
@@ -770,7 +770,7 @@ class RoomDetectionTest {
                 {"W", "W", "W", "W", "W"}
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(
+        Search<Room> room = RoomDetection.findRoomForDoor(
                 new Position(0, 2), 6, 0, (Position dp) -> {
                     if (dp.x < 0 || dp.z < 0) {
                         return false;
@@ -801,7 +801,7 @@ class RoomDetectionTest {
                 {"W", "W", "W", "W", "W"}
         };
 
-        Optional<Room> room = RoomDetection.findRoomForDoor(
+        Search<Room> room = RoomDetection.findRoomForDoor(
                 new Position(0, 2), 6, 0, (Position dp) -> {
                     if (dp.x < 0 || dp.z < 0) {
                         return false;

@@ -188,4 +188,22 @@ public class InclusiveSpaces {
         });
     }
 
+    public static boolean fullyContains(
+            InclusiveSpace inclusiveSpace,
+            InclusiveSpace ss
+    ) {
+        if (ss.getWestX() < inclusiveSpace.getWestX()) {
+            return false;
+        }
+        if (ss.getNorthZ() < inclusiveSpace.getNorthZ()) {
+            return false;
+        }
+        if (ss.getEastX() > inclusiveSpace.getEastX()) {
+            return false;
+        }
+        if (ss.getSouthZ() > inclusiveSpace.getSouthZ()) {
+            return false;
+        }
+        return true;
+    }
 }
