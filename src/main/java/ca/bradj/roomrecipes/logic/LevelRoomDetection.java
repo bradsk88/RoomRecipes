@@ -1,6 +1,5 @@
 package ca.bradj.roomrecipes.logic;
 
-import ca.bradj.roomrecipes.RoomRecipes;
 import ca.bradj.roomrecipes.adapter.Positions;
 import ca.bradj.roomrecipes.core.Room;
 import ca.bradj.roomrecipes.core.RoomSplit;
@@ -13,9 +12,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.stream.Stream;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 public class LevelRoomDetection {
 
@@ -30,7 +29,7 @@ public class LevelRoomDetection {
     public static ImmutableMap<Position, Optional<Room>> findRooms(
             Collection<Position> currentDoors,
             int maxDistanceFromDoor,
-            @Nullable LinkedBlockingQueue<String> fRec,
+            @Nullable Consumer<String> fRec,
             WallDetector checker
     ) {
         LevelRoomDetector d = new LevelRoomDetector(

@@ -135,12 +135,17 @@ public class RoomHints {
             RoomDetection.WallExclusion exclusion
     ) {
         if (isRoom(exclusion)) {
-            if (northWall != null && southWall != null) {
-                return Optional.of(InclusiveSpace.from(northWall.westCorner).to(southWall.eastCorner));
+            XWall nPart = northOpening == null ? northWall : northOpening;
+            XWall sPart = southOpening == null ? southWall : southOpening;
+            ZWall wPart = westOpening == null ? westWall : westOpening;
+            ZWall ePart = eastOpening == null ? eastWall : eastOpening;
+            if (nPart != null && sPart != null) {
+                return Optional.of(InclusiveSpace.from(nPart.westCorner).to(sPart.eastCorner));
             }
-            if (westWall != null && eastWall != null) {
-                return Optional.of(InclusiveSpace.from(westWall.northCorner).to(eastWall.southCorner));
+            if (wPart != null && ePart != null) {
+                return Optional.of(InclusiveSpace.from(wPart.northCorner).to(ePart.southCorner));
             }
+            return Optional.of(InclusiveSpace.from(nPart.westCorner).to(sPart.eastCorner));
         }
         return Optional.empty();
     }
@@ -240,6 +245,9 @@ public class RoomHints {
             if (joinW && joinE && s.isPresent()) {
                 return s;
             }
+            if (s.isPresent() && InclusiveSpaces.calculateArea(s.get()) == 1) {
+                return s;
+            }
         }
         if (southOpening != null) {
             boolean joinW = false;
@@ -254,6 +262,9 @@ public class RoomHints {
             }
             Optional<InclusiveSpace> s = space.asSpace(RoomDetection.WallExclusion.allowNorthOpen());
             if (joinW && joinE && s.isPresent()) {
+                return s;
+            }
+            if (s.isPresent() && InclusiveSpaces.calculateArea(s.get()) == 1) {
                 return s;
             }
         }
@@ -272,6 +283,9 @@ public class RoomHints {
             if (joinN && joinS && s.isPresent()) {
                 return s;
             }
+            if (s.isPresent() && InclusiveSpaces.calculateArea(s.get()) == 1) {
+                return s;
+            }
         }
         if (eastOpening != null) {
             boolean joinN = false;
@@ -286,6 +300,9 @@ public class RoomHints {
             }
             Optional<InclusiveSpace> s = space.asSpace(RoomDetection.WallExclusion.allowWestOpen());
             if (joinN && joinS && s.isPresent()) {
+                return s;
+            }
+            if (s.isPresent() && InclusiveSpaces.calculateArea(s.get()) == 1) {
                 return s;
             }
         }
@@ -364,5 +381,45 @@ public class RoomHints {
             case WEST -> w == null ? withWestOpening(null) : withWestOpening(w.toZWall());
             case EAST -> w == null ? withEastOpening(null) : withEastOpening(w.toZWall());
         };
+    }
+
+    public String toShortString() {
+        if (!hasAnyOpenings()) {
+            return "[]";
+        }
+        if (northOpening != null && southOpening != null) {
+            if (westOpening != null && eastOpening != null) {
+                return "-";
+            }
+            if (westOpening != null) {
+                return "-|";
+            }
+            if (eastOpening != null) {
+                return "|-";
+            }
+            return "|-|";
+        }
+        if (northOpening != null) {
+            if (westOpening != null && eastOpening != null) {
+                return "_";
+            }
+            if (westOpening != null) {
+                return "_|";
+            }
+            if (eastOpening != null) {
+                return "|_";
+            }
+            return "|_|";
+        }
+        if (westOpening != null && eastOpening != null) {
+            return "^";
+        }
+        if (westOpening != null) {
+            return "^|";
+        }
+        if (eastOpening != null) {
+            return "|^";
+        }
+        return "|^|";
     }
 }

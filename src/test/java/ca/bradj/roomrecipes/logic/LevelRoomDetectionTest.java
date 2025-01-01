@@ -13,18 +13,28 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.ConsoleHandler;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SuppressWarnings({"DataFlowIssue", "OptionalGetWithoutIsPresent"})
 class LevelRoomDetectionTest {
 
     private WallDetector WD(String[][] map) {
 
         return TestHelpers.WD(map);
+    }
+
+    private static class TestRecorder extends LinkedBlockingQueue<String> {
+        @Override
+        public boolean add(String s) {
+            System.out.println(s);
+            return super.add(s);
+        }
     }
 
     @Test
@@ -39,12 +49,12 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W", "W", "W"}
         };
 
-        LinkedBlockingQueue<String> recorder = new LinkedBlockingQueue<>();
+        TestRecorder recorder = new TestRecorder();
         ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
                 ImmutableList.of(
                         new Position(1, 0),
                         new Position(3, 0)
-                ), 4, recorder, WD(map)
+                ), 4, recorder::add, WD(map)
         );
         assertTrue(room.containsKey(new Position(1, 0)));
         assertTrue(room.containsKey(new Position(3, 0)));
@@ -1239,7 +1249,7 @@ class LevelRoomDetectionTest {
                                                                 .filter(v -> v.getValue().isPresent()).toList();
         assertEquals(1, present.size());
 
-        Object onlyKey = present.get(0).getKey();
+        Position onlyKey = present.get(0).getKey();
 
         InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(4, 2);
         assertEquals(expectedCorners, room.get(onlyKey).get().getSpace());
@@ -1274,7 +1284,7 @@ class LevelRoomDetectionTest {
                                                                 .filter(v -> v.getValue().isPresent()).toList();
         assertEquals(1, present.size());
 
-        Object onlyKey = present.get(0).getKey();
+        Position onlyKey = present.get(0).getKey();
         InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(2, 4);
         assertEquals(expectedCorners, room.get(onlyKey).get().getSpace());
     }
@@ -1506,12 +1516,12 @@ class LevelRoomDetectionTest {
         };
         Position doorPos = new Position(6, 5);
 
-        LinkedBlockingQueue<String> flightRecorder = new LinkedBlockingQueue<>();
+        TestRecorder flightRecorder = new TestRecorder();
 
         ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
                 ImmutableList.of(
                         doorPos
-                ), 20, flightRecorder, WD(map)
+                ), 20, flightRecorder::add, WD(map)
         );
         assertEquals(1, room.size());
         assertTrue(room.get(doorPos).isPresent(), () -> blackBox(flightRecorder));
@@ -1534,19 +1544,19 @@ class LevelRoomDetectionTest {
         };
         Position doorPos = new Position(5, 2);
 
-        LinkedBlockingQueue<String> flightRecorder = new LinkedBlockingQueue<>();
+        TestRecorder flightRecorder = new TestRecorder();
 
         ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
                 ImmutableList.of(
                         doorPos
-                ), 20, flightRecorder, WD(map)
+                ), 20, flightRecorder::add, WD(map)
         );
         assertEquals(1, room.size());
         assertTrue(room.get(doorPos).isPresent(), () -> blackBox(flightRecorder));
         assertTrue(room.get(doorPos).get().getBackZWall().isPresent());
     }
 
-    private String blackBox(LinkedBlockingQueue<String> flightRecorder) {
+    private String blackBox(TestRecorder flightRecorder) {
         StringBuilder b = new StringBuilder();
         flightRecorder.forEach(v -> {
             b.append(v);
@@ -1570,11 +1580,11 @@ class LevelRoomDetectionTest {
         };
         Position doorPos = new Position(5, 4);
 
-        LinkedBlockingQueue<String> flightRecorder = new LinkedBlockingQueue<>();
+        TestRecorder flightRecorder = new TestRecorder();
 
         ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(ImmutableList.of(
                 doorPos
-        ), 20, flightRecorder, WD(map));
+        ), 20, flightRecorder::add, WD(map));
         assertEquals(1, room.size());
         assertTrue(room.get(doorPos).isPresent(), () -> blackBox(flightRecorder));
         assertTrue(room.get(doorPos).get().getBackZWall().isPresent());

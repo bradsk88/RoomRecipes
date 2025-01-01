@@ -11,13 +11,12 @@ import com.google.common.collect.ImmutableList;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class RoomDetection {
 
-    public static Optional<Room> findRoomForDoor(
+    public static Search<Room> findRoomForDoor(
             Position doorPos,
             int maxDistanceFromDoor,
             int depth,
@@ -39,7 +38,7 @@ public class RoomDetection {
         );
     }
 
-    public static Optional<Room> findRoomForDoor(
+    public static Search<Room> findRoomForDoor(
             Position doorPos,
             int maxDistanceFromDoor,
             Optional<InclusiveSpace> findAlternativeTo,
@@ -62,11 +61,11 @@ public class RoomDetection {
         );
     }
 
-    public static Optional<Room> findRoomForDoorIteration(
+    public static Search<Room> findRoomForDoorIteration(
             Position nextDoor,
             int i,
             int maxDistanceFromDoor,
-            LinkedBlockingQueue<String> flightRecorder,
+            Consumer<String> flightRecorder,
             WallDetector checker
     ) {
         return findRoomForDoorIteration(
@@ -78,7 +77,8 @@ public class RoomDetection {
                 RoomDetection.WallExclusion.mustHaveAllWalls(),
                 0,
                 flightRecorder,
-                checker
+                checker,
+                ImmutableList.of()
         );
     }
 
@@ -110,7 +110,7 @@ public class RoomDetection {
         }
     }
 
-    public static Optional<Room> findRoomForDoorIteration(
+    public static Search<Room> findRoomForDoorIteration(
             Position doorPos,
             int i,
             int maxDistanceFromDoor,
@@ -119,16 +119,17 @@ public class RoomDetection {
             // TODO: Is this needed anymore
             WallExclusion exclusion,
             int depth,
-            LinkedBlockingQueue<String> flightRecorder,
-            WallDetector wd
+            Consumer<String> flightRecorder,
+            WallDetector wd,
+            ImmutableList<InclusiveSpace> spacesFoundAlready
     ) {
         if (!wd.IsWall(doorPos)) {
-            return Optional.empty();
+            return Search.empty();
         }
 
         record(flightRecorder, "Searching outward from door position %s [radius %d]", doorPos.getUIString(), i);
 
-        Function<Position, Optional<Room>> findFromBackWall = (Position wallPos) ->
+        Function<Position, Search<Room>> findFromBackWall = (Position wallPos) ->
                 findRoomFromBackWall(
                         doorPos,
                         wallPos,
@@ -137,10 +138,11 @@ public class RoomDetection {
                         exclusion,
                         depth + 1,
                         (s) -> record(flightRecorder, s),
-                        wd
+                        wd,
+                        spacesFoundAlready
                 );
 
-        Optional<Room> foundRoom = Optional.empty();
+        Search<Room> foundRoom = Search.empty();
         if (!exclusion.allowOpenEastWall) {
             Position offset = doorPos.offset(
                     i,
@@ -189,21 +191,21 @@ public class RoomDetection {
                 return foundRoom;
             }
         }
-        return Optional.empty();
+        return Search.empty();
     }
 
     private static void record(
-            LinkedBlockingQueue<String> flightRecorder,
+            Consumer<String> flightRecorder,
             String s,
             Object... uiString
     ) {
         if (flightRecorder == null) {
             return;
         }
-        flightRecorder.add(String.format(s, uiString));
+        flightRecorder.accept(String.format(s, uiString));
     }
 
-    public static Optional<Room> findRoomForDoor(
+    public static Search<Room> findRoomForDoor(
             Position doorPos,
             int maxDistanceFromDoor,
             SearchRange range,
@@ -214,7 +216,7 @@ public class RoomDetection {
             WallDetector wd
     ) {
         for (int i = 2; i < maxDistanceFromDoor; i++) {
-            Optional<Room> res = findRoomForDoorIteration(
+            Search<Room> res = findRoomForDoorIteration(
                     doorPos,
                     i,
                     maxDistanceFromDoor,
@@ -223,23 +225,25 @@ public class RoomDetection {
                     exclusion,
                     depth,
                     null, // FIXME: Keep recording
-                    wd
+                    wd,
+                    ImmutableList.of()
             );
             if (res.isPresent()) {
                 return res;
             }
         }
-        return Optional.empty();
+        return Search.empty();
     }
 
-    private static Optional<Room> findRoomFromBackWall(
+    private static Search<Room> findRoomFromBackWall(
             Position doorPos,
             Position wallPos,
             int maxDistFromDoor,
             Optional<InclusiveSpace> findAlt,
             int depth,
             Consumer<String> flightRecorder,
-            WallDetector wd
+            WallDetector wd,
+            ImmutableList<InclusiveSpace> spacesFoundAlready
     ) {
         return findRoomFromBackWall(
                 doorPos,
@@ -249,11 +253,12 @@ public class RoomDetection {
                 WallExclusion.mustHaveAllWalls(),
                 depth + 1,
                 flightRecorder,
-                wd
+                wd,
+                spacesFoundAlready
         );
     }
 
-    private static Optional<Room> findRoomFromBackWall(
+    private static Search<Room> findRoomFromBackWall(
             Position doorPos,
             Position wallPos,
             int maxDistFromDoor,
@@ -261,31 +266,33 @@ public class RoomDetection {
             WallExclusion exclusion,
             int depth,
             Consumer<String> flightRecorder,
-            WallDetector wd
+            WallDetector wd,
+            ImmutableList<InclusiveSpace> spacesFoundAlready
     ) {
         if (!wd.IsWall(wallPos)) {
             flightRecorder.accept("Was air at " + wallPos.getUIString());
-            return Optional.empty();
+            return Search.empty();
         }
         flightRecorder.accept("Was wall block at " + wallPos.getUIString());
-        Optional<Room> room = findRoomBetween(
+        Search<Room> room = findRoomBetween(
                 doorPos,
                 wallPos,
                 maxDistFromDoor,
                 exclusion,
                 depth + 1,
                 flightRecorder,
-                wd
+                wd,
+                spacesFoundAlready
         );
         if (room.isEmpty()) {
             flightRecorder.accept(
                     String.format("No room was found between %s and %s", doorPos.getUIString(), wallPos.getUIString()));
-            return Optional.empty();
+            return Search.empty();
         }
         if (findAlt.isPresent() && room.get()
                                        .getSpace()
                                        .equals(findAlt.get())) {
-            return Optional.empty();
+            return Search.empty();
         }
 
         return room.map(RoomDetection::simplify);
@@ -313,13 +320,14 @@ public class RoomDetection {
         return v;
     }
 
-    private static Optional<Room> findRoomBetween(
+    private static Search<Room> findRoomBetween(
             Position doorPos,
             Position wallPos,
             int maxDistFromDoor,
             int depth,
             Consumer<String> flightRecorder,
-            WallDetector wd
+            WallDetector wd,
+            ImmutableList<InclusiveSpace> spacesFoundAlready
     ) {
         return findRoomBetween(
                 doorPos,
@@ -328,18 +336,20 @@ public class RoomDetection {
                 WallExclusion.mustHaveAllWalls(),
                 depth + 1,
                 flightRecorder,
-                wd
+                wd,
+                spacesFoundAlready
         );
     }
 
-    private static Optional<Room> findRoomBetween(
+    private static Search<Room> findRoomBetween(
             Position doorPos,
             Position wallPos,
             int maxDistFromDoor,
             WallExclusion exclusion,
             int depth,
             Consumer<String> flightRecorder,
-            WallDetector wd
+            WallDetector wd,
+            ImmutableList<InclusiveSpace> spacesFoundAlready
     ) {
         if (doorPos.x != wallPos.x && doorPos.z != wallPos.z) {
             throw new IllegalStateException("Expected straight line between positions");
@@ -369,7 +379,8 @@ public class RoomDetection {
                     flightRecorder,
                     wd,
                     ZWall::new,
-                    XWall::new
+                    XWall::new,
+                    spacesFoundAlready
             );
         }
         return findRoomWithDoor(
@@ -382,11 +393,12 @@ public class RoomDetection {
                 flightRecorder,
                 wd,
                 XWall::new,
-                ZWall::new
+                ZWall::new,
+                spacesFoundAlready
         );
     }
 
-    private static <W extends Wall<W>, W2 extends Wall<W2>> Optional<Room> findRoomWithDoor(
+    private static <W extends Wall<W>, W2 extends Wall<W2>> Search<Room> findRoomWithDoor(
             Direction doorSide,
             Position doorPos,
             Position wallPos,
@@ -396,11 +408,12 @@ public class RoomDetection {
             Consumer<String> flightRecorder,
             WallDetector wd,
             WallFactory<W> midWallFactory,
-            WallFactory<W2> endWallsFactory
+            WallFactory<W2> endWallsFactory,
+            ImmutableList<InclusiveSpace> spacesFoundAlready
     ) {
         if (doorPos.x != wallPos.x && doorPos.z != wallPos.z) {
             flightRecorder.accept("The door and the wall do not share coordinates. Skipping.");
-            return Optional.empty();
+            return Search.empty();
         }
         W midWall = midWallFactory.makeWall(
                 doorPos,
@@ -418,7 +431,8 @@ public class RoomDetection {
         }
 
         flightRecorder.accept(
-                String.format("Staged potential mid-wall %s due to exclusion policy %s",
+                String.format(
+                        "Staged potential mid-wall %s due to exclusion policy %s",
                         midWall.toShortString(),
                         exclusion.toShortString()
                 ));
@@ -429,7 +443,7 @@ public class RoomDetection {
                 wd
         )) {
             flightRecorder.accept("Potential mid-wall is not a wall");
-            return Optional.empty();
+            return Search.empty();
         }
         RoomHints roomHints = RoomHints.empty();
         for (int i = 1; i < maxDistFromDoor; i++) {
@@ -449,36 +463,48 @@ public class RoomDetection {
             }
             roomHints = rh;
             if (roomHints.isRoom(exclusion)) {
-                return roomHints.asRoom(
+                return Search.from(roomHints.asRoom(
                         doorPos,
                         exclusion
-                );
+                ));
             }
         }
+        if (alreadyFound(spacesFoundAlready, roomHints.asSpace(WallExclusion.allowAllOpen()).get())) {
+            // TODO: Is this the ONLY alreadyFound check that is needed?
+            flightRecorder.accept(
+                    "Found adjoining room that is already accounted for. Must have gone in a circle. Stopping now.");
+            return Search.of(new Room(doorPos, InclusiveSpace.from(doorPos).to(doorPos)));
+        }
+
         if (roomHints.hasAnyOpenings()) {
-            Optional<Room> adjoined = findAdjoiningRoom(
+            ImmutableList.Builder<InclusiveSpace> b = ImmutableList.builder();
+            b.addAll(spacesFoundAlready);
+            b.add(roomHints.asSpace(WallExclusion.allowAllOpen()).get());
+            Search<Room> adjoined = findAdjoiningRoom(
                     roomHints,
                     doorPos,
                     maxDistFromDoor,
                     depth + 1,
                     flightRecorder,
-                    wd
+                    wd,
+                    spacesFoundAlready
             );
 
             if (adjoined.isPresent()) {
                 return adjoined;
             }
         }
-        return Optional.empty();
+        return Search.empty();
     }
 
-    private static Optional<Room> findAdjoiningRoom(
+    private static Search<Room> findAdjoiningRoom(
             RoomHints roomHints,
             Position doorPos,
             int maxDistFromDoor,
             int depth,
             Consumer<String> flightRecorder,
-            WallDetector wd
+            WallDetector wd,
+            ImmutableList<InclusiveSpace> spacesFoundAlready
     ) {
         Optional<InclusiveSpace> n = Optional.empty();
         Optional<InclusiveSpace> s = Optional.empty();
@@ -486,7 +512,10 @@ public class RoomDetection {
         Optional<InclusiveSpace> w = Optional.empty();
         if (roomHints.northOpening != null) {
             flightRecorder.accept("An opening was detected on the north side of the room");
-            Optional<RoomHints> space = findRoomForXOpening(
+            ImmutableList.Builder<InclusiveSpace> b = ImmutableList.builder();
+            b.addAll(spacesFoundAlready);
+            b.add(roomHints.asSpace(WallExclusion.allowAllOpen()).get());
+            Search<RoomHints> space = findNewRoomForXOpening(
                     roomHints.northOpening,
                     maxDistFromDoor,
                     -1,
@@ -502,9 +531,13 @@ public class RoomDetection {
                     ),
                     flightRecorder,
                     WallExclusion.allowSouthOpen(),
-                    wd
+                    wd,
+                    b.build()
             );
             if (space.isPresent()) {
+                if (isLoopEnd(space)) {
+                    return Search.end(roomHints.asRoom(doorPos, WallExclusion.allowAllOpen()).get());
+                }
                 n = roomHints.adjoinedTo(
                         doorPos,
                         space.get()
@@ -513,7 +546,10 @@ public class RoomDetection {
         }
         if (roomHints.southOpening != null) {
             flightRecorder.accept("An opening was detected on the south side of the room");
-            Optional<RoomHints> space = findRoomForXOpening(
+            ImmutableList.Builder<InclusiveSpace> b = ImmutableList.builder();
+            b.addAll(spacesFoundAlready);
+            b.add(roomHints.asSpace(WallExclusion.allowAllOpen()).get());
+            Search<RoomHints> space = findNewRoomForXOpening(
                     roomHints.southOpening,
                     maxDistFromDoor,
                     1,
@@ -529,9 +565,13 @@ public class RoomDetection {
                     ),
                     flightRecorder,
                     WallExclusion.allowNorthOpen(),
-                    wd
+                    wd,
+                    b.build()
             );
             if (space.isPresent()) {
+                if (isLoopEnd(space)) {
+                    return Search.end(roomHints.asRoom(doorPos, WallExclusion.allowAllOpen()).get());
+                }
                 s = roomHints.adjoinedTo(
                         doorPos,
                         space.get()
@@ -539,8 +579,14 @@ public class RoomDetection {
             }
         }
         if (roomHints.westOpening != null) {
-            flightRecorder.accept("An opening was detected on the west side of the room");
-            Optional<RoomHints> space = findRoomForZOpening(
+            flightRecorder.accept(String.format(
+                    "An opening was detected on the west side of the room: -> %s <-",
+                    roomHints.toShortString()
+            ));
+            ImmutableList.Builder<InclusiveSpace> b = ImmutableList.builder();
+            b.addAll(spacesFoundAlready);
+            b.add(roomHints.asSpace(WallExclusion.allowAllOpen()).get());
+            Search<RoomHints> space = findNewRoomForZOpening(
                     roomHints.westOpening,
                     maxDistFromDoor,
                     -1,
@@ -556,9 +602,13 @@ public class RoomDetection {
                     ),
                     WallExclusion.allowEastOpen(),
                     flightRecorder,
-                    wd
+                    wd,
+                    b.build()
             );
             if (space.isPresent()) {
+                if (isLoopEnd(space)) {
+                    return Search.end(roomHints.asRoom(doorPos, WallExclusion.allowAllOpen()).get());
+                }
                 w = roomHints.adjoinedTo(
                         doorPos,
                         space.get()
@@ -567,7 +617,10 @@ public class RoomDetection {
         }
         if (roomHints.eastOpening != null) {
             flightRecorder.accept("An opening was detected on the east side of the room");
-            Optional<RoomHints> space = findRoomForZOpening(
+            ImmutableList.Builder<InclusiveSpace> b = ImmutableList.builder();
+            b.addAll(spacesFoundAlready);
+            b.add(roomHints.asSpace(WallExclusion.allowAllOpen()).get());
+            Search<RoomHints> space = findNewRoomForZOpening(
                     roomHints.eastOpening,
                     maxDistFromDoor,
                     1,
@@ -583,9 +636,13 @@ public class RoomDetection {
                     ),
                     WallExclusion.allowWestOpen(),
                     flightRecorder,
-                    wd
+                    wd,
+                    b.build()
             );
             if (space.isPresent()) {
+                if (isLoopEnd(space)) {
+                    return Search.end(roomHints.asRoom(doorPos, WallExclusion.allowAllOpen()).get());
+                }
                 e = roomHints.adjoinedTo(
                         doorPos,
                         space.get()
@@ -596,68 +653,95 @@ public class RoomDetection {
         if (roomHints.northOpening != null && roomHints.southOpening != null && n.isPresent() && s.isPresent()) {
             final InclusiveSpace nn = n.get();
             final InclusiveSpace ss = s.get();
-            return roomHints.asRoom(
-                                    doorPos,
-                                    new WallExclusion(
-                                            false,
-                                            false,
-                                            true,
-                                            true
-                                    )
-                            )
-                            .map(v -> v.withExtraSpace(nn)
-                                       .withExtraSpace(ss));
+            return Search.from(roomHints.asRoom(
+                                                doorPos,
+                                                new WallExclusion(
+                                                        false,
+                                                        false,
+                                                        true,
+                                                        true
+                                                )
+                                        )
+                                        .map(v -> v.withExtraSpace(nn)
+                                                   .withExtraSpace(ss)));
         }
         if (roomHints.northOpening != null && n.isPresent()) {
             final InclusiveSpace nn = n.get();
-            return roomHints.asRoom(
-                                    doorPos,
-                                    WallExclusion.allowNorthOpen()
-                            )
-                            .map(v -> v.withExtraSpace(nn));
+            return Search.from(roomHints.asRoom(
+                                                doorPos,
+                                                WallExclusion.allowAllOpen()
+                                        )
+                                        .map(v -> v.withExtraSpace(nn)));
         }
         if (roomHints.southOpening != null && s.isPresent()) {
             final InclusiveSpace ss = s.get();
-            return roomHints.asRoom(
-                                    doorPos,
-                                    WallExclusion.allowSouthOpen()
-                            )
-                            .map(v -> v.withExtraSpace(ss));
+            return Search.from(roomHints.asRoom(
+                                                doorPos,
+                                                WallExclusion.allowAllOpen()
+                                        )
+                                        .map(v -> v.withExtraSpace(ss)));
         }
 
         if (roomHints.westOpening != null && roomHints.eastOpening != null && w.isPresent() && e.isPresent()) {
             final InclusiveSpace ww = w.get();
             final InclusiveSpace ee = e.get();
-            return roomHints.asRoom(
-                                    doorPos,
-                                    new WallExclusion(
-                                            true,
-                                            true,
-                                            false,
-                                            false
-                                    )
-                            )
-                            .map(v -> v.withExtraSpace(ww)
-                                       .withExtraSpace(ee));
+            return Search.from(roomHints.asRoom(
+                                                doorPos,
+                                                new WallExclusion(
+                                                        true,
+                                                        true,
+                                                        false,
+                                                        false
+                                                )
+                                        )
+                                        .map(v -> v.withExtraSpace(ww)
+                                                   .withExtraSpace(ee)));
         }
         if (roomHints.westOpening != null && w.isPresent()) {
             final InclusiveSpace ww = w.get();
-            return roomHints.asRoom(
-                                    doorPos,
-                                    WallExclusion.allowWestOpen()
-                            )
-                            .map(v -> v.withExtraSpace(ww));
+            return Search.from(
+                    roomHints.asRoom(
+                                     doorPos,
+                                     WallExclusion.allowAllOpen()
+                             )
+                             .map(v -> v.withExtraSpace(ww))
+            );
         }
         if (roomHints.eastOpening != null && e.isPresent()) {
             final InclusiveSpace ee = e.get();
-            return roomHints.asRoom(
-                                    doorPos,
-                                    WallExclusion.allowEastOpen()
-                            )
-                            .map(v -> v.withExtraSpace(ee));
+            return Search.from(
+                    roomHints.asRoom(
+                                     doorPos,
+                                     WallExclusion.allowAllOpen()
+                             )
+                             .map(v -> v.withExtraSpace(ee))
+            );
         }
 
-        return Optional.empty();
+        return Search.empty();
+    }
+
+    private static boolean isLoopEnd(
+            Search<RoomHints> space
+    ) {
+        if (space.isEnd()) {
+            return true;
+        }
+        Optional<InclusiveSpace> zpc = space.get().asSpace(WallExclusion.allowAllOpen());
+        return InclusiveSpaces.calculateArea(zpc.get()) == 1;
+    }
+
+    private static boolean alreadyFound(
+            ImmutableList<InclusiveSpace> spacesFoundAlready,
+            InclusiveSpace ss
+    ) {
+        for (InclusiveSpace inclusiveSpace : spacesFoundAlready) {
+            if (InclusiveSpaces.fullyContains(inclusiveSpace, ss)) {
+
+                return true;
+            }
+        }
+        return false;
     }
 
     private interface OpeningXHintFactory {
@@ -674,17 +758,18 @@ public class RoomDetection {
         );
     }
 
-    private static Optional<RoomHints> findRoomForXOpening(
+    private static Search<RoomHints> findNewRoomForXOpening(
             XWall opening,
             int maxDistFromDoor,
             int z,
             OpeningXHintFactory factory,
             Consumer<String> flightRecorder,
             WallExclusion exclusion,
-            WallDetector wd
+            WallDetector wd,
+            ImmutableList<InclusiveSpace> spacesFoundAlready
     ) {
         if (z == 0) {
-            return Optional.empty();
+            return Search.empty();
         }
 
         flightRecorder.accept(String.format(
@@ -717,7 +802,7 @@ public class RoomDetection {
         Position mp = opening.getMidpoint();
         for (int i = 1; i < maxDistFromDoor; i++) {
             int zShift = i * z;
-            Optional<Room> room = findRoomFromBackWall(
+            Search<Room> room = findRoomFromBackWall(
                     mp,
                     mp.offset(
                             0,
@@ -728,7 +813,8 @@ public class RoomDetection {
                     exclusion,
                     0,
                     flightRecorder,
-                    wd
+                    wd,
+                    spacesFoundAlready
             );
             if (room.isPresent()) {
                 return room.map(v -> new RoomHints(
@@ -768,7 +854,7 @@ public class RoomDetection {
             }
         }
         if (hints.northWall == null || hints.southWall == null) {
-            return Optional.empty();
+            return Search.empty();
         }
         ZWall westWall = new ZWall(
                 hints.northWall.westCorner,
@@ -785,33 +871,34 @@ public class RoomDetection {
                 eastWall,
                 wd
         )) {
-            return Optional.of(hints);
+            return Search.of(hints);
         }
-        return Optional.empty();
+        return Search.empty();
     }
 
-    private static Optional<RoomHints> findRoomForZOpening(
+    private static Search<RoomHints> findNewRoomForZOpening(
             ZWall opening,
             int maxDistFromDoor,
             int x,
             OpeningZHintFactory factory,
             WallExclusion exclusion,
             Consumer<String> flightRecorder,
-            WallDetector wd
+            WallDetector wd,
+            ImmutableList<InclusiveSpace> spacesFoundAlready
     ) {
         if (x == 0) {
-            return Optional.empty();
+            return Search.empty();
         }
 
         flightRecorder.accept(String.format(
                 "Treating opening %s like a door and searching for a room [Exlusion %s]",
-                opening, exclusion
+                opening.toShortString(), exclusion.toShortString()
         ));
 
         Position mp = opening.getMidpoint();
         for (int i = 1; i < maxDistFromDoor; i++) {
             int xShift = i * x;
-            Optional<Room> room = findRoomFromBackWall(
+            Search<Room> room = findRoomFromBackWall(
                     mp,
                     mp.offset(
                             xShift,
@@ -822,7 +909,8 @@ public class RoomDetection {
                     exclusion,
                     0,
                     flightRecorder,
-                    wd
+                    wd,
+                    spacesFoundAlready
             );
             if (room.isPresent()) {
                 return room.map(v -> new RoomHints(
@@ -862,7 +950,7 @@ public class RoomDetection {
             }
         }
 
-        return Optional.empty();
+        return Search.empty();
     }
 
     private interface WallFactory<W extends Wall<W>> {
@@ -1084,6 +1172,15 @@ public class RoomDetection {
                     false,
                     false,
                     false
+            );
+        }
+
+        public static WallExclusion allowAllOpen() {
+            return new WallExclusion(
+                    true,
+                    true,
+                    true,
+                    true
             );
         }
 
