@@ -2,12 +2,14 @@ package ca.bradj.roomrecipes.recipes;
 
 import ca.bradj.roomrecipes.adapter.Positions;
 import ca.bradj.roomrecipes.adapter.RoomRecipeMatch;
+import ca.bradj.roomrecipes.adapter.RoomRecipeMatches;
 import ca.bradj.roomrecipes.logic.DoorDetection;
 import ca.bradj.roomrecipes.serialization.MCRoom;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -21,10 +23,22 @@ import java.util.function.Function;
 
 public class RecipeDetection {
 
+    /**
+     * @deprecated RecipeDetection.getActiveRecipes
+     */
+    @Deprecated
     public static Optional<RoomRecipeMatch<MCRoom>> getActiveRecipe(
             Level level,
             MCRoom room,
             DoorDetection.DoorChecker doorChecker
+    ) {
+        return getActiveRecipes(level, room, false).map(v -> v);
+    }
+
+    public static Optional<RoomRecipeMatches<MCRoom>> getActiveRecipes(
+            Level level,
+            MCRoom room,
+            boolean getFarmRecipesOnly
     ) {
         Map<BlockPos, Block> blocksInSpace = getBlocksInRoom(level, room, false);
         RecipeManager recipeManager = level.getRecipeManager();
@@ -39,10 +53,19 @@ public class RecipeDetection {
         List<RoomRecipe> recipes = recipeManager.getAllRecipesFor(RecipesInit.ROOM);
         recipes = Lists.reverse(ImmutableList.sortedCopyOf(recipes));
 
-        Optional<RoomRecipe> matchedRecipe = recipes.stream().filter(r -> r.matches(inv, level)).findFirst();
-        return matchedRecipe.map(v -> new RoomRecipeMatch<>(
-                room, v.getId(), blocksInSpace.entrySet())
-        );
+        List<ResourceLocation> matchedRecipes = recipes
+                .stream()
+                .filter(r -> getFarmRecipesOnly ? r.isFarmRecipe() : true)
+                .filter(r -> r.matches(inv, level))
+                .map(RoomRecipe::getId)
+                .toList();
+        if (matchedRecipes.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(new RoomRecipeMatches<>(
+                room, ImmutableList.copyOf(matchedRecipes),
+                blocksInSpace.entrySet()
+        ));
     }
 
     public static ImmutableMap<BlockPos, Block> getBlocksInRoom(

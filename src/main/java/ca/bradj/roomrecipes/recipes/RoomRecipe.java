@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 
 public class RoomRecipe implements Recipe<Container>, Comparable<RoomRecipe> {
     private final int recipeStrength;
+    private boolean farm;
 
     @Override
     public boolean isSpecial() {
@@ -45,14 +46,28 @@ public class RoomRecipe implements Recipe<Container>, Comparable<RoomRecipe> {
     private final ResourceLocation id;
     private final NonNullList<Ingredient> recipeItems;
 
+    /**
+     * @deprecated Use constructor with "isRecipeForFarms" boolean
+     */
+    @Deprecated(since = "1.18.2-0.0.6-alpha.3")
     public RoomRecipe(
             ResourceLocation id,
             NonNullList<Ingredient> recipeItems,
             int recipeStrength
     ) {
+        this(id, recipeItems, recipeStrength, false);
+    }
+
+    public RoomRecipe(
+            ResourceLocation id,
+            NonNullList<Ingredient> recipeItems,
+            int recipeStrength,
+            boolean isRecipeForFarms
+    ) {
         this.id = id;
         this.recipeItems = recipeItems;
         this.recipeStrength = recipeStrength;
+        this.farm = isRecipeForFarms;
     }
 
     @Override
@@ -75,12 +90,12 @@ public class RoomRecipe implements Recipe<Container>, Comparable<RoomRecipe> {
             }
         }
         ImmutableMultiset<JsonElement> foundMS = ImmutableMultiset.copyOf(found.stream()
-                .map(Ingredient::toJson)
-                .collect(Collectors.toList()));
+                                                                               .map(Ingredient::toJson)
+                                                                               .collect(Collectors.toList()));
         ImmutableMultiset<JsonElement> recipeMS = ImmutableMultiset.copyOf(recipeItems.stream()
-                .map(Ingredient::toJson)
-                .collect(Collectors.toList()));
-        return foundMS.size() >= recipeMS.size() && foundMS.containsAll(recipeMS);
+                                                                                      .map(Ingredient::toJson)
+                                                                                      .collect(Collectors.toList()));
+        return NoMCRomRecipe.foundMatchRecipe(foundMS, recipeMS);
     }
 
     @Override
@@ -130,7 +145,12 @@ public class RoomRecipe implements Recipe<Container>, Comparable<RoomRecipe> {
         return compare;
     }
 
-    public static class Serializer extends ForgeRegistryEntry<RecipeSerializer<?>> implements RecipeSerializer<RoomRecipe> {
+    public boolean isFarmRecipe() {
+        return farm;
+    }
+
+    public static class Serializer extends ForgeRegistryEntry<RecipeSerializer<?>> implements
+            RecipeSerializer<RoomRecipe> {
 
         @Override
         public RoomRecipe fromJson(
@@ -157,8 +177,12 @@ public class RoomRecipe implements Recipe<Container>, Comparable<RoomRecipe> {
             if (json.has("recipe_strength")) {
                 strength = json.get("recipe_strength").getAsInt();
             }
+            boolean farm = false;
+            if (json.has("farm")) {
+                farm = json.get("farm").getAsBoolean();
+            }
 
-            return new RoomRecipe(recipeId, inputs, strength);
+            return new RoomRecipe(recipeId, inputs, strength, farm);
         }
 
         @Nullable
@@ -173,7 +197,8 @@ public class RoomRecipe implements Recipe<Container>, Comparable<RoomRecipe> {
                 inputs.set(i, Ingredient.fromNetwork(buffer));
             }
             int recipeStrength = buffer.readInt();
-            return new RoomRecipe(recipeId, inputs, recipeStrength);
+            boolean farm = buffer.readBoolean();
+            return new RoomRecipe(recipeId, inputs, recipeStrength, farm);
         }
 
         @Override
@@ -186,6 +211,7 @@ public class RoomRecipe implements Recipe<Container>, Comparable<RoomRecipe> {
                 ing.toNetwork(buffer);
             }
             buffer.writeInt(recipe.recipeStrength);
+            buffer.writeBoolean(recipe.farm);
         }
     }
 
