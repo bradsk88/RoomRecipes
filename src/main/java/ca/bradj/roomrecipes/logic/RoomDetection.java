@@ -624,7 +624,7 @@ public class RoomDetection {
             flightRecorder.accept("An opening was detected on the east side of the room");
             ImmutableList.Builder<InclusiveSpace> b = ImmutableList.builder();
             b.addAll(spacesFoundAlready);
-            b.add(space1.get());
+            space1.ifPresent(b::add);
             Search<RoomHints> space = findNewRoomForZOpening(
                     roomHints.eastOpening,
                     maxDistFromDoor,
