@@ -56,7 +56,7 @@ class XWallsTest {
                         return false;
                     }
                     return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
-                }
+                }, true, true
         );
         assertFalse(opening.isPresent());
     }
@@ -79,7 +79,7 @@ class XWallsTest {
                         return false;
                     }
                     return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
-                }
+                }, true, true
         );
         assertFalse(opening.isPresent());
     }

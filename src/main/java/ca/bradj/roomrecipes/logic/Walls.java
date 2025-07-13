@@ -21,11 +21,13 @@ public class Walls {
     public static Optional<Wall<?>> findOpening(
             Direction n,
             Wall<?> metaNorthWall,
-            WallDetector wd
+            WallDetector wd,
+            boolean requireNegWall,
+            boolean requirePosWall
     ) {
         return switch (n) {
             case NORTH, SOUTH -> XWalls.findOpening(metaNorthWall.toXWall(), wd).map(v -> v);
-            case WEST, EAST -> ZWalls.findOpening(metaNorthWall.toZWall(), wd).map(v -> v);
+            case WEST, EAST -> ZWalls.findOpening(metaNorthWall.toZWall(), wd, requireNegWall, requirePosWall).map(v -> v);
         };
     }
 }

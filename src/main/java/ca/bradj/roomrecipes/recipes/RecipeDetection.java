@@ -3,6 +3,7 @@ package ca.bradj.roomrecipes.recipes;
 import ca.bradj.roomrecipes.adapter.Positions;
 import ca.bradj.roomrecipes.adapter.RoomRecipeMatch;
 import ca.bradj.roomrecipes.adapter.RoomRecipeMatches;
+import ca.bradj.roomrecipes.core.space.InclusiveSpace;
 import ca.bradj.roomrecipes.logic.DoorDetection;
 import ca.bradj.roomrecipes.serialization.MCRoom;
 import com.google.common.collect.ImmutableList;
@@ -16,9 +17,8 @@ import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public class RecipeDetection {
@@ -81,11 +81,22 @@ public class RecipeDetection {
             MCRoom room,
             boolean includeWallBlocks
     ) {
-        BlockPos pos1 = Positions.ToBlock(room.getSpace().getCornerA(), room.yCoord);
-        BlockPos pos2 = Positions.ToBlock(room.getSpace().getCornerB(), room.yCoord).above();
+        HashMap<BlockPos, Block> b = new HashMap<>();
+        for (InclusiveSpace space : room.getSpaces()) {
+            BlockPos pos1 = Positions.ToBlock(space.getCornerA(), room.yCoord);
+            BlockPos pos2 = Positions.ToBlock(space.getCornerB(), room.yCoord).above();
+            addBlocksInSpace(level, includeWallBlocks, pos1, pos2, b::put);
+        }
+        return ImmutableMap.copyOf(b);
+    }
 
-        ImmutableMap.Builder<BlockPos, Block> b = ImmutableMap.builder();
-
+    private static void addBlocksInSpace(
+            Function<BlockPos, Block> level,
+            boolean includeWallBlocks,
+            BlockPos pos1,
+            BlockPos pos2,
+            BiConsumer<BlockPos, Block> b
+    ) {
         // Get the chunk containing the starting and ending coordinates
         int xMin = Math.min(pos1.getX(), pos2.getX());
         int xMax = Math.max(pos1.getX(), pos2.getX());
@@ -115,13 +126,12 @@ public class RecipeDetection {
                         for (int blockY = yMin; blockY <= yMax; blockY++) {
                             BlockPos blockPos = new BlockPos(blockX, blockY, blockZ);
                             Block block = level.apply(blockPos);
-                            b.put(blockPos, block);
+                            b.accept(blockPos, block);
                         }
                     }
                 }
             }
         }
-        return b.build();
     }
 
 }

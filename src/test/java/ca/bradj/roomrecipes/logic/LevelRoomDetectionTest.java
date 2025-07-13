@@ -13,6 +13,7 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -1307,10 +1308,14 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W", "_"}
         };
 
+        ArrayList<String> recorder = new ArrayList<>();
+
         ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
                 ImmutableList.of(
                         new Position(3, 2)
-                ), 10, WD(map)
+                ), 10,
+                recorder::add,
+                WD(map)
         );
         assertEquals(1, room.size());
 

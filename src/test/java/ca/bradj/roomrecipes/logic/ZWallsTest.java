@@ -33,7 +33,7 @@ class ZWallsTest {
                         return false;
                     }
                     return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
-                }
+                }, true, true
         );
         assertTrue(opening.isPresent());
         assertEquals(new Position(0, 1), opening.get().northCorner);
@@ -63,7 +63,7 @@ class ZWallsTest {
                         return false;
                     }
                     return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
-                }
+                }, true, true
         );
         assertFalse(opening.isPresent());
     }

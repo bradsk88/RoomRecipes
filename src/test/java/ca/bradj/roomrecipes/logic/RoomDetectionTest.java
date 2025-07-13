@@ -7,6 +7,8 @@ import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -827,6 +829,159 @@ class RoomDetectionTest {
         assertEquals(expectedCorners, spaces.get(1));
         expectedCorners = InclusiveSpace.from(1, 3).to(4, 4);
         assertEquals(expectedCorners, spaces.get(2));
+
+    }
+
+    @Test
+    public void Test_DetectRoomWithInsetBackCorner() {
+        // _ = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"W", "W", "W", "W", "W", "W"},
+                {"W", "_", "_", "_", "W", "W"},
+                {"D", "_", "_", "_", "_", "W"},
+                {"W", "_", "_", "_", "_", "W"},
+                {"W", "_", "_", "_", "_", "W"},
+                {"W", "W", "W", "W", "W", "W"}
+        };
+
+        List<String> recorder = new ArrayList<>();
+
+        Search<Room> room = RoomDetection.findRoomForDoor(
+                new Position(0, 2), 10, 0, (Position dp) -> {
+                    if (dp.x < 0 || dp.z < 0) {
+                        return false;
+                    }
+                    if (dp.x >= map[0].length || dp.z >= map.length) {
+                        return false;
+                    }
+                    return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
+                },
+                recorder::add
+        );
+        assertTrue(room.isPresent());
+
+        ImmutableList<InclusiveSpace> spaces = ImmutableList.copyOf(room.get().getSpaces());
+        assertEquals(2, spaces.size());
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 1).to(5, 5);
+        assertEquals(expectedCorners, spaces.get(0));
+        expectedCorners = InclusiveSpace.from(0, 0).to(4, 1);
+        assertEquals(expectedCorners, spaces.get(1));
+
+    }
+    @Test
+    public void Test_DetectRoomWithInsetBackCorner_R2() {
+        // _ = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"W", "W", "W", "D", "W", "W"},
+                {"W", "_", "_", "_", "_", "W"},
+                {"W", "_", "_", "_", "_", "W"},
+                {"W", "_", "_", "_", "_", "W"},
+                {"W", "_", "_", "_", "W", "W"},
+                {"W", "W", "W", "W", "W", "W"}
+        };
+
+        List<String> recorder = new ArrayList<>();
+
+        Search<Room> room = RoomDetection.findRoomForDoor(
+                new Position(3, 0), 10, 0, (Position dp) -> {
+                    if (dp.x < 0 || dp.z < 0) {
+                        return false;
+                    }
+                    if (dp.x >= map[0].length || dp.z >= map.length) {
+                        return false;
+                    }
+                    return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
+                },
+                recorder::add
+        );
+        assertTrue(room.isPresent());
+
+        ImmutableList<InclusiveSpace> spaces = ImmutableList.copyOf(room.get().getSpaces());
+        assertEquals(2, spaces.size());
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(4, 5);
+        assertEquals(expectedCorners, spaces.get(0));
+        expectedCorners = InclusiveSpace.from(4, 0).to(5, 4);
+        assertEquals(expectedCorners, spaces.get(1));
+
+    }
+    @Test
+    public void Test_DetectRoomWithInsetBackCorner_R3() {
+        // _ = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"W", "W", "W", "W", "W", "W"},
+                {"W", "_", "_", "_", "_", "W"},
+                {"W", "_", "_", "_", "_", "W"},
+                {"W", "_", "_", "_", "_", "D"},
+                {"W", "W", "_", "_", "_", "W"},
+                {"W", "W", "W", "W", "W", "W"}
+        };
+
+        List<String> recorder = new ArrayList<>();
+
+        Search<Room> room = RoomDetection.findRoomForDoor(
+                new Position(5, 3), 10, 0, (Position dp) -> {
+                    if (dp.x < 0 || dp.z < 0) {
+                        return false;
+                    }
+                    if (dp.x >= map[0].length || dp.z >= map.length) {
+                        return false;
+                    }
+                    return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
+                },
+                recorder::add
+        );
+        assertTrue(room.isPresent());
+
+        ImmutableList<InclusiveSpace> spaces = ImmutableList.copyOf(room.get().getSpaces());
+        assertEquals(2, spaces.size());
+        InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(5, 4);
+        assertEquals(expectedCorners, spaces.get(0));
+        expectedCorners = InclusiveSpace.from(1, 4).to(5, 5);
+        assertEquals(expectedCorners, spaces.get(1));
+
+    }
+    @Test
+    public void Test_DetectRoomWithInsetBackCorner_R4() {
+        // _ = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {"W", "W", "W", "W", "W", "W"},
+                {"W", "W", "_", "_", "_", "W"},
+                {"W", "_", "_", "_", "_", "W"},
+                {"W", "_", "_", "_", "_", "W"},
+                {"W", "_", "_", "_", "_", "W"},
+                {"W", "W", "D", "W", "W", "W"}
+        };
+
+        List<String> recorder = new ArrayList<>();
+
+        Search<Room> room = RoomDetection.findRoomForDoor(
+                new Position(2, 5), 10, 0, (Position dp) -> {
+                    if (dp.x < 0 || dp.z < 0) {
+                        return false;
+                    }
+                    if (dp.x >= map[0].length || dp.z >= map.length) {
+                        return false;
+                    }
+                    return "W".equals(map[dp.z][dp.x]) || "D".equals(map[dp.z][dp.x]);
+                },
+                recorder::add
+        );
+        assertTrue(room.isPresent());
+
+        ImmutableList<InclusiveSpace> spaces = ImmutableList.copyOf(room.get().getSpaces());
+        assertEquals(2, spaces.size());
+        InclusiveSpace expectedCorners = InclusiveSpace.from(1, 0).to(5, 5);
+        assertEquals(expectedCorners, spaces.get(0));
+        expectedCorners = InclusiveSpace.from(0, 1).to(1, 5);
+        assertEquals(expectedCorners, spaces.get(1));
 
     }
 

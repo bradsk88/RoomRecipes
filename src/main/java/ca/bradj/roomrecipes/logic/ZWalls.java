@@ -24,9 +24,13 @@ public class ZWalls {
 
     public static Optional<ZWall> findOpening(
             ZWall zWall,
-            WallDetector wd
+            WallDetector wd,
+            boolean requireNorthWall,
+            boolean requireSouthWall
     ) {
-        if (!wd.IsWall(zWall.northCorner) || !wd.IsWall(zWall.southCorner)) {
+        boolean northInvalid = requireNorthWall && !wd.IsWall(zWall.northCorner);
+        boolean southInvalid = requireSouthWall && !wd.IsWall(zWall.southCorner);
+        if (northInvalid || southInvalid) {
             return Optional.empty();
         }
 
@@ -41,6 +45,12 @@ public class ZWalls {
                 return Optional.of(new ZWall(zWall.northCorner.WithZ(zTop), zWall.southCorner.WithZ(i)));
             }
             if (i == 0) {
+                return Optional.empty();
+            }
+            if (i == zWall.southCorner.z) {
+                if (wasWall) {
+                    return Optional.of(new ZWall(zWall.northCorner.WithZ(zTop+1), zWall.southCorner));
+                }
                 return Optional.empty();
             }
             wasWall = false;
