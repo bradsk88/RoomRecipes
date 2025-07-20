@@ -25,17 +25,6 @@ public class RoomRecipeMatch<ROOM> extends RoomWithBlocks<ROOM, BlockPos, Block>
         this.recipeIDs = recipeIDs;
     }
 
-    /**
-     * @deprecated No replacement is being provided
-     */
-    @Deprecated
-    public boolean isSameRoomAndRecipe(RoomRecipeMatch<ROOM> o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        return Objects.equals(room, o.room) &&
-                Objects.equals(recipeIDs, o.recipeIDs);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -48,14 +37,6 @@ public class RoomRecipeMatch<ROOM> extends RoomWithBlocks<ROOM, BlockPos, Block>
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), recipeIDs);
-    }
-
-    /**
-     * @deprecated Room recipes now have zero-or-more matches. Use getRecipeIDs().
-     */
-    @Override
-    public ResourceLocation getRecipeID() {
-        return recipeIDs.get(0);
     }
 
     public boolean anyMatch(ResourceLocation recipeId) {

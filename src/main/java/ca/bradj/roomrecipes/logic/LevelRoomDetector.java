@@ -101,7 +101,7 @@ public class LevelRoomDetector {
 
         Optional<Room> existing = existingRooms.apply(nextDoor);
         if (existing.isPresent() && InclusiveSpaces.isWhole(
-                existing.get().getSpace(), p -> checker.test(p, null, null)
+                existing.get().getSpace(), p -> checker.test(p, null, null), true
         )) {
             processedRooms.put(nextDoor, existing);
             return null;

@@ -45,18 +45,6 @@ public class RoomRecipe implements Recipe<Container>, Comparable<RoomRecipe> {
     private final ResourceLocation id;
     private final NonNullList<Ingredient> recipeItems;
 
-    /**
-     * @deprecated Use constructor with "isRecipeForFarms" boolean
-     */
-    @Deprecated(since = "1.18.2-0.0.6-alpha.3")
-    public RoomRecipe(
-            ResourceLocation id,
-            NonNullList<Ingredient> recipeItems,
-            int recipeStrength
-    ) {
-        this(id, recipeItems, recipeStrength, false);
-    }
-
     public RoomRecipe(
             ResourceLocation id,
             NonNullList<Ingredient> recipeItems,

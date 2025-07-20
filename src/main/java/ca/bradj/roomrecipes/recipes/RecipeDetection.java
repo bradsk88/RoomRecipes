@@ -23,18 +23,6 @@ import java.util.function.Function;
 
 public class RecipeDetection {
 
-    /**
-     * @deprecated RecipeDetection.getActiveRecipes
-     */
-    @Deprecated
-    public static Optional<RoomRecipeMatch<MCRoom>> getActiveRecipe(
-            Level level,
-            MCRoom room,
-            DoorDetection.DoorChecker doorChecker
-    ) {
-        return getActiveRecipes(level, room, false).map(v -> v);
-    }
-
     public static Optional<RoomRecipeMatches<MCRoom>> getActiveRecipes(
             Level level,
             MCRoom room,

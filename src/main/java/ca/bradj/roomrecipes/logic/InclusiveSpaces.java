@@ -112,26 +112,27 @@ public class InclusiveSpaces {
         }
         return false;
     }
-
+    
     // Returns true if the space has all four outside walls intact and no
     // internal dividing walls.
     public static boolean isWhole(
             InclusiveSpace space,
-            Predicate<Position> isWallO
+            Predicate<Position> isWallO,
+            boolean requireCorners
     ) {
         Map<Position, Boolean> cache = new HashMap<>();
         Predicate<Position> isWall = p -> cache.compute(p, (p2, r) -> r != null ? r : isWallO.test(p2));
-        if (!hasNorthAndSouthWalls(space, isWall)) return false;
-        if (!hasWestAndEastWalls(space, isWall)) return false;
+        if (!hasNorthAndSouthWalls(space, isWall, requireCorners)) return false;
+        if (!hasWestAndEastWalls(space, isWall, requireCorners)) return false;
         for (int x = space.getWestX() + 1; x < space.getEastX() - 1; x++) {
             int xx = x;
-            if (hasZWall(space, z -> isWall.test(new Position(xx, z)))) {
+            if (hasZWall(space, z -> isWall.test(new Position(xx, z)), requireCorners)) {
                 return false;
             }
         }
         for (int z = space.getNorthZ() + 1; z < space.getSouthZ() - 1; z++) {
             int zz = z;
-            if (hasZWall(space, x -> isWall.test(new Position(x, zz)))) {
+            if (hasZWall(space, x -> isWall.test(new Position(x, zz)), requireCorners)) {
                 return false;
             }
         }
@@ -141,21 +142,25 @@ public class InclusiveSpaces {
 
     private static boolean hasWestAndEastWalls(
             InclusiveSpace space,
-            Predicate<Position> isWall
+            Predicate<Position> isWall,
+            boolean requireCorners
     ) {
         return hasZWall(space, z -> {
             Position west = new Position(space.getWestX(), z);
             Position east = new Position(space.getWestX(), z);
             return isWall.test(west) && isWall.test(east);
-        });
+        }, requireCorners);
     }
 
     private static boolean hasZWall(
             InclusiveSpace space,
-            Predicate<Integer> test
+            Predicate<Integer> test,
+            boolean requireCorners
     ) {
 
-        for (int z = space.getNorthZ(); z < space.getSouthZ(); z++) {
+        int top = requireCorners ? space.getNorthZ(): space.getNorthZ() + 1;
+        int bot = requireCorners ? space.getSouthZ() : space.getSouthZ() - 1;
+        for (int z = top; z < bot; z++) {
             if (!test.test(z)) {
                 return false;
             }
@@ -165,10 +170,13 @@ public class InclusiveSpaces {
 
     private static boolean hasXWall(
             InclusiveSpace space,
-            Predicate<Integer> test
+            Predicate<Integer> test,
+            boolean requireCorners
     ) {
 
-        for (int x = space.getWestX(); x < space.getEastX(); x++) {
+        int neg = requireCorners ? space.getWestX() : space.getWestX() + 1;
+        int pos = requireCorners ? space.getEastX() : space.getEastX() - 1;
+        for (int x = neg; x < pos; x++) {
             if (!test.test(x)) {
                 return false;
             }
@@ -178,14 +186,15 @@ public class InclusiveSpaces {
 
     private static boolean hasNorthAndSouthWalls(
             InclusiveSpace space,
-            Predicate<Position> isWall
+            Predicate<Position> isWall,
+            boolean requireCorners
     ) {
 
         return hasXWall(space, x -> {
             Position north = new Position(x, space.getNorthZ());
             Position south = new Position(x, space.getSouthZ());
             return isWall.test(north) && isWall.test(south);
-        });
+        }, requireCorners);
     }
 
     public static boolean fullyContains(
