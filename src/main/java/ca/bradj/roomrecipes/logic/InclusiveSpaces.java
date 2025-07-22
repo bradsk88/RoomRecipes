@@ -96,23 +96,32 @@ public class InclusiveSpaces {
             Position pos
     ) {
         for (InclusiveSpace space : spaces) {
-            if (pos.x < space.getWestX() + 1) {
-                continue;
+            if (contains(space, pos)) {
+                return true;
             }
-            if (pos.x > space.getEastX()) {
-                continue;
-            }
-            if (pos.z < space.getNorthZ() + 1) {
-                continue;
-            }
-            if (pos.z > space.getSouthZ()) {
-                continue;
-            }
-            return true;
         }
         return false;
     }
-    
+
+    public static boolean contains(
+            InclusiveSpace space,
+            Position pos
+    ) {
+        if (pos.x < space.getWestX() + 1) {
+            return false;
+        }
+        if (pos.x > space.getEastX()) {
+            return false;
+        }
+        if (pos.z < space.getNorthZ() + 1) {
+            return false;
+        }
+        if (pos.z > space.getSouthZ()) {
+            return false;
+        }
+        return true;
+    }
+
     // Returns true if the space has all four outside walls intact and no
     // internal dividing walls.
     public static boolean isWhole(

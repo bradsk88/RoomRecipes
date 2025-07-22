@@ -1,24 +1,21 @@
 package ca.bradj.roomrecipes.recipes;
 
-import ca.bradj.roomrecipes.adapter.Positions;
-import ca.bradj.roomrecipes.adapter.RoomRecipeMatch;
 import ca.bradj.roomrecipes.adapter.RoomRecipeMatches;
-import ca.bradj.roomrecipes.core.space.InclusiveSpace;
-import ca.bradj.roomrecipes.logic.DoorDetection;
+import ca.bradj.roomrecipes.core.space.ThreePosition;
 import ca.bradj.roomrecipes.serialization.MCRoom;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
-import java.util.function.BiConsumer;
+import java.util.AbstractMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 public class RecipeDetection {
@@ -28,32 +25,35 @@ public class RecipeDetection {
             MCRoom room,
             boolean getFarmRecipesOnly
     ) {
-        Map<BlockPos, Block> blocksInSpace = getBlocksInRoom(level, room, false);
-        RecipeManager recipeManager = level.getRecipeManager();
-
-        List<Block> blocksList = ImmutableList.copyOf(blocksInSpace.values());
-        SimpleContainer inv = new SimpleContainer(blocksList.size());
-        for (int i = 0; i < blocksList.size(); i++) {
-            ItemStack stackInSlot = new ItemStack(blocksList.get(i), 1);
-            inv.setItem(i, stackInSlot);
-        }
-
-        List<RoomRecipe> recipes = recipeManager.getAllRecipesFor(RecipesInit.ROOM);
-        recipes = Lists.reverse(ImmutableList.sortedCopyOf(recipes));
-
-        List<ResourceLocation> matchedRecipes = recipes
-                .stream()
-                .filter(r -> getFarmRecipesOnly ? r.isFarmRecipe() : true)
-                .filter(r -> r.matches(inv, level))
-                .map(RoomRecipe::getId)
-                .toList();
-        if (matchedRecipes.isEmpty()) {
+        RecipeDetectionClean.Match<MCRoom, RoomRecipe, Block> activeRecipes = RecipeDetectionClean.getActiveRecipes(
+                tp -> level.getBlockState(pos(tp)).getBlock(),
+                room,
+                room.yCoord,
+                room.yCoord + 1,
+                () -> ImmutableList.copyOf(level.getRecipeManager().getAllRecipesFor(RecipesInit.ROOM)),
+                (recipe, blocks) -> recipe.matches(simulateContainer(blocks), level),
+                recipe -> getFarmRecipesOnly || !recipe.isFarmRecipe()
+        );
+        if (activeRecipes == null) {
             return Optional.empty();
         }
         return Optional.of(new RoomRecipeMatches<>(
-                room, ImmutableList.copyOf(matchedRecipes),
-                blocksInSpace.entrySet()
+                activeRecipes.room(),
+                activeRecipes.recipeIDs().stream().map(RoomRecipe::getId).collect(ImmutableList.toImmutableList()),
+                RecipeDetection.pos(activeRecipes.containedBlocks())
         ));
+    }
+
+    private static Iterable<Map.Entry<BlockPos, Block>> pos(Iterable<Map.Entry<ThreePosition, Block>> entries) {
+        return Lists.transform(
+                ImmutableList.copyOf(entries),
+                e -> new AbstractMap.SimpleImmutableEntry<>(pos(e.getKey()), e.getValue())
+        );
+    }
+
+    private static @NotNull SimpleContainer simulateContainer(ImmutableList<Block> blocks) {
+        ItemStack[] list = blocks.stream().map(b -> new ItemStack(b, 1)).toArray(ItemStack[]::new);
+        return new SimpleContainer(list);
     }
 
     public static ImmutableMap<BlockPos, Block> getBlocksInRoom(
@@ -69,57 +69,22 @@ public class RecipeDetection {
             MCRoom room,
             boolean includeWallBlocks
     ) {
-        HashMap<BlockPos, Block> b = new HashMap<>();
-        for (InclusiveSpace space : room.getSpaces()) {
-            BlockPos pos1 = Positions.ToBlock(space.getCornerA(), room.yCoord);
-            BlockPos pos2 = Positions.ToBlock(space.getCornerB(), room.yCoord).above();
-            addBlocksInSpace(level, includeWallBlocks, pos1, pos2, b::put);
-        }
-        return ImmutableMap.copyOf(b);
+        ImmutableMap<ThreePosition, Block> blocks = RecipeDetectionClean.getBlocksInRoom(
+                tp -> level.apply(pos(tp)),
+                room.getSpaces(),
+                room.yCoord,
+                room.yCoord + 1
+        );
+        return ImmutableMap.copyOf(
+                Lists.transform(
+                        ImmutableList.copyOf(blocks.entrySet()),
+                        e -> new AbstractMap.SimpleImmutableEntry<>(pos(e.getKey()), e.getValue())
+                )
+        );
     }
 
-    private static void addBlocksInSpace(
-            Function<BlockPos, Block> level,
-            boolean includeWallBlocks,
-            BlockPos pos1,
-            BlockPos pos2,
-            BiConsumer<BlockPos, Block> b
-    ) {
-        // Get the chunk containing the starting and ending coordinates
-        int xMin = Math.min(pos1.getX(), pos2.getX());
-        int xMax = Math.max(pos1.getX(), pos2.getX());
-        int zMin = Math.min(pos1.getZ(), pos2.getZ());
-        int zMax = Math.max(pos1.getZ(), pos2.getZ());
-        if (!includeWallBlocks) {
-            xMin = xMin + 1;
-            xMax = xMax - 1;
-            zMin = zMin + 1;
-            zMax = zMax - 1;
-        }
-        int chunkXMin = xMin >> 4;
-        int chunkXMax = xMax >> 4;
-        int chunkZMin = zMin >> 4;
-        int chunkZMax = zMax >> 4;
-        for (int chunkX = chunkXMin; chunkX <= chunkXMax; chunkX++) {
-            for (int chunkZ = chunkZMin; chunkZ <= chunkZMax; chunkZ++) {
-                // Iterate over all blocks in the chunk and add them to the list
-                int blockXMin = Math.max(xMin, chunkX << 4);
-                int blockXMax = Math.min(xMax, (chunkX << 4) + 15);
-                int blockZMin = Math.max(zMin, chunkZ << 4);
-                int blockZMax = Math.min(zMax, (chunkZ << 4) + 15);
-                for (int blockX = blockXMin; blockX <= blockXMax; blockX++) {
-                    for (int blockZ = blockZMin; blockZ <= blockZMax; blockZ++) {
-                        int yMin = Math.min(pos1.getY(), pos2.getY());
-                        int yMax = Math.max(pos1.getY(), pos2.getY());
-                        for (int blockY = yMin; blockY <= yMax; blockY++) {
-                            BlockPos blockPos = new BlockPos(blockX, blockY, blockZ);
-                            Block block = level.apply(blockPos);
-                            b.accept(blockPos, block);
-                        }
-                    }
-                }
-            }
-        }
+    private static BlockPos pos(ThreePosition tp) {
+        return new BlockPos(tp.x, tp.getY(), tp.z);
     }
 
 }
