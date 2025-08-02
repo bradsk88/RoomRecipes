@@ -45,7 +45,7 @@ class RecipeDetectionCleanTest {
         // @formatter:on
 
         Match<Room, TestRecipe, String> result = RecipeDetectionClean.getActiveRecipes(
-                tp -> getBlockAt(map, tp.x, tp.z),
+                tp -> getBlockAt(map, tp.getX(), tp.getZ()),
                 new Room(
                         new Position(0, 2),
                         ImmutableList.of(InclusiveSpace.from(0, 0).to(4, 1), InclusiveSpace.from(0, 1).to(5, 4))
@@ -62,7 +62,7 @@ class RecipeDetectionCleanTest {
     }
 
     @Test
-    void testGetBlocksInRoomWithTwoSpaces() {
+    void testGetBlocksInRoomWithTwoSpaces_W() {
 
         // @formatter:off
         String[][] map = {
@@ -75,10 +75,64 @@ class RecipeDetectionCleanTest {
         // @formatter:on
 
         ImmutableMap<ThreePosition, String> result = RecipeDetectionClean.getBlocksInRoom(
-                tp -> getBlockAt(map, tp.x, tp.z),
+                tp -> getBlockAt(map, tp.getX(), tp.getZ()),
                 ImmutableList.of(
                         InclusiveSpace.from(0, 0).to(4, 1),
                         InclusiveSpace.from(0, 2).to(5, 4)
+                ),
+                0,
+                0
+        );
+        ImmutableList<String> expected = ImmutableList.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A");
+        Assertions.assertEquals(expected, ImmutableList.sortedCopyOf(result.values()));
+    }
+
+    @Test
+    void testGetBlocksInRoomWithTwoSpaces_N() {
+
+        // @formatter:off
+        String[][] map = {
+                {"W", "W", "W", "D", "W"},
+                {"W", "0", "1", "2", "W"},
+                {"W", "3", "4", "5", "W"},
+                {"W", "6", "7", "8", "W"},
+                {"W", "9", "A", "W", "W"},
+                {"W", "W", "W", "W", "W"}
+        };
+        // @formatter:on
+
+        ImmutableMap<ThreePosition, String> result = RecipeDetectionClean.getBlocksInRoom(
+                tp -> getBlockAt(map, tp.getX(), tp.getZ()),
+                ImmutableList.of(
+                        InclusiveSpace.from(0, 0).to(2, 5),
+                        InclusiveSpace.from(2, 0).to(4, 4)
+                ),
+                0,
+                0
+        );
+        ImmutableList<String> expected = ImmutableList.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A");
+        ImmutableList<String> actual = ImmutableList.sortedCopyOf(result.values());
+        Assertions.assertEquals(expected, actual);
+    }
+
+    @Test
+    void testGetBlocksInRoom_MissingHalfCornersAddingInset_W() {
+
+        // @formatter:off
+        String[][] map = {
+                {"W", "W", "W", "W", "W", "W"},
+                {"D", "0", "1", "2", "3", "W"},
+                {"W", "4", "5", "6", "7", "W"},
+                {"W", "8", "9", "A", "W", "W"},
+                {"_", "W", "W", "W", "W", "_"}
+        };
+        // @formatter:on
+
+        ImmutableMap<ThreePosition, String> result = RecipeDetectionClean.getBlocksInRoom(
+                tp -> getBlockAt(map, tp.getX(), tp.getZ()),
+                ImmutableList.of(
+                        InclusiveSpace.from(0, 0).to(5, 3),
+                        InclusiveSpace.from(0, 3).to(4, 4)
                 ),
                 0,
                 0

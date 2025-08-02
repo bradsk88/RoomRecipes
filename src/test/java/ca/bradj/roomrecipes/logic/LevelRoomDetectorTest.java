@@ -270,4 +270,49 @@ class LevelRoomDetectorTest {
             }
         }
     }
+
+
+    @Test
+    public void Test_ShouldFindRoomWithMissingCornersOneSizeAndInsetCorner() {
+
+        // A = air
+        // W = wall
+        // D = door
+        String[][] map = {
+                {" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "},
+                {" ", "W", "W", "W", "W", "W", "W", "W", "W", "W", " "},
+                {" ", "W", " ", " ", " ", " ", " ", " ", " ", "W", " "},
+                {" ", "D", " ", " ", " ", " ", " ", " ", " ", "W", " "},
+                {" ", "W", " ", " ", " ", " ", " ", " ", "W", "W", " "},
+                {" ", " ", "W", "W", "W", "W", "W", "W", "W", " ", " "},
+                {" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "},
+        };
+
+        Position doorPos1 = new Position(1, 3);
+        LevelRoomDetector d = new LevelRoomDetector(
+                ImmutableList.of(doorPos1),
+                20,
+                1000,
+                WD(map),
+                false,
+                null
+        );
+        Room currentRoom = new Room(doorPos1, ImmutableList.of(
+                InclusiveSpace.from(1, 1).to(10, 4),
+                InclusiveSpace.from(1, 4).to(9, 5)
+        ));
+        Function<Position, Optional<Room>> currentState = p -> Optional.of(currentRoom);
+
+        @Nullable ImmutableMap<Position, Optional<Room>> res = d.proceed(currentState);
+
+        // The first iteration will return null - the detector only returns AFTER checking all doors
+        Assertions.assertNull(res);
+        res = d.proceed(currentState);
+
+        // It should be found after one iteration
+        Assertions.assertNotNull(res);
+        Optional<Room> room = res.get(doorPos1);
+        Assertions.assertNotNull(room);
+        Assertions.assertTrue(room.isPresent());
+    }
 }

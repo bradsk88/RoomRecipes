@@ -68,15 +68,13 @@ public class RecipeDetectionClean {
                     new ThreePosition(pos2.x, maxY, pos2.z),
                     (pos, block) -> {
                         blocks.put(pos, block);
-                        positions.put(pos, true);
+                        positions.put(pos.dropY(), true);
                     },
-                    (pos, block) -> positions.put(new Position(pos.x, pos.z), true)
+                    (pos, block) -> positions.put(pos.dropY(), true)
             );
         }
         // Iterate only the edges of each space
         for (InclusiveSpace space : room) {
-            // FIXME Somehow we need to
-
             // top
             Position a = space.getNorthXWall().negativeCorner();
             Position b = space.getNorthXWall().positiveCorner();
@@ -181,10 +179,10 @@ public class RecipeDetectionClean {
             BiConsumer<ThreePosition, B> ifInterior,
             BiConsumer<ThreePosition, B> ifWall
     ) {
-        int xMin = Math.min(pos1.x, pos2.x);
-        int xMax = Math.max(pos1.x, pos2.x);
-        int zMin = Math.min(pos1.z, pos2.z);
-        int zMax = Math.max(pos1.z, pos2.z);
+        int xMin = Math.min(pos1.getX(), pos2.getX());
+        int xMax = Math.max(pos1.getX(), pos2.getX());
+        int zMin = Math.min(pos1.getZ(), pos2.getZ());
+        int zMax = Math.max(pos1.getZ(), pos2.getZ());
         // Get the chunk containing the starting and ending coordinates
         int chunkXMin = xMin >> 4;
         int chunkXMax = xMax >> 4;

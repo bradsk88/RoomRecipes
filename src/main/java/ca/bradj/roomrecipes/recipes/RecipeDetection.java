@@ -84,7 +84,7 @@ public class RecipeDetection {
     }
 
     private static BlockPos pos(ThreePosition tp) {
-        return new BlockPos(tp.x, tp.getY(), tp.z);
+        return new BlockPos(tp.getX(), tp.getY(), tp.getZ());
     }
 
 }
