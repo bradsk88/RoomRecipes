@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -273,33 +274,35 @@ class LevelRoomDetectorTest {
 
 
     @Test
-    public void Test_ShouldFindRoomWithMissingCornersOneSizeAndInsetCorner() {
+    public void Test_ShouldFindRoomWithMissingCornersOneSideAndInsetCorner() {
 
         // A = air
         // W = wall
         // D = door
         String[][] map = {
-                {" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "},
-                {" ", "W", "W", "W", "W", "W", "W", "W", "W", "W", " "},
-                {" ", "W", " ", " ", " ", " ", " ", " ", " ", "W", " "},
-                {" ", "D", " ", " ", " ", " ", " ", " ", " ", "W", " "},
-                {" ", "W", " ", " ", " ", " ", " ", " ", "W", "W", " "},
-                {" ", " ", "W", "W", "W", "W", "W", "W", "W", " ", " "},
-                {" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "},
+                //0    1    2    3    4    5    6    7    8    9   10
+                {" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "}, // 0
+                {" ", "W", "W", "W", "W", "W", "W", "W", "W", "W", " "}, // 1
+                {" ", "W", " ", " ", " ", " ", " ", " ", " ", "W", " "}, // 2
+                {" ", "D", " ", " ", " ", " ", " ", " ", " ", "W", " "}, // 3
+                {" ", "W", " ", " ", " ", " ", " ", " ", "W", "W", " "}, // 4
+                {" ", " ", "W", "W", "W", "W", "W", "W", "W", " ", " "}, // 5
+                {" ", " ", " ", " ", " ", " ", " ", " ", " ", " ", " "}, // 6
         };
 
         Position doorPos1 = new Position(1, 3);
+        ArrayList<String> recorder = new ArrayList<>();
         LevelRoomDetector d = new LevelRoomDetector(
                 ImmutableList.of(doorPos1),
                 20,
                 1000,
                 WD(map),
                 false,
-                null
+                recorder::add
         );
         Room currentRoom = new Room(doorPos1, ImmutableList.of(
-                InclusiveSpace.from(1, 1).to(10, 4),
-                InclusiveSpace.from(1, 4).to(9, 5)
+                InclusiveSpace.from(1, 1).to(9, 4),
+                InclusiveSpace.from(1, 4).to(8, 5)
         ));
         Function<Position, Optional<Room>> currentState = p -> Optional.of(currentRoom);
 
@@ -307,7 +310,9 @@ class LevelRoomDetectorTest {
 
         // The first iteration will return null - the detector only returns AFTER checking all doors
         Assertions.assertNull(res);
+
         res = d.proceed(currentState);
+        Assertions.assertNotNull(res);
 
         // It should be found after one iteration
         Assertions.assertNotNull(res);

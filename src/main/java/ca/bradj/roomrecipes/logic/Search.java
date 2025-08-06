@@ -18,7 +18,7 @@ public class Search<T> {
         this.end = end;
     }
 
-    public static Search<Room> end(Room room) {
+    public static <T> Search<T> end(T room) {
         return new Search<>(room, true);
     }
 

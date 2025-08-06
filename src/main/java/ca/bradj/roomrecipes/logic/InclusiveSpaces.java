@@ -3,6 +3,7 @@ package ca.bradj.roomrecipes.logic;
 import ca.bradj.roomrecipes.core.space.InclusiveSpace;
 import ca.bradj.roomrecipes.core.space.Position;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -223,5 +224,18 @@ public class InclusiveSpaces {
             return false;
         }
         return true;
+    }
+
+    public static ImmutableSet<Position> getWallPositions(InclusiveSpace rect) {
+        ImmutableSet.Builder<Position> builder = ImmutableSet.builder();
+        for (int x = rect.getWestX(); x <= rect.getEastX(); x++) {
+            builder.add(new Position(x, rect.getNorthZ()));
+            builder.add(new Position(x, rect.getSouthZ()));
+        }
+        for (int z = rect.getNorthZ(); z <= rect.getSouthZ(); z++) {
+            builder.add(new Position(rect.getWestX(), z));
+            builder.add(new Position(rect.getEastX(), z));
+        }
+        return builder.build();
     }
 }

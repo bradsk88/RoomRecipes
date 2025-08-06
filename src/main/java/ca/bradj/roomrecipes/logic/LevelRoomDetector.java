@@ -111,10 +111,9 @@ public class LevelRoomDetector {
             return null;
         }
 
-        Optional<Room> roomForDoor = RoomDetection.findRoomForDoorIteration(
+        Optional<Room> roomForDoor = WallWalkingRoomDetection.tryFind(
                 nextDoor,
-                this.doorIteration.getOrDefault(nextDoor, 0) + 2,
-                maxDistanceFromDoor - 2,
+                this.doorIteration.getOrDefault(nextDoor, 0),
                 flightRecorder,
                 p -> checker.test(p, nextDoor, debugArt.get(nextDoor))
         ).toOptional();

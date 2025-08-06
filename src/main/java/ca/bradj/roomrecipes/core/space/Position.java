@@ -1,5 +1,7 @@
 package ca.bradj.roomrecipes.core.space;
 
+import ca.bradj.roomrecipes.logic.Direction;
+
 import java.util.Objects;
 
 public class Position {
@@ -52,5 +54,20 @@ public class Position {
 
     public String getUIString() {
         return String.format("[%d, %d]", x, z);
+    }
+
+    public Position relative(Direction initDirection) {
+        switch (initDirection) {
+            case NORTH:
+                return offset(0, -1);
+            case EAST:
+                return offset(1, 0);
+            case SOUTH:
+                return offset(0, 1);
+            case WEST:
+                return offset(-1, 0);
+            default:
+                throw new IllegalArgumentException("Invalid direction: " + initDirection);
+        }
     }
 }

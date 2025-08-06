@@ -3,8 +3,10 @@ package ca.bradj.roomrecipes.logic;
 import ca.bradj.roomrecipes.core.space.Position;
 import ca.bradj.roomrecipes.logic.interfaces.WallDetector;
 import ca.bradj.roomrecipes.rooms.XWall;
+import com.google.common.collect.ImmutableSet;
 
 import java.util.Optional;
+import java.util.Set;
 
 public class XWalls {
     public static boolean isConnected(XWall wall, WallDetector wd) {
@@ -82,5 +84,14 @@ public class XWalls {
             wasWall = false;
         }
         return Optional.empty();
+    }
+
+    public static Set<Position> getPositions(XWall wall) {
+        ImmutableSet.Builder<Position> builder = ImmutableSet.builder();
+        for (int x = wall.westCorner.x; x <= wall.eastCorner.x; x++) {
+            builder.add(new Position(x, wall.westCorner.z));
+            builder.add(new Position(x, wall.eastCorner.z));
+        }
+        return builder.build();
     }
 }

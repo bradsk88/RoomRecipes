@@ -3,8 +3,10 @@ package ca.bradj.roomrecipes.logic;
 import ca.bradj.roomrecipes.core.space.Position;
 import ca.bradj.roomrecipes.logic.interfaces.WallDetector;
 import ca.bradj.roomrecipes.rooms.ZWall;
+import com.google.common.collect.ImmutableSet;
 
 import java.util.Optional;
+import java.util.Set;
 
 public class ZWalls {
 
@@ -56,5 +58,14 @@ public class ZWalls {
             wasWall = false;
         }
         return Optional.empty();
+    }
+
+    public static Set<Position> getWallPositions(ZWall rect) {
+        ImmutableSet.Builder<Position> builder = ImmutableSet.builder();
+        for (int z = rect.northCorner.z; z <= rect.southCorner.z; z++) {
+            builder.add(new Position(rect.getX(), z));
+            builder.add(new Position(rect.getX(), z));
+        }
+        return builder.build();
     }
 }
