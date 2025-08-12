@@ -238,4 +238,15 @@ public class InclusiveSpaces {
         }
         return builder.build();
     }
+
+    public static String getShortString(InclusiveSpace space) {
+        return "[ " + space.getCornerA().getUIString() + " -> " + space.getCornerB().getUIString() + " ]";
+    }
+
+    public static String getShortString(Collection<InclusiveSpace> spaces) {
+        return spaces.stream()
+                .map(InclusiveSpaces::getShortString)
+                .reduce((a, b) -> a + ", " + b)
+                .orElse("[]");
+    }
 }

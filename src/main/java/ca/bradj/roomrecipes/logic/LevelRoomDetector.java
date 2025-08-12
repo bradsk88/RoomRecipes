@@ -64,7 +64,8 @@ public class LevelRoomDetector {
                 debugArt.get(door)[maxDistanceFromDoor][maxDistanceFromDoor] = "D";
             });
         }
-        this.flightRecorder = flightRecorder;
+        this.flightRecorder = flightRecorder == null ? s -> {
+        } : flightRecorder;
     }
 
     public boolean isDone() {
@@ -185,51 +186,64 @@ public class LevelRoomDetector {
         int corrections = 1;
         while (corrections > 0 && attempts <= 3) {
             attempts++;
+            flightRecorder.accept(String.format(
+                    "Running overlap removal. Attempt %d. Corrections: %d",
+                    attempts,
+                    corrections
+            ));
             Stream<Optional<Room>> onlyPresent = detectedRooms.values()
                                                               .stream()
                                                               .filter(Optional::isPresent);
-            List<Room> rooms = onlyPresent.map(Optional::get)
-                                          .toList();
+            Map<Position, Room> rooms = ImmutableMap.copyOf(onlyPresent.map(Optional::get)
+                                                                       .map(v -> new AbstractMap.SimpleEntry<>(
+                                                                               v.doorPos,
+                                                                               v
+                                                                       )).toList());
+            List<Position> leastUsedDoorPositions = getLeastUsedDoorPositionsFirst(rooms.values());
             corrections = 0;
-            for (Room r1 : rooms) {
+            for (Position p1 : leastUsedDoorPositions) {
+                Room r1 = rooms.get(p1);
                 if (corrections > 0) {
                     break;
                 }
-                for (Room r2 : rooms) {
+                for (Position p2 : leastUsedDoorPositions) {
+                    Room r2 = rooms.get(p2);
                     if (r1.equals(r2)) {
                         continue;
                     }
+                    Position r1dp = r1.getDoorPos();
+                    Position r2dp = r2.getDoorPos();
                     if (r1.getSpace()
                           .equals(r2.getSpace())) {
                         final Optional<Room> alternate = RoomDetection.findRoomForDoor(
-                                r2.getDoorPos(),
+                                r2dp,
                                 maxDistanceFromDoor,
                                 Optional.of(r1.getSpace()),
                                 0,
                                 this::checkWithoutArt
                         ).toOptional();
                         if (alternate.isPresent()) {
-                            if (rooms.stream()
+                            if (rooms.values().stream()
                                      .anyMatch(v -> v.getSpace()
                                                      .equals(alternate.get()
                                                                       .getSpace()))) {
                                 detectedRooms.put(
-                                        r2.getDoorPos(),
+                                        r2dp,
                                         Optional.empty()
                                 );
                                 corrections++;
                                 break;
                             }
-                            RoomRecipes.LOGGER.trace("Using alternate room: " + alternate.get());
+                            flightRecorder.accept("Using alternate room: " + sm(alternate.get()));
                             detectedRooms.put(
-                                    r2.getDoorPos(),
+                                    r2dp,
                                     alternate
                             );
                             corrections++;
                             break;
                         }
                         Optional<Room> alternate2 = RoomDetection.findRoomForDoor(
-                                r1.getDoorPos(),
+                                r1dp,
                                 maxDistanceFromDoor,
                                 Optional.of(r2.getSpace()),
                                 0,
@@ -237,15 +251,15 @@ public class LevelRoomDetector {
                         ).toOptional();
                         if (alternate2.isPresent()) {
                             detectedRooms.put(
-                                    r1.getDoorPos(),
+                                    r1dp,
                                     alternate2
                             );
                             corrections++;
-                            RoomRecipes.LOGGER.trace("Using alternate room: " + alternate2.get());
+                            flightRecorder.accept("Using alternate room: " + sm(alternate2.get()));
                             break;
                         }
                         detectedRooms.put(
-                                r2.getDoorPos(),
+                                r2dp,
                                 Optional.empty()
                         );
                         corrections++;
@@ -258,22 +272,39 @@ public class LevelRoomDetector {
                             double a1 = InclusiveSpaces.calculateArea(r1.getSpace());
                             double a2 = InclusiveSpaces.calculateArea(r2.getSpace());
                             if (a1 > a2) {
-                                RoomRecipes.LOGGER.debug("Chopping " + r2 + " off of " + r1);
+                                flightRecorder.accept("Chopping " + sm(r2.getSpace()) + " off of " + sm(r1.getSpace()));
                                 InclusiveSpace chopped = r1.getSpace()
                                                            .chopOff(r2.getSpace());
+
+                                if (!InclusiveSpaces.getWallPositions(chopped).contains(r1dp)) {
+                                    flightRecorder.accept("Giving " + sm(r2.getSpace()) + " to " + r2dp + " instead of " + r1dp);
+                                    detectedRooms.put(r2dp, Optional.of(r2.withSpace(chopped)));
+                                    detectedRooms.put(r1dp, Optional.of(r1.withSpace(r2.getSpace())));
+                                    corrections++;
+                                    break;
+                                }
+                                flightRecorder.accept("Giving chopped-off portion to " + r1dp);
                                 detectedRooms.put(
-                                        r1.getDoorPos(),
+                                        r1dp,
                                         Optional.of(r1.withSpace(chopped))
                                 );
                                 corrections++;
                                 break;
                             }
                             if (a2 > a1) {
-                                RoomRecipes.LOGGER.debug("Chopping " + r1 + " off of " + r2);
+                                flightRecorder.accept("Chopping " + sm(r1.getSpace()) + " off of " + sm(r2.getSpace()));
                                 InclusiveSpace chopped = r2.getSpace()
                                                            .chopOff(r1.getSpace());
+                                if (!InclusiveSpaces.getWallPositions(chopped).contains(r2dp)) {
+                                    flightRecorder.accept("Giving " + sm(r1.getSpace()) + " to " + r1dp + " instead of " + r2dp);
+                                    detectedRooms.put(r1dp, Optional.of(r1.withSpace(chopped)));
+                                    detectedRooms.put(r2dp, Optional.of(r2.withSpace(r1.getSpace())));
+                                    corrections++;
+                                    break;
+                                }
+                                flightRecorder.accept("Giving chopped-off portion to " + r2dp);
                                 detectedRooms.put(
-                                        r2.getDoorPos(),
+                                        r2dp,
                                         Optional.of(r2.withSpace(chopped))
                                 );
                                 corrections++;
@@ -285,6 +316,35 @@ public class LevelRoomDetector {
             }
         }
         return ImmutableMap.copyOf(detectedRooms);
+    }
+
+    private List<Position> getLeastUsedDoorPositionsFirst(Collection<Room> values) {
+        ImmutableList.Builder<Position> b = ImmutableList.builder();
+        for (Room value : values) {
+            for (InclusiveSpace space : value.getSpaces()) {
+                b.addAll(InclusiveSpaces.getWallPositions(space));
+            }
+        }
+        ImmutableList<Position> wallPos = b.build();
+        HashMap<Position, Integer> m = new HashMap<>();
+        for (Room value : values) {
+            if (wallPos.contains(value.doorPos)) {
+                m.merge(value.doorPos, -1, Integer::sum);
+            }
+        }
+        return m.entrySet()
+                .stream()
+                .sorted(Comparator.comparingInt(Map.Entry::getValue))
+                .map(Map.Entry::getKey)
+                .collect(ImmutableList.toImmutableList());
+    }
+
+    private String sm(Room room) {
+        return "Room{" + room.getDoorPos().getUIString() + ": " + sm(room.getSpace()) + "}";
+    }
+
+    private String sm(InclusiveSpace space) {
+        return InclusiveSpaces.getShortString(space);
     }
 
     private boolean checkWithoutArt(Position p) {

@@ -2,6 +2,7 @@ package ca.bradj.roomrecipes.core;
 
 import ca.bradj.roomrecipes.core.space.InclusiveSpace;
 import ca.bradj.roomrecipes.core.space.Position;
+import ca.bradj.roomrecipes.logic.InclusiveSpaces;
 import ca.bradj.roomrecipes.rooms.XWall;
 import ca.bradj.roomrecipes.rooms.ZWall;
 import com.google.common.collect.ImmutableList;
@@ -18,6 +19,7 @@ public class Room {
         }
         return Optional.empty();
     }
+
     public Optional<ZWall> getBackZWall() {
         if (doorPos.x == getSpace().getWestX()) {
             return Optional.of(getSpace().getEastZWall());
@@ -47,15 +49,20 @@ public class Room {
             Position doorPos,
             InclusiveSpace space
     ) {
-        // TODO: Validate doorPos is in space
         this(doorPos, ImmutableList.of(space));
     }
+
     public Room(
             Position doorPos,
             Collection<InclusiveSpace> spaces
     ) {
         // TODO: Validate doorPos is in space
         this.doorPos = doorPos;
+        if (spaces.stream().noneMatch(space -> InclusiveSpaces.getWallPositions(space).contains(doorPos))) {
+            throw new IllegalArgumentException(String.format(
+                    "Door Position %s must be within spaces %s", doorPos.getUIString(), InclusiveSpaces.getShortString(spaces)
+            ));
+        }
         this.space = new ArrayList<>(spaces);
     }
 
@@ -63,8 +70,8 @@ public class Room {
         return this.space.get(0);
     }
 
-    public Collection<InclusiveSpace> getSpaces() {
-        return this.space;
+    public ImmutableList<InclusiveSpace> getSpaces() {
+        return ImmutableList.copyOf(this.space);
     }
 
     @Override

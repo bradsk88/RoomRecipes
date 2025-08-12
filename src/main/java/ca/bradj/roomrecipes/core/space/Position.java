@@ -1,10 +1,11 @@
 package ca.bradj.roomrecipes.core.space;
 
 import ca.bradj.roomrecipes.logic.Direction;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class Position {
+public class Position implements Comparable<Position>{
     public Position(
             int x,
             int z
@@ -68,6 +69,15 @@ public class Position {
                 return offset(-1, 0);
             default:
                 throw new IllegalArgumentException("Invalid direction: " + initDirection);
+        }
+    }
+
+    @Override
+    public int compareTo(@NotNull Position o) {
+        if (this.x != o.x) {
+            return Integer.compare(this.x, o.x);
+        } else {
+            return Integer.compare(this.z, o.z);
         }
     }
 }

@@ -8,15 +8,13 @@ import ca.bradj.roomrecipes.logic.interfaces.WallDetector;
 import ca.bradj.roomrecipes.rooms.ZWall;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.ConsoleHandler;
 
@@ -574,16 +572,20 @@ class LevelRoomDetectionTest {
         // W = wall
         // D = door
         String[][] map = {
-                {"W", "W", "W", "D", "W"},
-                {"W", "A", "D", "A", "W"},
-                {"W", "W", "W", "W", "W"}
+                //0    1    2    3    4
+                {"W", "W", "W", "D", "W"}, // 0
+                {"W", "A", "D", "A", "W"}, // 1
+                {"W", "W", "W", "W", "W"}  // 2
         };
 
+        List<String> flightRecorder = new ArrayList<>();
         ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
                 ImmutableList.of(
                         new Position(3, 0),
                         new Position(2, 1)
-                ), 4, WD(map)
+                ), 4,
+                flightRecorder::add,
+                WD(map)
         );
         assertTrue(room.containsKey(new Position(3, 0)));
         assertTrue(room.containsKey(new Position(2, 1)));
@@ -633,7 +635,7 @@ class LevelRoomDetectionTest {
     }
 
     @Test
-    public void Test_DetectLShape_N() {
+    public void Test_DetectSegmentedLShape_N() {
         java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
         Configurator.setLevel(RoomRecipes.LOGGER.getName(), Level.TRACE);
         // _ = air
@@ -673,7 +675,7 @@ class LevelRoomDetectionTest {
     }
 
     @Test
-    public void Test_DetectLShape_N2() {
+    public void Test_DetectSegmentedLShape_N2() {
         java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
         Configurator.setLevel(RoomRecipes.LOGGER.getName(), Level.TRACE);
         // _ = air
@@ -771,13 +773,13 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(2, 1)).isPresent());
 
         List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(2, 1)).get().getSpaces());
-        assertEquals(2, spaces.size());
 
-        InclusiveSpace expectedCorners1 = InclusiveSpace.from(0, 0).to(2, 2);
-        InclusiveSpace expectedCorners2 = InclusiveSpace.from(0, 2).to(4, 4);
 
-        assertEquals(expectedCorners1, spaces.get(0));
-        assertEquals(expectedCorners2, spaces.get(1));
+        assertSpacesEqual(
+                InclusiveSpace.from(0, 0).to(2, 4),
+                InclusiveSpace.from(2, 2).to(4, 4),
+                spaces
+        );
     }
 
     @Test
@@ -833,13 +835,12 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(0, 1)).isPresent());
 
         List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(0, 1)).get().getSpaces());
-        assertEquals(2, spaces.size());
 
-        InclusiveSpace expectedCorners1 = InclusiveSpace.from(0, 0).to(4, 2);
-        InclusiveSpace expectedCorners2 = InclusiveSpace.from(0, 2).to(2, 4);
-
-        assertEquals(expectedCorners1, spaces.get(0));
-        assertEquals(expectedCorners2, spaces.get(1));
+        assertSpacesEqual(
+                InclusiveSpace.from(0, 0).to(4, 2),
+                InclusiveSpace.from(0, 2).to(2, 4),
+                spaces
+        );
     }
 
     @Test
@@ -850,30 +851,52 @@ class LevelRoomDetectionTest {
         // W = wall
         // D = door
         String[][] map = {
-                {"W", "W", "W", "W", "W", "_"},
-                {"W", "_", "_", "_", "W", "_"},
-                {"W", "_", "W", "D", "W", "_"},
-                {"W", "_", "W", "_", "_", "_"},
-                {"W", "W", "W", "_", "_", "_"}
+                //0    1    2    3    4    5
+                {"W", "W", "W", "W", "W", "_"}, // 0
+                {"W", "_", "_", "_", "W", "_"}, // 1
+                {"W", "_", "W", "D", "W", "_"}, // 2
+                {"W", "_", "W", "_", "_", "_"}, // 3
+                {"W", "W", "W", "_", "_", "_"}  // 4
         };
 
         ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
                 ImmutableList.of(
                         new Position(3, 2)
-                ), 10, WD(map)
+                ), 10, System.out::println, WD(map)
         );
         assertTrue(room.containsKey(new Position(3, 2)));
 
         assertTrue(room.get(new Position(3, 2)).isPresent());
 
         List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(3, 2)).get().getSpaces());
-        assertEquals(2, spaces.size());
 
-        InclusiveSpace expectedCorners1 = InclusiveSpace.from(2, 0).to(4, 2);
-        InclusiveSpace expectedCorners2 = InclusiveSpace.from(0, 0).to(2, 4);
+        assertSpacesEqual(
+                InclusiveSpace.from(0, 0).to(4, 2),
+                InclusiveSpace.from(0, 2).to(2, 4),
+                spaces
+        );
+    }
 
-        assertEquals(expectedCorners1, spaces.get(0));
-        assertEquals(expectedCorners2, spaces.get(1));
+    /// x x x
+    /// x x x
+    /// x x x
+
+    private static void assertSpacesEqual(
+            InclusiveSpace lPart1,
+            InclusiveSpace lPart2,
+            List<InclusiveSpace> spaces
+    ) {
+        ImmutableSet.Builder<Position> b = ImmutableSet.builder();
+        b.addAll(InclusiveSpaces.getAllEnclosedPositions(lPart1));
+        b.addAll(InclusiveSpaces.getAllEnclosedPositions(lPart2));
+        Set<Position> expected = b.build().stream().sorted().collect(ImmutableSet.toImmutableSet());
+
+        Set<Position> actual = spaces.stream()
+                .flatMap(space -> InclusiveSpaces.getAllEnclosedPositions(space).stream())
+                .sorted()
+                .collect(ImmutableSet.toImmutableSet());
+
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -901,13 +924,12 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(3, 0)).isPresent());
 
         List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(3, 0)).get().getSpaces());
-        assertEquals(2, spaces.size());
 
-        InclusiveSpace expectedCorners1 = InclusiveSpace.from(2, 0).to(4, 4);
-        InclusiveSpace expectedCorners2 = InclusiveSpace.from(0, 0).to(2, 2);
-
-        assertEquals(expectedCorners1, spaces.get(0));
-        assertEquals(expectedCorners2, spaces.get(1));
+        assertSpacesEqual(
+                InclusiveSpace.from(0, 0).to(4, 2),
+                InclusiveSpace.from(2, 2).to(4, 4),
+                spaces
+        );
     }
 
     @Test
@@ -935,13 +957,12 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(2, 3)).isPresent());
 
         List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(2, 3)).get().getSpaces());
-        assertEquals(2, spaces.size());
 
-        InclusiveSpace expectedCorners1 = InclusiveSpace.from(2, 2).to(4, 4);
-        InclusiveSpace expectedCorners2 = InclusiveSpace.from(0, 0).to(4, 2);
-
-        assertEquals(expectedCorners1, spaces.get(0));
-        assertEquals(expectedCorners2, spaces.get(1));
+        assertSpacesEqual(
+                InclusiveSpace.from(0, 0).to(4, 2),
+                InclusiveSpace.from(2, 2).to(4, 4),
+                spaces
+        );
     }
 
     @Test
@@ -969,13 +990,12 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(4, 3)).isPresent());
 
         List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(4, 3)).get().getSpaces());
-        assertEquals(2, spaces.size());
 
-        InclusiveSpace expectedCorners1 = InclusiveSpace.from(0, 2).to(4, 4);
-        InclusiveSpace expectedCorners2 = InclusiveSpace.from(2, 0).to(4, 2);
-
-        assertEquals(expectedCorners1, spaces.get(0));
-        assertEquals(expectedCorners2, spaces.get(1));
+        assertSpacesEqual(
+                InclusiveSpace.from(2, 0).to(4, 2),
+                InclusiveSpace.from(0, 2).to(4, 4),
+                spaces
+        );
     }
 
     @Test
@@ -1156,15 +1176,14 @@ class LevelRoomDetectionTest {
 
     @Test
     public void Test_DetectJoiningDoor() {
-        java.util.logging.Logger.getLogger(RoomRecipes.LOGGER.getName()).addHandler(new ConsoleHandler());
-        Configurator.setLevel(RoomRecipes.LOGGER.getName(), Level.TRACE);
         // _ = air
         // W = wall
         // D = door
         String[][] map = {
-                {"W", "W", "W", "W", "W"},
-                {"W", "_", "D", "_", "W"},
-                {"W", "D", "W", "D", "W"}
+                //0    1    2    3    4
+                {"W", "W", "W", "W", "W"}, // 0
+                {"W", "_", "D", "_", "W"}, // 1
+                {"W", "D", "W", "D", "W"} //  2
         };
 
         ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
@@ -1172,7 +1191,7 @@ class LevelRoomDetectionTest {
                         new Position(1, 2),
                         new Position(3, 2),
                         new Position(2, 1)
-                ), 10, WD(map)
+                ), 10, System.out::println, WD(map)
         );
         assertTrue(room.containsKey(new Position(1, 2)));
         assertTrue(room.containsKey(new Position(3, 2)));
@@ -1314,7 +1333,7 @@ class LevelRoomDetectionTest {
                 ImmutableList.of(
                         new Position(3, 2)
                 ), 10,
-                recorder::add,
+                System.out::println,
                 WD(map)
         );
         assertEquals(1, room.size());
@@ -1322,15 +1341,12 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(3, 2)).isPresent());
 
         List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(3, 2)).get().getSpaces());
-        assertEquals(3, spaces.size());
 
-        InclusiveSpace expectedCorners1 = InclusiveSpace.from(0, 1).to(3, 3);
-        InclusiveSpace expectedCorners2 = InclusiveSpace.from(0, 0).to(2, 1);
-        InclusiveSpace expectedCorners3 = InclusiveSpace.from(0, 3).to(2, 4);
-
-        assertEquals(expectedCorners1, spaces.get(0));
-        assertEquals(expectedCorners2, spaces.get(1));
-        assertEquals(expectedCorners3, spaces.get(2));
+        assertSpacesEqual(
+                InclusiveSpace.from(0, 0).to(2, 4),
+                InclusiveSpace.from(2, 3).to(4, 3),
+                spaces
+        );
     }
 
     @Test
@@ -1430,15 +1446,12 @@ class LevelRoomDetectionTest {
         assertTrue(room.get(new Position(2, 0)).isPresent());
 
         List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(2, 0)).get().getSpaces());
-        assertEquals(3, spaces.size());
 
-        InclusiveSpace expectedCorners1 = InclusiveSpace.from(1, 0).to(3, 4);
-        InclusiveSpace expectedCorners2 = InclusiveSpace.from(0, 1).to(1, 4);
-        InclusiveSpace expectedCorners3 = InclusiveSpace.from(3, 1).to(4, 4);
-
-        assertEquals(expectedCorners1, spaces.get(0));
-        assertEquals(expectedCorners2, spaces.get(1));
-        assertEquals(expectedCorners3, spaces.get(2));
+        assertSpacesEqual(
+                InclusiveSpace.from(1, 0).to(3, 1),
+                InclusiveSpace.from(0, 1).to(4, 4),
+                spaces
+        );
     }
 
     @Test
