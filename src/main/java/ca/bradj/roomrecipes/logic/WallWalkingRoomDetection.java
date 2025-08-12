@@ -3,13 +3,14 @@ package ca.bradj.roomrecipes.logic;
 import ca.bradj.roomrecipes.core.Room;
 import ca.bradj.roomrecipes.core.space.Position;
 import ca.bradj.roomrecipes.logic.interfaces.WallDetector;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
 
 // Attempts to detect a room by walking along walls, starting at a door position
 // and turning clockwise whenever possible.
@@ -32,18 +33,26 @@ public class WallWalkingRoomDetection {
         Position checkPos = doorPos.relative(dir);
         flightRecorder.accept(String.format("Searching %s at %s for iteration %d from %s", dir, sm(checkPos), iteration, sm(doorPos)));
         if (wd.IsWall(checkPos)) {
-            flightRecorder.accept(String.format("Found wall at %s, continuing %s", sm(checkPos), dir));
-            Search<ImmutableSet<Position>> result = tryFindWalls(
-                    checkPos, Direction::cw, dir, flightRecorder, wd, ImmutableSet.of(
-                            doorPos, checkPos
-                    ), p -> p.equals(doorPos.relative(dir.opp())),
-                    0
-            );
+            flightRecorder.accept(String.format("Found wall at %s, continuing facing %s", sm(checkPos), dir));
+
+            Crawl.Checks checks = new Crawl.Checks() {
+                @Override
+                public boolean isWall(Position pos) {
+                    return wd.IsWall(pos);
+                }
+
+                @Override
+                public boolean isOrigin(Position pos) {
+                    return pos.equals(doorPos.relative(dir.opp()));
+                }
+            };
+
+            ImmutableList<Crawl> crawls = Crawl.forwardSpread(checkPos, dir, checks, ImmutableSet.of(doorPos, checkPos));
+            Search<ImmutableSet<Position>> result = tryFindWalls(crawls, flightRecorder, 0);
             if (result.isEnd()) {
                 return result;
             }
         } else {
-            flightRecorder.accept(String.format("No wall found at %s. Ending iteration.", sm(checkPos)));
         }
 
         return Search.empty();
@@ -55,13 +64,8 @@ public class WallWalkingRoomDetection {
     }
 
     private static Search<ImmutableSet<Position>> tryFindWalls(
-            Position prevPos,
-            Function<Direction, Direction> rotate,
-            Direction dir,
+            Collection<Crawl> crawls,
             Consumer<String> flightRecorder,
-            WallDetector wd,
-            Set<Position> wallsSoFar,
-            Predicate<Position> isPastStart,
             int depth
     ) {
         if (depth > 1000) {
@@ -69,111 +73,41 @@ public class WallWalkingRoomDetection {
             return Search.empty();
         }
 
-        Position checkPos = prevPos.relative(dir);
-        flightRecorder.accept(String.format("Checking %s at %s", dir, checkPos));
-        if (wd.IsWall(checkPos)) {
-            Search<ImmutableSet<Position>> result = tfw(rotate, dir, flightRecorder, wd, wallsSoFar, isPastStart, depth, checkPos);
-            if (result.isEnd()) {
-                return result;
-            }
-        } else {
-            flightRecorder.accept("No wall at " + checkPos);
-        }
-        // Try the 45 degree diagonal
-        dir = rotate.apply(dir);
-        checkPos = checkPos.relative(dir);
-        flightRecorder.accept(String.format("Checking diagonal %s%s at %s", dir.ccw(), dir, checkPos));
-        if (wd.IsWall(checkPos)) {
-            Search<ImmutableSet<Position>> result = tfw(rotate, dir, flightRecorder, wd, wallsSoFar, isPastStart, depth, checkPos);
-            if (result.isEnd()) {
-                return result;
-            }
-        } else {
-            flightRecorder.accept("No wall at " + checkPos);
-        }
-        // Try 90
-        checkPos = prevPos.relative(dir);
-        flightRecorder.accept(String.format("Checking 90 degrees (%s) at %s", dir, checkPos));
-        if (wd.IsWall(checkPos)) {
-            Search<ImmutableSet<Position>> result = tfw(rotate, dir, flightRecorder, wd, wallsSoFar, isPastStart, depth, checkPos);
-            if (result.isEnd()) {
-                return result;
-            }
-        } else {
-            flightRecorder.accept("No wall at " + checkPos);
-        }
-        // Try 135 degree diagonal
-        dir = rotate.apply(dir);
-        checkPos = checkPos.relative(dir);
-        flightRecorder.accept(String.format("Checking 135 degrees (%s) at %s", dir, checkPos));
-        if (wd.IsWall(checkPos)) {
-            Search<ImmutableSet<Position>> result = tfw(rotate, dir, flightRecorder, wd, wallsSoFar, isPastStart, depth, checkPos);
-            if (result.isEnd()) {
-                return result;
-            }
-        } else {
-            flightRecorder.accept("No wall at " + checkPos);
-        }
-        // Skip 180
-        checkPos = prevPos.relative(dir);
-        flightRecorder.accept(String.format("Skipping 180 degrees (%s) at %s", dir, checkPos));
+        ImmutableList.Builder<Crawl> b = ImmutableList.builder();
 
-        // Try 225 degree diagonal
-        dir = rotate.apply(dir);
-        checkPos = checkPos.relative(dir);
-        flightRecorder.accept(String.format("Skipping 225 degrees (%s) at %s", dir, checkPos));
+        Set<Position> positions = new HashSet<>();
 
-        // Try 270
-        checkPos = prevPos.relative(dir);
-        flightRecorder.accept(String.format("Checking 270 degrees (%s) at %s", dir, checkPos));
-        if (wd.IsWall(checkPos)) {
-            Search<ImmutableSet<Position>> result = tfw(rotate, dir, flightRecorder, wd, wallsSoFar, isPastStart, depth, checkPos);
-            if (result.isEnd()) {
-                return result;
+        for (Crawl crawl : crawls) {
+            flightRecorder.accept(crawl.toString());
+
+            if (crawl.isOrigin()) {
+                flightRecorder.accept("Reached origin, recording wall positions.");
+                // Instead of returning immediately, we collect positions from
+                // (potentially) multiple parallel crawls. This allows us to
+                // handle mirrored rooms with a door in the adjoining wall.
+                positions.addAll(crawl.getCheckedPositions());
+                continue;
             }
-        } else {
-            flightRecorder.accept("No wall at " + checkPos);
-        }
-        // Try 315 degree diagonal
-        dir = rotate.apply(dir);
-        checkPos = checkPos.relative(dir);
-        flightRecorder.accept(String.format("Checking 315 degrees (%s) at %s", dir, checkPos));
-        if (wd.IsWall(checkPos)) {
-            Search<ImmutableSet<Position>> result = tfw(rotate, dir, flightRecorder, wd, wallsSoFar, isPastStart, depth, checkPos);
-            if (result.isEnd()) {
-                return result;
+
+            ImmutableList<Crawl> nextSteps = crawl.getNextSteps();
+            if (nextSteps == null || nextSteps.isEmpty()) {
+                continue;
             }
-        } else {
-            flightRecorder.accept("No wall at " + checkPos);
+            flightRecorder.accept("--> Detected wall <--");
+            b.addAll(nextSteps);
         }
 
-        return Search.empty();
-    }
-
-    private static Search<ImmutableSet<Position>> tfw(
-            Function<Direction, Direction> rotate,
-            Direction dir,
-            Consumer<String> flightRecorder,
-            WallDetector wd,
-            Set<Position> wallsSoFar,
-            Predicate<Position> isPastStart,
-            int depth,
-            Position checkPos
-    ) {
-        ImmutableSet<Position> wsf = ImmutableSet.<Position>builder().addAll(wallsSoFar).add(checkPos).build();
-        if (isPastStart.test(checkPos)) {
-            flightRecorder.accept("Passed start position. Ending.");
-            ImmutableSet.Builder<Position> b = ImmutableSet.builder();
-            return Search.end(wsf);
+        if (!positions.isEmpty()) {
+            flightRecorder.accept("One or more rooms found connected to door. Returning all positions.");
+            return Search.end(ImmutableSet.copyOf(positions));
         }
-        flightRecorder.accept(String.format("Found wall at %s, continuing %s", checkPos, dir));
-        ImmutableSet.Builder<Position> b = ImmutableSet.builder();
-        Search<ImmutableSet<Position>> result = tryFindWalls(
-                checkPos, rotate, dir, flightRecorder,
-                wd, wsf,
-                isPastStart, depth + 1
-        );
-        return result;
+
+        crawls = b.build();
+        if (crawls.isEmpty()) {
+            return Search.empty();
+        }
+
+        return tryFindWalls(crawls, flightRecorder, depth + 1);
     }
 
     public static Search<Room> tryFind(

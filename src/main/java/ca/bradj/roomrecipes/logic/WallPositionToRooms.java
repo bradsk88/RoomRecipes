@@ -25,10 +25,13 @@ public class WallPositionToRooms {
 
         ImmutableList.Builder<InclusiveSpace> b = ImmutableList.builder();
 
-        InclusiveSpace rect = gerRect(positions, b);
+        Set<Position> coveredSoFar = new HashSet<>();
+
+        InclusiveSpace rect = getRect(positions, b);
         if (rect != null) {
             b.add(rect);
-            Sets.SetView<Position> difference = Sets.difference(positions, InclusiveSpaces.getWallPositions(rect));
+            coveredSoFar.addAll(InclusiveSpaces.getWallPositions(rect));
+            Sets.SetView<Position> difference = Sets.difference(positions, coveredSoFar);
             if (difference.isEmpty()) {
                 return b.build();
             }
@@ -37,16 +40,45 @@ public class WallPositionToRooms {
                                     .addAll(ZWalls.getWallPositions(rect.getEastZWall()))
                                     .build();
         }
-        rect = gerRect(positions.stream().map(v -> new Position(-v.x, -v.z)).toList(), b);
+        rect = getRect(positions.stream().map(v -> new Position(-v.x, -v.z)).toList(), b);
         if (rect != null) {
             Position a = rect.getCornerA();
             Position bb = rect.getCornerB();
-            b.add(InclusiveSpace.from(-a.x, -a.z).to(-bb.x, -bb.z));
+            InclusiveSpace unspun = InclusiveSpace.from(-a.x, -a.z).to(-bb.x, -bb.z);
+            b.add(unspun);
+            coveredSoFar.addAll(InclusiveSpaces.getWallPositions(unspun));
+            Sets.SetView<Position> difference = Sets.difference(positions, coveredSoFar);
+            if (difference.isEmpty()) {
+                return b.build();
+            }
         }
-        return b.build();
+        return simplify(b.build());
     }
 
-    private @Nullable InclusiveSpace gerRect(
+    private ImmutableList<InclusiveSpace> simplify(ImmutableList<InclusiveSpace> build) {
+        if (build.size() != 2) {
+            return build;
+        }
+        InclusiveSpace a = build.get(0);
+        InclusiveSpace b = build.get(1);
+
+        if (a.getWestX() == b.getWestX() && a.getEastX() == b.getEastX()) {
+            // They are on the same X wall
+            if (a.getNorthZ() == b.getSouthZ() || a.getSouthZ() == b.getNorthZ()) {
+                return ImmutableList.of(InclusiveSpace.from(a.getWestX(), a.getNorthZ())
+                                                      .to(a.getEastX(), b.getSouthZ()));
+            }
+        } else if (a.getNorthZ() == b.getNorthZ() && a.getSouthZ() == b.getSouthZ()) {
+            // They are on the same Z wall
+            if (a.getWestX() == b.getEastX() || a.getEastX() == b.getWestX()) {
+                return ImmutableList.of(InclusiveSpace.from(a.getWestX(), a.getNorthZ())
+                                                      .to(b.getEastX(), a.getSouthZ()));
+            }
+        }
+        return build;
+    }
+
+    private @Nullable InclusiveSpace getRect(
             Collection<Position> positions,
             ImmutableList.Builder<InclusiveSpace> b
     ) {

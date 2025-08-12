@@ -16,6 +16,16 @@ public enum Direction {
         };
     }
 
+    public static String toString(
+            Direction d1,
+            Direction d2
+    ) {
+        if (d1 == NORTH || d1 == SOUTH) {
+            return d1.toString() + d2;
+        }
+        return d2.toString() + d1;
+    }
+
     public Direction ccw() {
         return switch (this) {
             case NORTH -> WEST;

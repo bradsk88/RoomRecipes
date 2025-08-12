@@ -35,9 +35,39 @@ public class TestHelpers {
             return cz.test(p);
         }
     }
+    public static class TrackedWD2 implements WallDetector {
+
+        private final String[] map;
+        private final HashSet<Position> checks = new HashSet<>();
+
+        public TrackedWD2(String[] map) {
+            this.map = map;
+        }
+
+        @Override
+        public boolean IsWall(Position p) {
+            Predicate<Position> cz = dp -> {
+                if (dp.x < 0 || dp.z < 0) {
+                    return false;
+                }
+                if (dp.x >= map[0].length() || dp.z >= map.length) {
+                    return false;
+                }
+                char v = map[dp.z].charAt(dp.x);
+                return 'W' == v || 'D' == v || 'w' == v;
+            };
+            if (!checks.add(p)) {
+                throw new AssertionError("Double-checked spot - inefficient!");
+            }
+            return cz.test(p);
+        }
+    }
 
     public static TrackedWD WD(String[][] map) {
         return new TrackedWD(map);
+    }
+    public static TrackedWD2 WD2(String[] map) {
+        return new TrackedWD2(map);
     }
 
 

@@ -58,11 +58,11 @@ public class Room {
     ) {
         // TODO: Validate doorPos is in space
         this.doorPos = doorPos;
-        if (spaces.stream().noneMatch(space -> InclusiveSpaces.getWallPositions(space).contains(doorPos))) {
-            throw new IllegalArgumentException(String.format(
-                    "Door Position %s must be within spaces %s", doorPos.getUIString(), InclusiveSpaces.getShortString(spaces)
-            ));
-        }
+//        if (spaces.stream().noneMatch(space -> InclusiveSpaces.getWallPositions(space).contains(doorPos))) {
+//            throw new IllegalArgumentException(String.format(
+//                    "Door Position %s must be within spaces %s", doorPos.getUIString(), InclusiveSpaces.getShortString(spaces)
+//            ));
+//        }
         this.space = new ArrayList<>(spaces);
     }
 
