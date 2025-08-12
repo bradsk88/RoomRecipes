@@ -493,14 +493,13 @@ class LevelRoomDetectorTest {
         };
 
         Position rightDoor = new Position(5, 2);
-        ArrayList<String> recorder = new ArrayList<>();
         LevelRoomDetector d = new LevelRoomDetector(
                 ImmutableList.of(rightDoor),
                 20,
                 1000,
                 WD(map),
                 false,
-                recorder::add
+                System.out::println
         );
         Function<Position, Optional<Room>> currentState = p -> Optional.empty();
 
