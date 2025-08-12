@@ -43,7 +43,7 @@ public class WallWalkingRoomDetection {
 
                 @Override
                 public boolean isOrigin(Position pos) {
-                    return pos.equals(doorPos.relative(dir.opp()));
+                    return pos.equals(doorPos.relative(dir.opp())) || pos.equals(doorPos);
                 }
             };
 

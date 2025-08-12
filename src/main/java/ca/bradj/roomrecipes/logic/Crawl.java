@@ -90,7 +90,7 @@ public class Crawl {
     }
 
     public boolean isOrigin() {
-        return !isDiagonal && checks.isOrigin(checkPos);
+        return checks.isOrigin(checkPos);
     }
 
     public static final class Builder {

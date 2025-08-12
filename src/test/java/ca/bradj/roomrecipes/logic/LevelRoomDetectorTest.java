@@ -302,7 +302,7 @@ class LevelRoomDetectorTest {
                 1000,
                 WD(map),
                 false,
-                recorder::add
+                System.out::println
         );
         Room currentRoom = new Room(
                 doorPos1, ImmutableList.of(
@@ -417,7 +417,7 @@ class LevelRoomDetectorTest {
                 1000,
                 WD(map),
                 false,
-                recorder::add
+                System.out::println
         );
         Function<Position, Optional<Room>> currentState = p -> Optional.empty();
 
@@ -433,25 +433,12 @@ class LevelRoomDetectorTest {
         // the LEFT space.
         Assertions.assertNull(res);
 
-        // The second iteration will not find anything for the right door,
-        // because it searches north and tries to walk the wall in a clockwise
-        // direction - which is not possible. Another iteration will be needed.
+        // The second iteration will find the entire space for the right door,
+        // again stashing it on the detector, but it will return null
         res = d.proceed(currentState);
         Assertions.assertNull(res);
 
-        // The third iteration will not find anything for the right door,
-        // because it searches east and tries to walk the wall in a clockwise
-        // direction - which is not possible. Another iteration will be needed.
-        res = d.proceed(currentState);
-        Assertions.assertNull(res);
-
-        // The fourth iteration WILL find a room for the right door, although
-        // that room will be the full space from 1,1 to 5,3. Nothing is
-        // returned yet, because we still need the post-processing step.
-        res = d.proceed(currentState);
-        Assertions.assertNull(res);
-
-        // The fifth iteration will post-process the found rooms. This will
+        // The third iteration will post-process the found rooms. This will
         // take care of the overlapping spaces that were detected in earlier
         // stages.
         res = d.proceed(currentState);
@@ -509,21 +496,11 @@ class LevelRoomDetectorTest {
         // The test should still pass with other methods, but might
         // require a different number of "processing" iterations
 
-        // The first iteration will not find a room, because it searches
-        // north and exits if it finds no initial walls
+        // The first iteration will find the room, but not return it yet,
+        // because it needs to post-process the found room.
         Assertions.assertNull(res);
 
-        // The second iteration will not find a room, because it searches
-        // east and exits if it finds no initial walls
-        res = d.proceed(currentState);
-        Assertions.assertNull(res);
-
-        // The third iteration WILL find a room, because it searches south
-        // and is able to follow a clockwise spiral to detect all walls.
-        res = d.proceed(currentState);
-        Assertions.assertNull(res);
-
-        // The fourth iteration will post-process the found room (which,
+        // The second iteration will post-process the found room (which,
         // for a single, simple room is basically a no-op) and return
         // the result.
         res = d.proceed(currentState);
