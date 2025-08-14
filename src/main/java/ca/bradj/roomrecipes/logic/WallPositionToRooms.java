@@ -27,6 +27,8 @@ public class WallPositionToRooms {
 
         Set<Position> coveredSoFar = new HashSet<>();
 
+        ImmutableSet<Position> initPositions = ImmutableSet.copyOf(positions);
+
         InclusiveSpace rect = getRect(positions, b);
         if (rect != null) {
             b.add(rect);
@@ -45,6 +47,33 @@ public class WallPositionToRooms {
             Position a = rect.getCornerA();
             Position bb = rect.getCornerB();
             InclusiveSpace unspun = InclusiveSpace.from(-a.x, -a.z).to(-bb.x, -bb.z);
+            b.add(unspun);
+            coveredSoFar.addAll(InclusiveSpaces.getWallPositions(unspun));
+            Sets.SetView<Position> difference = Sets.difference(positions, coveredSoFar);
+            if (difference.isEmpty()) {
+                return b.build();
+            }
+        }
+
+        b = ImmutableList.builder();
+        positions = ImmutableSet.copyOf(initPositions);
+        rect = getRect(positions.stream().map(v -> new Position(v.z, v.x)).toList(), b);
+        if (rect != null) {
+            Position a = rect.getCornerA();
+            Position bb = rect.getCornerB();
+            InclusiveSpace unspun = InclusiveSpace.from(a.z, a.x).to(bb.z, bb.x);
+            b.add(unspun);
+            coveredSoFar.addAll(InclusiveSpaces.getWallPositions(unspun));
+            Sets.SetView<Position> difference = Sets.difference(positions, coveredSoFar);
+            if (difference.isEmpty()) {
+                return b.build();
+            }
+        }
+        rect = getRect(positions.stream().map(v -> new Position(-v.z, -v.x)).toList(), b);
+        if (rect != null) {
+            Position a = rect.getCornerA();
+            Position bb = rect.getCornerB();
+            InclusiveSpace unspun = InclusiveSpace.from(-a.z, -a.x).to(-bb.z, -bb.x);
             b.add(unspun);
             coveredSoFar.addAll(InclusiveSpaces.getWallPositions(unspun));
             Sets.SetView<Position> difference = Sets.difference(positions, coveredSoFar);

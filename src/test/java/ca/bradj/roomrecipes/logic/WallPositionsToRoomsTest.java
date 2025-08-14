@@ -8,6 +8,8 @@ import com.google.common.collect.ImmutableSet;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import static ca.bradj.roomrecipes.logic.LevelRoomDetectionTest.assertSpacesEqual;
+
 class WallPositionsToRoomsTest {
 
     WallPositionToRooms SINGLETON = new WallPositionToRooms(100);
@@ -111,30 +113,30 @@ class WallPositionsToRoomsTest {
     public void test_RoomWithNarrowEntrance() {
         // This list was generated from Test_DetectNarrowEntrance_N in another file
         ImmutableSet<Position> positions = ImmutableSet.of(
-                new Position(4, 3),
                 new Position(1, 0),
-                new Position(4, 4),
-                new Position(1, 1),
-                new Position(3, 4),
-                new Position(0, 1),
-                new Position(2, 4),
-                new Position(0, 2),
-                new Position(1, 4),
-                new Position(0, 3),
-                new Position(0, 4),
-                new Position(3, 0),
-                new Position(4, 1),
                 new Position(2, 0),
+                new Position(3, 0),
+                new Position(0, 1),
+                new Position(1, 1),
                 new Position(3, 1),
-                new Position(4, 2)
+                new Position(4, 1),
+                new Position(0, 2),
+                new Position(4, 2),
+                new Position(0, 3),
+                new Position(4, 3),
+                new Position(0, 4),
+                new Position(1, 4),
+                new Position(2, 4),
+                new Position(3, 4),
+                new Position(4, 4)
         );
         ImmutableList<InclusiveSpace> spaces = SINGLETON.getSpaces(positions);
         Assertions.assertEquals(2, spaces.size());
-        Assertions.assertEquals(ImmutableList.of(
-                // TODO: Expected values will depend on implementation, or we can use assertSpacesEqual
-//                InclusiveSpace.from(0, 1).to(1, 4),
-//                InclusiveSpace.from(3, 1).to(4, 4)
-        ), spaces);
+        assertSpacesEqual(
+                InclusiveSpace.from(1, 0).to(3, 1),
+                InclusiveSpace.from(0, 1).to(4, 4),
+                spaces
+        );
     }
 
 }

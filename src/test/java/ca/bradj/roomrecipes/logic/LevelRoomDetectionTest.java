@@ -154,23 +154,23 @@ class LevelRoomDetectionTest {
                 {"W", "W", "W"}
         };
 
-        ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
+        ImmutableMap<Position, Optional<Room>> rooms = LevelRoomDetection.findRooms(
                 ImmutableList.of(
                         new Position(2, 1),
                         new Position(2, 4)
                 ), 5, WD(map)
         );
-        assertTrue(room.containsKey(new Position(2, 1)));
-        assertTrue(room.containsKey(new Position(2, 4)));
+        assertTrue(rooms.containsKey(new Position(2, 1)));
+        assertTrue(rooms.containsKey(new Position(2, 4)));
 
-        assertTrue(room.get(new Position(2, 1)).isPresent());
-        assertTrue(room.get(new Position(2, 4)).isPresent());
+        assertTrue(rooms.get(new Position(2, 1)).isPresent());
+        assertTrue(rooms.get(new Position(2, 4)).isPresent());
 
         InclusiveSpace expectedCorners = InclusiveSpace.from(0, 0).to(2, 2);
-        assertEquals(expectedCorners, room.get(new Position(2, 1)).get().getSpace());
+        assertEquals(expectedCorners, rooms.get(new Position(2, 1)).get().getSpace());
 
         expectedCorners = InclusiveSpace.from(0, 2).to(2, 5);
-        assertEquals(expectedCorners, room.get(new Position(2, 4)).get().getSpace());
+        assertEquals(expectedCorners, rooms.get(new Position(2, 4)).get().getSpace());
 
     }
 
@@ -793,11 +793,12 @@ class LevelRoomDetectionTest {
         // W = wall
         // D = door
         String[][] map = {
-                {"W", "W", "W", "_", "_", "_"},
-                {"W", "_", "W", "_", "_", "_"},
-                {"W", "_", "_", "W", "W", "_"},
-                {"W", "_", "_", "_", "W", "_"},
-                {"W", "D", "W", "W", "W", "_"}
+                //0    1    2    3    4    5
+                {"W", "W", "W", "_", "_", "_"}, // 0
+                {"W", "_", "W", "_", "_", "_"}, // 1
+                {"W", "_", "_", "W", "W", "_"}, // 2
+                {"W", "_", "_", "_", "W", "_"}, // 3
+                {"W", "D", "W", "W", "W", "_"} //  4
         }; // Missing inside corner
 
         ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
@@ -807,7 +808,13 @@ class LevelRoomDetectionTest {
         );
         assertTrue(room.containsKey(new Position(1, 4)));
 
-        assertFalse(room.get(new Position(1, 4)).isPresent());
+        assertTrue(room.get(new Position(1, 4)).isPresent());
+
+        assertSpacesEqual(
+                InclusiveSpace.from(0, 0).to(2, 2),
+                InclusiveSpace.from(0, 2).to(4, 4),
+                room.get(new Position(1, 4)).get().getSpaces()
+        );
     }
 
     @Test
@@ -882,7 +889,7 @@ class LevelRoomDetectionTest {
     /// x x x
     /// x x x
 
-    private static void assertSpacesEqual(
+    public static void assertSpacesEqual(
             InclusiveSpace lPart1,
             InclusiveSpace lPart2,
             List<InclusiveSpace> spaces
@@ -1413,12 +1420,18 @@ class LevelRoomDetectionTest {
         // W = wall
         // D = door
         String[] map = {
+                //1234
                 "_WDW_", // 0
                 "WW_WW", // 1
                 "W___W", // 2
                 "W___W", // 3
                 "WWWWW" //  4
         };
+
+        // FIXME: This test is failing because the corners of the doorway are
+        //  considered "inside" the room, which is not correct. The wall crawling
+        //  algorithm cuts diagonally from (for example) [0, 1] to [1,0], rather
+        //  than taking the full three step route through [0, 1] ->[1, 1] -> [1, 0].
 
         ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
                 ImmutableList.of(

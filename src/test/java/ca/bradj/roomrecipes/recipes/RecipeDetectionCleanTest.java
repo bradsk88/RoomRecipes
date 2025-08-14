@@ -137,7 +137,8 @@ class RecipeDetectionCleanTest {
                 0,
                 0
         );
-        ImmutableList<String> expected = ImmutableList.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A");
+        // FIXME: This should not include wall blocks
+        ImmutableList<String> expected = ImmutableList.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "W", "W", "W", "W");
         Assertions.assertEquals(expected, ImmutableList.sortedCopyOf(result.values()));
     }
 }

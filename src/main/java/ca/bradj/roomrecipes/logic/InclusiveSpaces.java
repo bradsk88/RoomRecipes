@@ -157,7 +157,7 @@ public class InclusiveSpaces {
     ) {
         return hasZWall(space, z -> {
             Position west = new Position(space.getWestX(), z);
-            Position east = new Position(space.getWestX(), z);
+            Position east = new Position(space.getEastX(), z);
             return isWall.test(west) && isWall.test(east);
         }, requireCorners);
     }

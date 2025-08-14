@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.Collection;
+import java.util.List;
 
 public class Crawl {
     private final Position checkPos;
@@ -13,6 +14,7 @@ public class Crawl {
     private final Checks checks;
     private final ImmutableList<Position> checkedAlready;
     private Direction heading;
+    private int diagonalBuffer = 2;
 
     public Crawl(
             Position checkPos,
@@ -35,27 +37,35 @@ public class Crawl {
         return String.format("Checking %s (%s)", dirDesc, checkPos.getUIString());
     }
 
-    public ImmutableList<Crawl> getNextSteps() {
+    public ImmutableList<Crawl> getNextSteps(List<Position> visitedSink) {
+        visitedSink.add(checkPos);
         if (checks.isWall(checkPos)) {
-            if (isDiagonal) {
+            if (isDiagonal && diagonalBuffer > 0) {
                 // Give the non-diagonal crawls a chance to catch up,
                 // Otherwise, diagonal crawls will always win the "race" around
                 // the room and corner blocks will never be found.
-                return ImmutableList.of(this);
+                return ImmutableList.of(this.consumePause());
             }
-                return Crawl.forwardSpread(
-                        checkPos, heading, checks,
-                        getCheckedPositions()
-                );
+            return Crawl.forwardSpread(
+                    checkPos, heading, checks,
+                    getCheckedPositions(),
+                    isDiagonal ? getCheckedPositions() : visitedSink
+            );
         }
-        return null;
+        return ImmutableList.of();
+    }
+
+    private Crawl consumePause() {
+        diagonalBuffer--;
+        return this;
     }
 
     public static ImmutableList<Crawl> forwardSpread(
             Position checkPos,
             Direction heading,
             Checks checks,
-            Collection<Position> alreadyChecked
+            Collection<Position> alreadyChecked,
+            Collection<Position> visitedSink
     ) {
         Crawl rightTurn = Crawl.from(checkPos).inDirection(heading.cw()).build(checks, alreadyChecked);
         Crawl leftTurn = Crawl.from(checkPos).inDirection(heading.ccw()).build(checks, alreadyChecked);
@@ -64,19 +74,19 @@ public class Crawl {
         Crawl leftDiag = Crawl.from(checkPos).inDirection(heading, heading.ccw()).build(checks, alreadyChecked);
 
         ImmutableList.Builder<Crawl> b = ImmutableList.builder();
-        if (!alreadyChecked.contains(rightTurn.checkPos)) {
+        if (!visitedSink.contains(rightTurn.checkPos)) {
             b.add(rightTurn);
         }
-        if (!alreadyChecked.contains(leftTurn.checkPos)) {
+        if (!visitedSink.contains(leftTurn.checkPos)) {
             b.add(leftTurn);
         }
-        if (!alreadyChecked.contains(straight.checkPos)) {
+        if (!visitedSink.contains(straight.checkPos)) {
             b.add(straight);
         }
-        if (!alreadyChecked.contains(rightDiag.checkPos)) {
+        if (!visitedSink.contains(rightDiag.checkPos)) {
             b.add(rightDiag);
         }
-        if (!alreadyChecked.contains(leftDiag.checkPos)) {
+        if (!visitedSink.contains(leftDiag.checkPos)) {
             b.add(leftDiag);
         }
         return b.build();
@@ -90,7 +100,22 @@ public class Crawl {
     }
 
     public boolean isOrigin() {
-        return checks.isOrigin(checkPos);
+        boolean isOrigin = checks.isOrigin(checkPos);
+        if (isOrigin && isDiagonal && diagonalBuffer > 0) {
+            consumePause();
+            return false;
+        }
+        return isOrigin;
+    }
+
+    public int getWidth() {
+        return checkedAlready.stream().mapToInt(v -> v.x).max().orElse(0) -
+               checkedAlready.stream().mapToInt(v -> v.x).min().orElse(0) + 1;
+    }
+
+    public int getHeight() {
+        return checkedAlready.stream().mapToInt(v -> v.z).max().orElse(0) -
+               checkedAlready.stream().mapToInt(v -> v.z).min().orElse(0) + 1;
     }
 
     public static final class Builder {

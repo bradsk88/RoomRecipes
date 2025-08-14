@@ -7,9 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 
 // Attempts to detect a room by walking along walls, starting at a door position
@@ -22,9 +20,15 @@ public class WallWalkingRoomDetection {
             @Nullable Consumer<String> flightRecorder,
             WallDetector wd
     ) {
+        List<Position> visitedSink = new ArrayList<>();
+
         if (flightRecorder == null) {
             flightRecorder = s -> {
             };
+        }
+
+        if (!wd.IsWall(doorPos)) {
+            return Search.empty();
         }
 
         // If iteration is 0, start north of the door
@@ -47,8 +51,8 @@ public class WallWalkingRoomDetection {
                 }
             };
 
-            ImmutableList<Crawl> crawls = Crawl.forwardSpread(checkPos, dir, checks, ImmutableSet.of(doorPos, checkPos));
-            Search<ImmutableSet<Position>> result = tryFindWalls(crawls, flightRecorder, 0);
+            List<Crawl> crawls = Crawl.forwardSpread(checkPos, dir, checks, ImmutableSet.of(doorPos, checkPos), visitedSink);
+            Search<ImmutableSet<Position>> result = tryFindWalls(crawls, flightRecorder, 0, visitedSink);
             if (result.isEnd()) {
                 return result;
             }
@@ -66,7 +70,8 @@ public class WallWalkingRoomDetection {
     private static Search<ImmutableSet<Position>> tryFindWalls(
             Collection<Crawl> crawls,
             Consumer<String> flightRecorder,
-            int depth
+            int depth,
+            List<Position> visitedSink
     ) {
         if (depth > 1000) {
             flightRecorder.accept("Reached max depth of 1000, giving up.");
@@ -81,16 +86,28 @@ public class WallWalkingRoomDetection {
             flightRecorder.accept(crawl.toString());
 
             if (crawl.isOrigin()) {
-                flightRecorder.accept("Reached origin, recording wall positions.");
+
+                ImmutableSet<Position> ps = crawl.getCheckedPositions();
+                String allPositions = ps.stream()
+                                               .sorted()
+                                               .map(Position::getUIString)
+                                               .reduce((a, b1) -> a + ", " + b1)
+                                               .orElse("none");
+                if (crawl.getWidth() < 3 || crawl.getHeight() < 3) {
+                    flightRecorder.accept("Area too small. Ignoring crawl: " + allPositions);
+                    continue;
+                }
+
+                flightRecorder.accept("Reached origin, recording wall positions:" + allPositions);
                 // Instead of returning immediately, we collect positions from
                 // (potentially) multiple parallel crawls. This allows us to
                 // handle mirrored rooms with a door in the adjoining wall.
-                positions.addAll(crawl.getCheckedPositions());
+                positions.addAll(ps);
                 continue;
             }
 
-            ImmutableList<Crawl> nextSteps = crawl.getNextSteps();
-            if (nextSteps == null || nextSteps.isEmpty()) {
+            ImmutableList<Crawl> nextSteps = crawl.getNextSteps(visitedSink);
+            if (nextSteps.isEmpty()) {
                 continue;
             }
             flightRecorder.accept("--> Detected wall <--");
@@ -98,7 +115,12 @@ public class WallWalkingRoomDetection {
         }
 
         if (!positions.isEmpty()) {
-            flightRecorder.accept("One or more rooms found connected to door. Returning all positions.");
+            String allPositions = positions.stream()
+                    .sorted()
+                    .map(Position::getUIString)
+                    .reduce((a, b1) -> a + ", " + b1)
+                    .orElse("none");
+            flightRecorder.accept("One or more rooms found connected to door. Returning combined positions: " + allPositions);
             return Search.end(ImmutableSet.copyOf(positions));
         }
 
@@ -107,7 +129,7 @@ public class WallWalkingRoomDetection {
             return Search.empty();
         }
 
-        return tryFindWalls(crawls, flightRecorder, depth + 1);
+        return tryFindWalls(crawls, flightRecorder, depth + 1, visitedSink);
     }
 
     public static Search<Room> tryFind(
