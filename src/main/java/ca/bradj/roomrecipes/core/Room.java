@@ -66,6 +66,10 @@ public class Room {
         this.space = new ArrayList<>(spaces);
     }
 
+    /**
+     * @deprecated Use getSpaces
+     */
+    @Deprecated(forRemoval = true, since = "0.0.7")
     public InclusiveSpace getSpace() {
         return this.space.get(0);
     }

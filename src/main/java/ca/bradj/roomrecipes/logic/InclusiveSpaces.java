@@ -13,6 +13,14 @@ import java.util.function.Predicate;
 
 public class InclusiveSpaces {
 
+    public static InclusiveSpace around(
+            Position pos,
+            int radius
+    ) {
+        return InclusiveSpace.from(pos.offset(-radius, -radius))
+                .to(pos.offset(radius, radius));
+    }
+
     public static boolean overlapOnXZPlane(
             InclusiveSpace space1,
             InclusiveSpace space2
@@ -227,14 +235,22 @@ public class InclusiveSpaces {
     }
 
     public static ImmutableSet<Position> getWallPositions(InclusiveSpace rect) {
+        return getWallPositions(rect, true);
+    }
+
+    public static ImmutableSet<Position> getWallPositions(
+            InclusiveSpace space,
+            boolean includeCorners
+    ){
         ImmutableSet.Builder<Position> builder = ImmutableSet.builder();
-        for (int x = rect.getWestX(); x <= rect.getEastX(); x++) {
-            builder.add(new Position(x, rect.getNorthZ()));
-            builder.add(new Position(x, rect.getSouthZ()));
+        int offset = includeCorners ? 0 : 1;
+        for (int x = space.getWestX() + offset; x <= space.getEastX() - offset; x++) {
+            builder.add(new Position(x, space.getNorthZ()));
+            builder.add(new Position(x, space.getSouthZ()));
         }
-        for (int z = rect.getNorthZ(); z <= rect.getSouthZ(); z++) {
-            builder.add(new Position(rect.getWestX(), z));
-            builder.add(new Position(rect.getEastX(), z));
+        for (int z = space.getNorthZ() + offset; z <= space.getSouthZ() - offset; z++) {
+            builder.add(new Position(space.getWestX(), z));
+            builder.add(new Position(space.getEastX(), z));
         }
         return builder.build();
     }

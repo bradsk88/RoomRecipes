@@ -3,6 +3,7 @@ package ca.bradj.roomrecipes.logic;
 import ca.bradj.roomrecipes.core.Room;
 import ca.bradj.roomrecipes.core.space.InclusiveSpace;
 import ca.bradj.roomrecipes.core.space.Position;
+import ca.bradj.roomrecipes.testutil.Debugger;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import org.junit.jupiter.api.Assertions;
@@ -96,16 +97,17 @@ class WallPositionsToRoomsTest {
                 new Position(4, 5),
                 new Position(3, 5),
                 new Position(2, 5),
-                new Position(1, 4)
+                new Position(1, 4),
+                new Position(8, 4)
         );
+        SINGLETON.setFlightRecorder(System.out::println);
         ImmutableList<InclusiveSpace> spaces = SINGLETON.getSpaces(positions);
-        Assertions.assertEquals(2, spaces.size());
-        InclusiveSpace space1 = spaces.get(0);
-        Assertions.assertEquals(new Position(1, 1), space1.getCornerA());
-        Assertions.assertEquals(new Position(8, 5), space1.getCornerB());
-        InclusiveSpace space2 = spaces.get(1);
-        Assertions.assertEquals(new Position(8, 1), space2.getCornerA());
-        Assertions.assertEquals(new Position(9, 4), space2.getCornerB());
+        SINGLETON.clearFlightRecorder();
+        assertSpacesEqual(
+                InclusiveSpace.from(1, 1).to(9, 4),
+                InclusiveSpace.from(1, 4).to(8, 5),
+                spaces
+        );
 
     }
 
@@ -131,10 +133,65 @@ class WallPositionsToRoomsTest {
                 new Position(4, 4)
         );
         ImmutableList<InclusiveSpace> spaces = SINGLETON.getSpaces(positions);
-        Assertions.assertEquals(2, spaces.size());
         assertSpacesEqual(
                 InclusiveSpace.from(1, 0).to(3, 1),
                 InclusiveSpace.from(0, 1).to(4, 4),
+                spaces
+        );
+    }
+
+    @Test
+    public void test_RoomWithAllCornerInsets() {
+        // This list was generated from Test_DetectInsetCorners_N in another file
+        ImmutableSet<Position> positions = ImmutableSet.of(
+                new Position(0, 0),
+                new Position(0, 1),
+                new Position(0, 2),
+                new Position(0, 3),
+                new Position(1, 0),
+                new Position(1, 1),
+                new Position(1, 3),
+                new Position(1, 4),
+                new Position(2, 0),
+                new Position(2, 4),
+                new Position(3, 0),
+                new Position(3, 1),
+                new Position(3, 3),
+                new Position(3, 4),
+                new Position(4, 1),
+                new Position(4, 2),
+                new Position(4, 3)
+        );
+        ImmutableList<InclusiveSpace> spaces = SINGLETON.getSpaces(positions);
+        assertSpacesEqual(
+                InclusiveSpace.from(1, 0).to(3, 4),
+                InclusiveSpace.from(0, 1).to(4, 3),
+                spaces
+        );
+    }
+    @Test
+    public void test_EndToEndRooms() {
+        // This list was generated from Test_DetectEndToEndRooms_N in another file
+        ImmutableSet<Position> positions = ImmutableSet.of(
+                new Position(2,1),
+                new Position(1,0),
+                new Position(2,2),
+                new Position(0,0),
+                new Position(1,2),
+                new Position(2,3),
+                new Position(0,1),
+                new Position(2,4),
+                new Position(0,2),
+                new Position(1,4),
+                new Position(0,3),
+                new Position(0,4),
+                new Position(2,0)
+        );
+        SINGLETON.setFlightRecorder(Debugger.on("2025-08-21"));
+        ImmutableList<InclusiveSpace> spaces = SINGLETON.getSpaces(positions);
+        assertSpacesEqual(
+                InclusiveSpace.from(0, 0).to(2, 2),
+                InclusiveSpace.from(0, 2).to(2, 4),
                 spaces
         );
     }

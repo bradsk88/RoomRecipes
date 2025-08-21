@@ -179,6 +179,16 @@ public class LevelRoomDetector {
         }
     }
 
+    private record Door(
+            Position doorPos,
+            int spaceIndex
+    ) {
+    };
+
+    // FIXME: This function is quite complex and could be simplified or refactored.
+    //  For example: It uses a hack that treats multi-space rooms as separate
+    //  entries in the map to overcome an edge case where a multi-space room
+    //  overlaps with another room.
     private ImmutableMap<Position, Optional<Room>> removeOverlaps(
             Map<Position, Optional<Room>> detectedRooms
     ) {
@@ -194,39 +204,40 @@ public class LevelRoomDetector {
             Stream<Optional<Room>> onlyPresent = detectedRooms.values()
                                                               .stream()
                                                               .filter(Optional::isPresent);
-            Map<Position, Room> rooms = ImmutableMap.copyOf(onlyPresent.map(Optional::get)
-                                                                       .map(v -> new AbstractMap.SimpleEntry<>(
-                                                                               v.doorPos,
-                                                                               v
-                                                                       )).toList());
-            List<Position> leastUsedDoorPositions = getLeastUsedDoorPositionsFirst(rooms.values());
+            List<AbstractMap.SimpleEntry<Door, Room>> presentRooms = onlyPresent.map(Optional::get)
+                                                                        .map(this::toEntry).flatMap(v -> v.stream())
+                                                                        .toList();
+            Map<Door, Room> rooms = ImmutableMap.copyOf(presentRooms);
+            List<Door> leastUsedDoorPositions = getLeastUsedDoorPositionsFirst(rooms.values());
             corrections = 0;
-            for (Position p1 : leastUsedDoorPositions) {
+            for (Door p1 : leastUsedDoorPositions) {
                 Room r1 = rooms.get(p1);
                 if (corrections > 0) {
                     break;
                 }
-                for (Position p2 : leastUsedDoorPositions) {
+                for (Door p2 : leastUsedDoorPositions) {
                     Room r2 = rooms.get(p2);
                     if (r1.equals(r2)) {
                         continue;
                     }
                     Position r1dp = r1.getDoorPos();
                     Position r2dp = r2.getDoorPos();
-                    if (r1.getSpace()
-                          .equals(r2.getSpace())) {
+                    //noinspection removal we are guaranteed to only have one space per room
+                    Function<Room, InclusiveSpace> gs = Room::getSpace;
+                    InclusiveSpace r1Space = gs.apply(r1);
+                    InclusiveSpace r2Space = gs.apply(r2);
+                    if (r1Space.equals(r2Space)) {
                         final Optional<Room> alternate = RoomDetection.findRoomForDoor(
                                 r2dp,
                                 maxDistanceFromDoor,
-                                Optional.of(r1.getSpace()),
+                                Optional.of(r1Space),
                                 0,
                                 this::checkWithoutArt
                         ).toOptional();
                         if (alternate.isPresent()) {
                             if (rooms.values().stream()
-                                     .anyMatch(v -> v.getSpace()
-                                                     .equals(alternate.get()
-                                                                      .getSpace()))) {
+                                     .anyMatch(v -> gs.apply(v)
+                                                     .equals(gs.apply(alternate.get())))) {
                                 detectedRooms.put(
                                         r2dp,
                                         Optional.empty()
@@ -245,7 +256,7 @@ public class LevelRoomDetector {
                         Optional<Room> alternate2 = RoomDetection.findRoomForDoor(
                                 r1dp,
                                 maxDistanceFromDoor,
-                                Optional.of(r2.getSpace()),
+                                Optional.of(r2Space),
                                 0,
                                 this::checkWithoutArt
                         ).toOptional();
@@ -266,20 +277,21 @@ public class LevelRoomDetector {
                         break;
                     } else {
                         if (InclusiveSpaces.overlapOnXZPlane(
-                                r1.getSpace(),
-                                r2.getSpace()
+                                r1Space,
+                                r2Space
                         )) {
-                            double a1 = InclusiveSpaces.calculateArea(r1.getSpace());
-                            double a2 = InclusiveSpaces.calculateArea(r2.getSpace());
+                            flightRecorder.accept("Spaces overlap on X/Z plane");
+                            double a1 = InclusiveSpaces.calculateArea(r1Space);
+                            double a2 = InclusiveSpaces.calculateArea(r2Space);
                             if (a1 > a2) {
-                                flightRecorder.accept("Chopping " + sm(r2.getSpace()) + " off of " + sm(r1.getSpace()));
-                                InclusiveSpace chopped = r1.getSpace()
-                                                           .chopOff(r2.getSpace());
+                                flightRecorder.accept("[B1] Chopping " + sm(r2Space) + " off of " + sm(r1Space));
+                                InclusiveSpace chopped = r1Space
+                                                           .chopOff(r2Space);
 
                                 if (!InclusiveSpaces.getWallPositions(chopped).contains(r1dp)) {
-                                    flightRecorder.accept("Giving " + sm(r2.getSpace()) + " to " + r2dp + " instead of " + r1dp);
+                                    flightRecorder.accept("Giving " + sm(r2Space) + " to " + r2dp + " instead of " + r1dp);
                                     detectedRooms.put(r2dp, Optional.of(r2.withSpace(chopped)));
-                                    detectedRooms.put(r1dp, Optional.of(r1.withSpace(r2.getSpace())));
+                                    detectedRooms.put(r1dp, Optional.of(r1.withSpace(r2Space)));
                                     corrections++;
                                     break;
                                 }
@@ -292,13 +304,13 @@ public class LevelRoomDetector {
                                 break;
                             }
                             if (a2 > a1) {
-                                flightRecorder.accept("Chopping " + sm(r1.getSpace()) + " off of " + sm(r2.getSpace()));
-                                InclusiveSpace chopped = r2.getSpace()
-                                                           .chopOff(r1.getSpace());
+                                flightRecorder.accept("[B2] Chopping " + sm(r1Space) + " off of " + sm(r2Space));
+                                InclusiveSpace chopped = r2Space
+                                                           .chopOff(r1Space);
                                 if (!InclusiveSpaces.getWallPositions(chopped).contains(r2dp)) {
-                                    flightRecorder.accept("Giving " + sm(r1.getSpace()) + " to " + r1dp + " instead of " + r2dp);
+                                    flightRecorder.accept("Giving " + sm(r1Space) + " to " + r1dp + " instead of " + r2dp);
                                     detectedRooms.put(r1dp, Optional.of(r1.withSpace(chopped)));
-                                    detectedRooms.put(r2dp, Optional.of(r2.withSpace(r1.getSpace())));
+                                    detectedRooms.put(r2dp, Optional.of(r2.withSpace(r1Space)));
                                     corrections++;
                                     break;
                                 }
@@ -318,7 +330,15 @@ public class LevelRoomDetector {
         return ImmutableMap.copyOf(detectedRooms);
     }
 
-    private List<Position> getLeastUsedDoorPositionsFirst(Collection<Room> values) {
+    private ImmutableList<AbstractMap.SimpleEntry<Door, Room>> toEntry(Room room) {
+        ImmutableList.Builder<AbstractMap.SimpleEntry<Door, Room>> b = ImmutableList.builder();
+        for (int i = 0; i < room.getSpaces().size(); i++) {
+            b.add(new AbstractMap.SimpleEntry<>(new Door(room.doorPos, i), new Room(room.doorPos, room.getSpaces().get(i))));
+        }
+        return b.build();
+    }
+
+    private List<Door> getLeastUsedDoorPositionsFirst(Collection<Room> values) {
         ImmutableList.Builder<Position> b = ImmutableList.builder();
         for (Room value : values) {
             for (InclusiveSpace space : value.getSpaces()) {
@@ -326,10 +346,13 @@ public class LevelRoomDetector {
             }
         }
         ImmutableList<Position> wallPos = b.build();
-        HashMap<Position, Integer> m = new HashMap<>();
+        HashMap<Door, Integer> m = new HashMap<>();
         for (Room value : values) {
             if (wallPos.contains(value.doorPos)) {
-                m.merge(value.doorPos, -1, Integer::sum);
+                for (int i = 0; i < value.getSpaces().size(); i++) {
+                m.merge(new Door(value.doorPos, i), -1, Integer::sum);
+
+                }
             }
         }
         return m.entrySet()
@@ -340,7 +363,7 @@ public class LevelRoomDetector {
     }
 
     private String sm(Room room) {
-        return "Room{" + room.getDoorPos().getUIString() + ": " + sm(room.getSpace()) + "}";
+        return "Room{" + room.getDoorPos().getUIString() + ": " + InclusiveSpaces.getShortString(room.getSpaces()) + "}";
     }
 
     private String sm(InclusiveSpace space) {

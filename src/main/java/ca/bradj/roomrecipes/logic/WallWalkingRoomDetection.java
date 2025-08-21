@@ -1,5 +1,6 @@
 package ca.bradj.roomrecipes.logic;
 
+import ca.bradj.roomrecipes.adapter.Positions;
 import ca.bradj.roomrecipes.core.Room;
 import ca.bradj.roomrecipes.core.space.Position;
 import ca.bradj.roomrecipes.logic.interfaces.WallDetector;
@@ -88,11 +89,7 @@ public class WallWalkingRoomDetection {
             if (crawl.isOrigin()) {
 
                 ImmutableSet<Position> ps = crawl.getCheckedPositions();
-                String allPositions = ps.stream()
-                                               .sorted()
-                                               .map(Position::getUIString)
-                                               .reduce((a, b1) -> a + ", " + b1)
-                                               .orElse("none");
+                String allPositions = Positions.getUIString(ps);
                 if (crawl.getWidth() < 3 || crawl.getHeight() < 3) {
                     flightRecorder.accept("Area too small. Ignoring crawl: " + allPositions);
                     continue;
@@ -115,11 +112,7 @@ public class WallWalkingRoomDetection {
         }
 
         if (!positions.isEmpty()) {
-            String allPositions = positions.stream()
-                    .sorted()
-                    .map(Position::getUIString)
-                    .reduce((a, b1) -> a + ", " + b1)
-                    .orElse("none");
+            String allPositions = Positions.getUIString(positions);
             flightRecorder.accept("One or more rooms found connected to door. Returning combined positions: " + allPositions);
             return Search.end(ImmutableSet.copyOf(positions));
         }
@@ -139,6 +132,6 @@ public class WallWalkingRoomDetection {
             WallDetector wd
     ) {
         Search<ImmutableSet<Position>> walls = tryFindWalls(nextDoor, iteration, flightRecorder, wd);
-        return walls.map(Rooms::wallPositionsToSpaces).map(v -> new Room(nextDoor, v));
+        return walls.map(v -> Rooms.wallPositionsToSpaces(v, flightRecorder)).map(v -> new Room(nextDoor, v));
     }
 }

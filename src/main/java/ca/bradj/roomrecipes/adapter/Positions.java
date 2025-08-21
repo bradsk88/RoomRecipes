@@ -54,4 +54,12 @@ public class Positions {
     public static Position FromBlockPos(BlockPos blockPos) {
         return new Position(blockPos.getX(), blockPos.getZ());
     }
+
+    public static String getUIString(Set<Position> positions) {
+        return positions.stream()
+                 .sorted()
+                 .map(Position::getUIString)
+                 .reduce((a, b1) -> a + ", " + b1)
+                 .orElse("none");
+    }
 }

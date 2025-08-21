@@ -6,6 +6,7 @@ import ca.bradj.roomrecipes.core.space.InclusiveSpace;
 import ca.bradj.roomrecipes.core.space.Position;
 import ca.bradj.roomrecipes.logic.interfaces.WallDetector;
 import ca.bradj.roomrecipes.rooms.ZWall;
+import ca.bradj.roomrecipes.testutil.Debugger;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -14,6 +15,7 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.text.DateFormat;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.ConsoleHandler;
@@ -422,7 +424,7 @@ class LevelRoomDetectionTest {
                 ImmutableList.of(
                         new Position(1, 0),
                         new Position(1, 2)
-                ), 4, WD(map)
+                ), 4, Debugger.on("2025-08-19"), WD(map)
         );
         assertTrue(room.containsKey(new Position(1, 0)));
         assertTrue(room.containsKey(new Position(1, 2)));
@@ -1469,7 +1471,7 @@ class LevelRoomDetectionTest {
         ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
                 ImmutableList.of(
                         new Position(2, 0)
-                ), 10, WD(map)
+                ), 10, System.out::println, WD(map)
         );
         assertEquals(1, room.size());
 
@@ -1477,8 +1479,8 @@ class LevelRoomDetectionTest {
 
         List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(2, 0)).get().getSpaces());
         assertSpacesEqual(
-                InclusiveSpace.from(0, 0).to(4, 4),
-                InclusiveSpace.from(0, 0).to(4, 4),
+                InclusiveSpace.from(1, 0).to(3, 4),
+                InclusiveSpace.from(0, 1).to(4, 3),
                 spaces
         );
     }

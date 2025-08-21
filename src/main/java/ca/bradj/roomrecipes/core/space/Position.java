@@ -57,18 +57,21 @@ public class Position implements Comparable<Position>{
         return String.format("[%d, %d]", x, z);
     }
 
-    public Position relative(Direction initDirection) {
-        switch (initDirection) {
+    public Position relative(Direction dir) {
+        return relative(dir, 1);
+    }
+    public Position relative(Direction dir, int amount) {
+        switch (dir) {
             case NORTH:
-                return offset(0, -1);
+                return offset(0, -amount);
             case EAST:
-                return offset(1, 0);
+                return offset(amount, 0);
             case SOUTH:
-                return offset(0, 1);
+                return offset(0, amount);
             case WEST:
-                return offset(-1, 0);
+                return offset(-amount, 0);
             default:
-                throw new IllegalArgumentException("Invalid direction: " + initDirection);
+                throw new IllegalArgumentException("Invalid direction: " + dir);
         }
     }
 
