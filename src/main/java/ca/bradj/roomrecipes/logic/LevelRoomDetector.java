@@ -204,29 +204,30 @@ public class LevelRoomDetector {
             Stream<Optional<Room>> onlyPresent = detectedRooms.values()
                                                               .stream()
                                                               .filter(Optional::isPresent);
-            List<AbstractMap.SimpleEntry<Door, Room>> presentRooms = onlyPresent.map(Optional::get)
-                                                                        .map(this::toEntry).flatMap(v -> v.stream())
-                                                                        .toList();
-            Map<Door, Room> rooms = ImmutableMap.copyOf(presentRooms);
-            List<Door> leastUsedDoorPositions = getLeastUsedDoorPositionsFirst(rooms.values());
+            Map<Position, Room> rooms = ImmutableMap.copyOf(onlyPresent.map(Optional::get)
+                                                                       .map(v -> new AbstractMap.SimpleEntry<>(
+                                                                               v.doorPos,
+                                                                               v
+                                                                       )).toList());
+            List<Position> leastUsedDoorPositions = getLeastUsedDoorPositionsFirst(rooms.values());
             corrections = 0;
-            for (Door p1 : leastUsedDoorPositions) {
+            for (Position p1 : leastUsedDoorPositions) {
                 Room r1 = rooms.get(p1);
                 if (corrections > 0) {
                     break;
                 }
-                for (Door p2 : leastUsedDoorPositions) {
+                for (Position p2 : leastUsedDoorPositions) {
                     Room r2 = rooms.get(p2);
                     if (r1.equals(r2)) {
                         continue;
                     }
                     Position r1dp = r1.getDoorPos();
                     Position r2dp = r2.getDoorPos();
-                    //noinspection removal we are guaranteed to only have one space per room
-                    Function<Room, InclusiveSpace> gs = Room::getSpace;
+                    //We are guaranteed to only have one space per room
+                    Function<Room, InclusiveSpace> gs = r -> r.getSpaces().get(0);
                     InclusiveSpace r1Space = gs.apply(r1);
                     InclusiveSpace r2Space = gs.apply(r2);
-                    if (r1Space.equals(r2Space)) {
+                    if (r1.getSpaces().equals(r2.getSpaces())) {
                         final Optional<Room> alternate = RoomDetection.findRoomForDoor(
                                 r2dp,
                                 maxDistanceFromDoor,
@@ -276,6 +277,18 @@ public class LevelRoomDetector {
                         corrections++;
                         break;
                     } else {
+                        if (r2.getSpaces().size() > 1 && r2.getSpaces().contains(r1.getSpace())) {
+                            flightRecorder.accept("Removing space " + sm(r1Space) + " from " + r2dp + " because it has multiple spaces and this space is already in " + r1dp);
+                            detectedRooms.put(r2.doorPos, Optional.of(r2.withSpaceRemoved(r1.getSpace())));
+                            corrections++;
+                            break;
+                        }
+                        if (r1.getSpaces().size() > 1 && r1.getSpaces().contains(r2.getSpace())) {
+                            flightRecorder.accept("Removing space " + sm(r2Space) + " from " + r1dp + " because it has multiple spaces and this space is already in " + r2dp);
+                            detectedRooms.put(r1.doorPos, Optional.of(r1.withSpaceRemoved(r2.getSpace())));
+                            corrections++;
+                            break;
+                        }
                         if (InclusiveSpaces.overlapOnXZPlane(
                                 r1Space,
                                 r2Space
@@ -330,15 +343,7 @@ public class LevelRoomDetector {
         return ImmutableMap.copyOf(detectedRooms);
     }
 
-    private ImmutableList<AbstractMap.SimpleEntry<Door, Room>> toEntry(Room room) {
-        ImmutableList.Builder<AbstractMap.SimpleEntry<Door, Room>> b = ImmutableList.builder();
-        for (int i = 0; i < room.getSpaces().size(); i++) {
-            b.add(new AbstractMap.SimpleEntry<>(new Door(room.doorPos, i), new Room(room.doorPos, room.getSpaces().get(i))));
-        }
-        return b.build();
-    }
-
-    private List<Door> getLeastUsedDoorPositionsFirst(Collection<Room> values) {
+    private List<Position> getLeastUsedDoorPositionsFirst(Collection<Room> values) {
         ImmutableList.Builder<Position> b = ImmutableList.builder();
         for (Room value : values) {
             for (InclusiveSpace space : value.getSpaces()) {
@@ -346,13 +351,10 @@ public class LevelRoomDetector {
             }
         }
         ImmutableList<Position> wallPos = b.build();
-        HashMap<Door, Integer> m = new HashMap<>();
+        HashMap<Position, Integer> m = new HashMap<>();
         for (Room value : values) {
             if (wallPos.contains(value.doorPos)) {
-                for (int i = 0; i < value.getSpaces().size(); i++) {
-                m.merge(new Door(value.doorPos, i), -1, Integer::sum);
-
-                }
+                m.merge(value.doorPos, -1, Integer::sum);
             }
         }
         return m.entrySet()

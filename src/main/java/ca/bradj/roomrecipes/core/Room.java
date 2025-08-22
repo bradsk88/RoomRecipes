@@ -99,4 +99,9 @@ public class Room {
         this.space.add(inclusiveSpace);
         return this;
     }
+
+    public Room withSpaceRemoved(InclusiveSpace space) {
+        this.space.remove(space);
+        return this;
+    }
 }

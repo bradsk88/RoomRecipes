@@ -806,15 +806,15 @@ class LevelRoomDetectionTest {
         ImmutableMap<Position, Optional<Room>> room = LevelRoomDetection.findRooms(
                 ImmutableList.of(
                         new Position(1, 4)
-                ), 10, WD(map)
+                ), 10, Debugger.on("2025-08-22"), WD(map)
         );
         assertTrue(room.containsKey(new Position(1, 4)));
 
         assertTrue(room.get(new Position(1, 4)).isPresent());
 
         assertSpacesEqual(
-                InclusiveSpace.from(0, 0).to(2, 2),
-                InclusiveSpace.from(0, 2).to(4, 4),
+                InclusiveSpace.from(0, 0).to(2, 4),
+                InclusiveSpace.from(3, 2).to(4, 4),
                 room.get(new Position(1, 4)).get().getSpaces()
         );
     }
