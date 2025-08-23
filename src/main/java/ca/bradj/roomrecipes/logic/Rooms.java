@@ -16,9 +16,6 @@ public class Rooms {
     public static ImmutableList<InclusiveSpace> wallPositionsToSpaces(Set<Position> positions, Consumer<String> flightRecorder) {
         WALL_POSITION_TO_ROOMS.setFlightRecorder(flightRecorder);
         ImmutableList<InclusiveSpace> spaces = WALL_POSITION_TO_ROOMS.getSpaces(positions);
-        if (spaces.isEmpty()) {
-            throw new IllegalStateException("No spaces found for positions: " + positions);
-        }
         WALL_POSITION_TO_ROOMS.clearFlightRecorder();
         return spaces;
     }

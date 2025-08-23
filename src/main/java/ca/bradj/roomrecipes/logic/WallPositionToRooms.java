@@ -124,11 +124,12 @@ public class WallPositionToRooms {
 
         flightRecorder.accept("Checking east walls");
         InclusiveSpace rect = clampRect(positions);
+        Sets.SetView<Position> difference = Sets.difference(initPositions, initPositions);
         if (rect != null) {
             flightRecorder.accept("A space was detected on the outer border of the west walls: " + InclusiveSpaces.getShortString(rect));
             b.add(rect);
             coveredSoFar.addAll(InclusiveSpaces.getWallPositions(rect));
-            Sets.SetView<Position> difference = Sets.difference(positions, coveredSoFar);
+            difference = Sets.difference(positions, coveredSoFar);
             if (difference.isEmpty()) {
                 flightRecorder.accept("There are no remaining walls to account for");
                 return ImmutableList.copyOf(b);
@@ -143,7 +144,7 @@ public class WallPositionToRooms {
             flightRecorder.accept("A space was detected on the outer border of the east walls: " + InclusiveSpaces.getShortString(unspun));
             b.add(unspun);
             coveredSoFar.addAll(InclusiveSpaces.getWallPositions(unspun));
-            Sets.SetView<Position> difference = Sets.difference(positions, coveredSoFar);
+            difference = Sets.difference(positions, coveredSoFar);
             if (difference.isEmpty()) {
                 flightRecorder.accept("There are no remaining walls to account for");
                 return ImmutableList.copyOf(b);
@@ -160,7 +161,7 @@ public class WallPositionToRooms {
             flightRecorder.accept("A space was detected on the outer border of the north walls: " + InclusiveSpaces.getShortString(unspun));
             b.add(unspun);
             coveredSoFar.addAll(InclusiveSpaces.getWallPositions(unspun));
-            Sets.SetView<Position> difference = Sets.difference(positions, coveredSoFar);
+            difference = Sets.difference(positions, coveredSoFar);
             if (difference.isEmpty()) {
                 flightRecorder.accept("There are no remaining walls to account for");
                 return ImmutableList.copyOf(b);
@@ -176,12 +177,34 @@ public class WallPositionToRooms {
             flightRecorder.accept("A space was detected on the outer border of the south walls: " + InclusiveSpaces.getShortString(unspun));
             b.add(unspun);
             coveredSoFar.addAll(InclusiveSpaces.getWallPositions(unspun));
-            Sets.SetView<Position> difference = Sets.difference(positions, coveredSoFar);
+            difference = Sets.difference(positions, coveredSoFar);
             if (difference.isEmpty()) {
                 flightRecorder.accept("There are no remaining walls to account for");
                 return ImmutableList.copyOf(b);
             }
         }
+
+        for (Position position : difference) {
+            flightRecorder.accept("Attempting to find space above position: " + position.getUIString());
+            Set<Position> verticallyAligned = positions.stream().filter(v -> v.x == position.x)
+                                                       .collect(Collectors.toSet());
+            Optional<Position> above = verticallyAligned.stream().filter(v -> v.z < position.z - 1)
+                                                        .max(Comparator.comparingInt(v -> v.z));
+            if (above.isPresent()) {
+                flightRecorder.accept("Found position above: " + above.get().getUIString());
+                InclusiveSpace e = InclusiveSpace.from(position.x, above.get().z).to(position.x, position.z);
+                flightRecorder.accept("Adding space: " + InclusiveSpaces.getShortString(e));
+                b.add(e);
+                coveredSoFar.add(position);
+                difference = Sets.difference(positions, coveredSoFar);
+                if (difference.isEmpty()) {
+                    flightRecorder.accept("There are no remaining walls to account for");
+                    return ImmutableList.copyOf(b);
+                }
+            }
+        }
+
+        flightRecorder.accept("Unprocessed wall positions remain. Returning empty result. Remaining positions: " + Positions.getUIString(difference.immutableCopy()));
         return ImmutableList.of();
     }
 

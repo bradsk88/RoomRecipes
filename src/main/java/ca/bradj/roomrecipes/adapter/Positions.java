@@ -56,10 +56,10 @@ public class Positions {
     }
 
     public static String getUIString(Set<Position> positions) {
-        return positions.stream()
+        return "<" + positions.stream()
                  .sorted()
                  .map(Position::getUIString)
                  .reduce((a, b1) -> a + ", " + b1)
-                 .orElse("none");
+                 .orElse("none") + ">";
     }
 }

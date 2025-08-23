@@ -131,7 +131,14 @@ public class WallWalkingRoomDetection {
             @Nullable Consumer<String> flightRecorder,
             WallDetector wd
     ) {
+        @Nullable Consumer<String> fr = flightRecorder == null ? s -> {
+        } : flightRecorder;
         Search<ImmutableSet<Position>> walls = tryFindWalls(nextDoor, iteration, flightRecorder, wd);
-        return walls.map(v -> Rooms.wallPositionsToSpaces(v, flightRecorder)).map(v -> new Room(nextDoor, v));
+        Search<Room> map = walls.map(v -> Rooms.wallPositionsToSpaces(v, fr))
+                                .map(v -> new Room(nextDoor, v));
+        if (walls.isPresent() && map.isPresent() && map.get().getSpaces().isEmpty()) {
+            fr.accept("No spaces found for door " + nextDoor.getUIString() + " and wall positions: " + Positions.getUIString(walls.get()));
+        }
+        return map;
     }
 }

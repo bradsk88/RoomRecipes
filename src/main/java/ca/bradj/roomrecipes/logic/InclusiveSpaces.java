@@ -76,6 +76,12 @@ public class InclusiveSpaces {
         return new Position(minX + randomInt.apply(width), minZ + randomInt.apply(height));
     }
 
+    /**
+     * @deprecated Use getPositions with PositionType.INTERIOR_ONLY
+     * @param space
+     * @return
+     */
+    @Deprecated(since="0.0.7", forRemoval=true)
     public static Collection<Position> getAllEnclosedPositions(InclusiveSpace space) {
         int minX = space.getWestX() + 1;
         int maxX = space.getEastX();
@@ -85,6 +91,39 @@ public class InclusiveSpaces {
         for (int z = minZ; z <= maxZ; z++) {
             for (int x = minX; x <= maxX; x++) {
                 b.add(new Position(x, z));
+            }
+        }
+        return b.build();
+    }
+
+    public enum PositionType {
+        WALLS_ONLY,
+        WALLS_AND_INTERIOR,
+        INTERIOR_ONLY
+    }
+
+    public static Collection<Position> getPositions(InclusiveSpace space, PositionType type) {
+        int minX = space.getWestX();
+        int maxX = space.getEastX();
+        int minZ = space.getNorthZ();
+        int maxZ = space.getSouthZ();
+        ImmutableList.Builder<Position> b = ImmutableList.builder();
+        for (int z = minZ; z <= maxZ; z++) {
+            for (int x = minX; x <= maxX; x++) {
+                boolean isWall = x == minX || x == maxX || z == minZ || z == maxZ;
+                if (minX == maxX) {
+                    isWall = z == minZ || z == maxZ;
+                }
+                if (minZ == maxZ) {
+                    isWall = x == minX || x == maxX;
+                }
+                if (type == PositionType.WALLS_ONLY && isWall) {
+                    b.add(new Position(x, z));
+                } else if (type == PositionType.WALLS_AND_INTERIOR) {
+                    b.add(new Position(x, z));
+                } else if (type == PositionType.INTERIOR_ONLY && !isWall) {
+                    b.add(new Position(x, z));
+                }
             }
         }
         return b.build();

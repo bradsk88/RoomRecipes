@@ -1,13 +1,15 @@
 package ca.bradj.roomrecipes.testutil;
 
+import ca.bradj.roomrecipes.core.space.Position;
+import ca.bradj.roomrecipes.logic.LevelRoomDetector;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.util.Date;
 import java.util.function.Consumer;
 
 public class Debugger {
@@ -32,5 +34,21 @@ public class Debugger {
         }
         return (str) -> {
         };
+    }
+
+    public static @NotNull String getDebugArt(ImmutableSet<Position> positions) {
+        String[][] art = new String[200][200];
+        for (Position position : positions) {
+            LevelRoomDetector.captureAsArtPixel(
+                    position, new Position(0, 0), art, true, "W", " ", 5
+            );
+        }
+
+        return LevelRoomDetector.doGetDebugArt(
+                ImmutableMap.of(
+                        new Position(0, 0),
+                        art
+                ), true
+        ).get(new Position(0, 0));
     }
 }

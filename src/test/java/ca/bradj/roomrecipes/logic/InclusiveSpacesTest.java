@@ -4,7 +4,6 @@ import ca.bradj.roomrecipes.core.space.InclusiveSpace;
 import ca.bradj.roomrecipes.core.space.Position;
 import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
@@ -75,12 +74,10 @@ class InclusiveSpacesTest {
         assertEquals(8, InclusiveSpaces.calculateArea(spaces), 0.001);
     }
 
-    @Disabled("Update assertions")
     @Test
     void getAllEnclosedPositions() {
-
         InclusiveSpace space = InclusiveSpace.from(0, 0).to(2, 2);
-        Collection<Position> posz = InclusiveSpaces.getAllEnclosedPositions(space);
+        Collection<Position> posz = InclusiveSpaces.getPositions(space, InclusiveSpaces.PositionType.INTERIOR_ONLY);
         Assertions.assertEquals(
                 ImmutableList.of(
                         new Position(1, 1)
@@ -89,12 +86,11 @@ class InclusiveSpacesTest {
 
     }
 
-    @Disabled("Update assertions")
     @Test
     void getAllEnclosedPositions_2() {
 
         InclusiveSpace space = InclusiveSpace.from(0, 0).to(3, 3);
-        Collection<Position> posz = InclusiveSpaces.getAllEnclosedPositions(space);
+        Collection<Position> posz = InclusiveSpaces.getPositions(space, InclusiveSpaces.PositionType.INTERIOR_ONLY);
         Assertions.assertEquals(
                 ImmutableList.of(
                         new Position(1, 1),

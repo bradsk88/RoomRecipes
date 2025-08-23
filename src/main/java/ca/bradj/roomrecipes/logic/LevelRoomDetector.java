@@ -8,6 +8,7 @@ import ca.bradj.roomrecipes.logic.interfaces.WallDetector;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraftforge.common.util.TriPredicate;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -21,7 +22,7 @@ public class LevelRoomDetector {
     private final Queue<Position> doorsToProcess = new LinkedBlockingQueue<>();
     private final ImmutableList<Position> initialDoors;
     private final boolean enableDebugArt;
-    private final @Nullable Consumer<String> flightRecorder;
+    private final Consumer<String> flightRecorder;
     private Map<Position, Optional<Room>> processedRooms = new HashMap<>();
     private final int maxDistanceFromDoor;
     private final TriPredicate<Position, @Nullable Position, @Nullable String[][]> checker;
@@ -51,8 +52,8 @@ public class LevelRoomDetector {
                     }
                     boolean b = checker.IsWall(p2);
                     if (enableDebugArt && nextDoor != null && art != null) {
-                        captureAsArtPixel(p2, nextDoor, art, b, "W", " ");
-                        captureSurroundingAsArtPixels(checker::IsWall, p2, nextDoor, art, "w", "_");
+                        captureAsArtPixel(p2, nextDoor, art, b, "W", " ", maxDistanceFromDoor);
+                        captureSurroundingAsArtPixels(checker::IsWall, p2, nextDoor, art, "w", "_", maxDistanceFromDoor);
                     }
                     return b;
                 }
@@ -132,30 +133,32 @@ public class LevelRoomDetector {
         return null;
     }
 
-    private void captureSurroundingAsArtPixels(
+    private static void captureSurroundingAsArtPixels(
             Predicate<Position> isWall,
             Position p,
             Position nextDoor,
             String[][] art,
             String w,
-            String a
+            String a,
+            int maxDistanceFromDoor
     ) {
         for (int i = -1; i < 2; i++) {
             for (int j = -1; j < 2; j++) {
                 Position op = p.offset(i, j);
                 boolean b2 = isWall.test(op);
-                captureAsArtPixel(op, nextDoor, art, b2, w, a);
+                captureAsArtPixel(op, nextDoor, art, b2, w, a, maxDistanceFromDoor);
             }
         }
     }
 
-    private void captureAsArtPixel(
+    public static void captureAsArtPixel(
             Position p,
             Position nextDoor,
             String[][] art,
-            boolean b,
+            boolean isWall,
             String w,
-            String a
+            String a,
+            int maxDistanceFromDoor
     ) {
         int zOffset = p.z - nextDoor.z;
         int xOffset = p.x - nextDoor.x;
@@ -168,7 +171,7 @@ public class LevelRoomDetector {
         try {
             String v = art[zzz][xxx];
             if (v == null || art[zzz][xxx].equals("w") || art[zzz][xxx].equals("_")) {
-                art[zzz][xxx] = b ? w : a;
+                art[zzz][xxx] = isWall ? w : a;
             }
         } catch (Exception e) {
             RoomRecipes.LOGGER.error(
@@ -391,6 +394,12 @@ public class LevelRoomDetector {
             return ImmutableMap.of();
         }
 
+        return doGetDebugArt(debugArt, cropNulls);
+    }
+
+    public static @NotNull ImmutableMap<Position, String> doGetDebugArt(
+            Map<Position, String[][]> debugArt,
+            boolean cropNulls) {
         ImmutableMap.Builder<Position, String> b = ImmutableMap.builder();
         debugArt.forEach((k, v) -> {
             if (cropNulls) {

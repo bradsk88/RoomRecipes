@@ -12,23 +12,23 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.config.Configurator;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.text.DateFormat;
 import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.Function;
 import java.util.logging.ConsoleHandler;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SuppressWarnings({"DataFlowIssue", "OptionalGetWithoutIsPresent"})
+@SuppressWarnings("removal DataFlowIssue")
 class LevelRoomDetectionTest {
 
     private WallDetector WD(String[][] map) {
 
         return TestHelpers.WD(map);
     }
+
     private WallDetector WD2(String[] map) {
 
         return TestHelpers.WD2(map);
@@ -896,17 +896,35 @@ class LevelRoomDetectionTest {
             InclusiveSpace lPart2,
             List<InclusiveSpace> spaces
     ) {
+        assertSpacesEqual(lPart1, lPart2, spaces, null);
+    }
+
+    public static void assertSpacesEqual(
+            InclusiveSpace lPart1,
+            InclusiveSpace lPart2,
+            List<InclusiveSpace> spaces,
+            String errMessage
+    ) {
         ImmutableSet.Builder<Position> b = ImmutableSet.builder();
-        b.addAll(InclusiveSpaces.getAllEnclosedPositions(lPart1));
-        b.addAll(InclusiveSpaces.getAllEnclosedPositions(lPart2));
+        Function<InclusiveSpace, Collection<Position>> get = v -> InclusiveSpaces.getPositions(
+                v,
+                InclusiveSpaces.PositionType.WALLS_AND_INTERIOR
+        );
+
+        b.addAll(get.apply(lPart1));
+        b.addAll(get.apply(lPart2));
         Set<Position> expected = b.build().stream().sorted().collect(ImmutableSet.toImmutableSet());
 
         Set<Position> actual = spaces.stream()
-                .flatMap(space -> InclusiveSpaces.getAllEnclosedPositions(space).stream())
-                .sorted()
-                .collect(ImmutableSet.toImmutableSet());
+                                     .map(get)
+                                     .flatMap(Collection::stream)
+                                     .sorted()
+                                     .collect(ImmutableSet.toImmutableSet());
 
-        assertEquals(expected, actual);
+        if (errMessage == null) {
+            assertEquals(expected, actual);
+        }
+        assertEquals(expected, actual, errMessage + "\n" + "Actual Spaces: " + InclusiveSpaces.getShortString(spaces));
     }
 
     @Test
@@ -1446,7 +1464,7 @@ class LevelRoomDetectionTest {
 
         List<InclusiveSpace> spaces = ImmutableList.copyOf(room.get(new Position(2, 0)).get().getSpaces());
         assertSpacesEqual(
-                InclusiveSpace.from(1 ,0).to(3, 1),
+                InclusiveSpace.from(1, 0).to(3, 1),
                 InclusiveSpace.from(0, 1).to(4, 4),
                 spaces
         );

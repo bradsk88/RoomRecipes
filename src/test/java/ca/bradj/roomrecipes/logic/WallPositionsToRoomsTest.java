@@ -1,6 +1,5 @@
 package ca.bradj.roomrecipes.logic;
 
-import ca.bradj.roomrecipes.core.Room;
 import ca.bradj.roomrecipes.core.space.InclusiveSpace;
 import ca.bradj.roomrecipes.core.space.Position;
 import ca.bradj.roomrecipes.testutil.Debugger;
@@ -169,23 +168,24 @@ class WallPositionsToRoomsTest {
                 spaces
         );
     }
+
     @Test
     public void test_EndToEndRooms() {
         // This list was generated from Test_DetectEndToEndRooms_N in another file
         ImmutableSet<Position> positions = ImmutableSet.of(
-                new Position(2,1),
-                new Position(1,0),
-                new Position(2,2),
-                new Position(0,0),
-                new Position(1,2),
-                new Position(2,3),
-                new Position(0,1),
-                new Position(2,4),
-                new Position(0,2),
-                new Position(1,4),
-                new Position(0,3),
-                new Position(0,4),
-                new Position(2,0)
+                new Position(2, 1),
+                new Position(1, 0),
+                new Position(2, 2),
+                new Position(0, 0),
+                new Position(1, 2),
+                new Position(2, 3),
+                new Position(0, 1),
+                new Position(2, 4),
+                new Position(0, 2),
+                new Position(1, 4),
+                new Position(0, 3),
+                new Position(0, 4),
+                new Position(2, 0)
         );
         SINGLETON.setFlightRecorder(Debugger.on("2025-08-21"));
         ImmutableList<InclusiveSpace> spaces = SINGLETON.getSpaces(positions);
@@ -193,6 +193,55 @@ class WallPositionsToRoomsTest {
                 InclusiveSpace.from(0, 0).to(2, 2),
                 InclusiveSpace.from(0, 2).to(2, 4),
                 spaces
+        );
+    }
+
+    @SuppressWarnings("GrazieInspection")
+    @Test
+    public void test_Regression_2025_02_22_1_DoubleInsetCorner() {
+
+        // This scenario has a left side that looks like this:
+        //  _ _ W W W W W
+        //  _ W W _ _ _ W < -- This is the inset corner
+        //  _ W _ _ _ _ W
+        //  _ W W W _ _ W < -- This is the double-inset corner
+        //  _ _ W W W W W
+
+        ImmutableSet<Position> positions = ImmutableSet.of(
+                new Position(6, 1),
+                new Position(5, 0),
+                new Position(6, 2),
+                new Position(5, 1),
+                new Position(4, 0),
+                new Position(6, 3),
+                new Position(3, 0),
+                new Position(2, 0),
+                new Position(6, 4),
+                new Position(1, 0),
+                new Position(5, 4),
+                new Position(6, 5),
+                new Position(1, 1),
+                new Position(5, 5),
+                new Position(0, 1),
+                new Position(4, 5),
+                new Position(0, 2),
+                new Position(3, 5),
+                new Position(2, 4),
+                new Position(0, 3),
+                new Position(1, 4),
+                new Position(2, 5),
+                new Position(0, 4),
+                new Position(1, 5)
+        );
+
+        SINGLETON.setFlightRecorder(Debugger.on("2025-08-23"));
+        ImmutableList<InclusiveSpace> spaces = SINGLETON.getSpaces(positions);
+        // TODO: A better assertion. I think this test *should* be passing.
+        assertSpacesEqual(
+                InclusiveSpace.from(0, 1).to(6, 4),
+                InclusiveSpace.from(1, 0).to(5, 5),
+                spaces,
+                Debugger.getDebugArt(positions)
         );
     }
 
