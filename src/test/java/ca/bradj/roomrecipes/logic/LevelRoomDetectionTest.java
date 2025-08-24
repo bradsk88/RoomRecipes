@@ -898,10 +898,17 @@ class LevelRoomDetectionTest {
     ) {
         assertSpacesEqual(lPart1, lPart2, spaces, null);
     }
-
     public static void assertSpacesEqual(
             InclusiveSpace lPart1,
             InclusiveSpace lPart2,
+            List<InclusiveSpace> spaces,
+            String errMessage
+    ) {
+        assertSpacesEqual(ImmutableList.of(lPart1, lPart2), spaces, errMessage);
+    }
+
+    public static void assertSpacesEqual(
+            Collection<InclusiveSpace> lParts,
             List<InclusiveSpace> spaces,
             String errMessage
     ) {
@@ -911,8 +918,9 @@ class LevelRoomDetectionTest {
                 InclusiveSpaces.PositionType.WALLS_AND_INTERIOR
         );
 
-        b.addAll(get.apply(lPart1));
-        b.addAll(get.apply(lPart2));
+        for (InclusiveSpace lPart : lParts) {
+            b.addAll(get.apply(lPart));
+        }
         Set<Position> expected = b.build().stream().sorted().collect(ImmutableSet.toImmutableSet());
 
         Set<Position> actual = spaces.stream()

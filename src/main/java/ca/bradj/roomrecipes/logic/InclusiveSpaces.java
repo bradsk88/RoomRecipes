@@ -2,6 +2,7 @@ package ca.bradj.roomrecipes.logic;
 
 import ca.bradj.roomrecipes.core.space.InclusiveSpace;
 import ca.bradj.roomrecipes.core.space.Position;
+import ca.bradj.roomrecipes.rooms.XWall;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 
@@ -94,6 +95,18 @@ public class InclusiveSpaces {
             }
         }
         return b.build();
+    }
+
+    public static boolean isCorner(
+            InclusiveSpace sp,
+            Position testPos
+    ) {
+        XWall nw = sp.getNorthXWall();
+        if (nw.westCorner.equals(testPos) || nw.eastCorner.equals(testPos)) {
+            return true;
+        }
+        XWall sw = sp.getSouthXWall();
+        return sw.westCorner.equals(testPos) || sw.eastCorner.equals(testPos);
     }
 
     public enum PositionType {

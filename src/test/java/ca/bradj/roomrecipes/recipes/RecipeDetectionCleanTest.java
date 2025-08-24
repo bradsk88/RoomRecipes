@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 class RecipeDetectionCleanTest {
@@ -61,6 +62,33 @@ class RecipeDetectionCleanTest {
         Assertions.assertEquals("bedroom", result.recipeIDs().get(0).name);
     }
 
+    @Disabled("Spaces should always overlap. If we want to support that, it will require a major overhaul of the entire mod")
+    @Test
+    void testGetBlocksInRoomWithTwoSpacesThatDontOverlap_W() {
+
+        // @formatter:off
+        String[][] map = {
+                {"W", "W", "W", "W", "W", "W"},
+                {"D", "0", "1", "2", "W", "W"}, // <-- Bottom of space A
+                {"W", "3", "4", "5", "6", "W"}, // <-- Top of space A
+                {"W", "7", "8", "9", "A", "W"},
+                {"W", "W", "W", "W", "W", "_"}
+        };
+        // @formatter:on
+
+        ImmutableMap<ThreePosition, String> result = RecipeDetectionClean.getBlocksInRoom(
+                tp -> getBlockAt(map, tp.getX(), tp.getZ()),
+                ImmutableList.of(
+                        InclusiveSpace.from(0, 0).to(4, 1),
+                        InclusiveSpace.from(0, 2).to(5, 4)
+                ),
+                0,
+                0
+        );
+        ImmutableList<String> expected = ImmutableList.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A");
+        Assertions.assertEquals(expected, ImmutableList.sortedCopyOf(result.values()));
+    }
+
     @Test
     void testGetBlocksInRoomWithTwoSpaces_W() {
 
@@ -77,7 +105,7 @@ class RecipeDetectionCleanTest {
         ImmutableMap<ThreePosition, String> result = RecipeDetectionClean.getBlocksInRoom(
                 tp -> getBlockAt(map, tp.getX(), tp.getZ()),
                 ImmutableList.of(
-                        InclusiveSpace.from(0, 0).to(4, 1),
+                        InclusiveSpace.from(0, 0).to(4, 2),
                         InclusiveSpace.from(0, 2).to(5, 4)
                 ),
                 0,
@@ -120,11 +148,12 @@ class RecipeDetectionCleanTest {
 
         // @formatter:off
         String[][] map = {
-                {"W", "W", "W", "W", "W", "W"},
-                {"D", "0", "1", "2", "3", "W"},
-                {"W", "4", "5", "6", "7", "W"},
-                {"W", "8", "9", "A", "W", "W"},
-                {"_", "W", "W", "W", "W", "_"}
+                //0    1    2    3    4    5
+                {"W", "W", "W", "W", "W", "W"}, // 0
+                {"D", "0", "1", "2", "3", "W"}, // 1
+                {"W", "4", "5", "6", "7", "W"}, // 2
+                {"W", "8", "9", "A", "W", "W"}, // 3
+                {"_", "W", "W", "W", "W", "_"} //  4
         };
         // @formatter:on
 
@@ -137,8 +166,37 @@ class RecipeDetectionCleanTest {
                 0,
                 0
         );
-        // FIXME: This should not include wall blocks
-        ImmutableList<String> expected = ImmutableList.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "W", "W", "W", "W");
+        // Since rooms can exist with missing corners, the logic includes the corner wall at [4,3]
+        ImmutableList<String> expected = ImmutableList.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "W");
+        Assertions.assertEquals(expected, ImmutableList.sortedCopyOf(result.values()));
+    }
+
+    @Test
+    void testGetBlocksInRoom_WithThreeInsetCorners_W() {
+
+        // @formatter:off
+        String[][] map = {
+                {"W", "W", "W", "W", "W", "W"},
+                {"W", "W", "0", "1", "W", "W"},
+                {"D", "2", "3", "4", "5", "W"},
+                {"W", "W", "6", "7", "8", "W"},
+                {"W", "W", "W", "W", "W", "W"}
+        };
+        // @formatter:on
+
+        ImmutableMap<ThreePosition, String> result = RecipeDetectionClean.getBlocksInRoom(
+                tp -> getBlockAt(map, tp.getX(), tp.getZ()),
+                ImmutableList.of(
+                        InclusiveSpace.from(0, 1).to(1, 3),
+                        InclusiveSpace.from(4, 1).to(5, 4),
+                        InclusiveSpace.from(1, 0).to(4, 1),
+                        InclusiveSpace.from(1, 3).to(5, 4),
+                        InclusiveSpace.from(1, 1).to(4, 3) // Middle
+                ),
+                0,
+                0
+        );
+        ImmutableList<String> expected = ImmutableList.of("0", "1", "2", "3", "4", "5", "6", "7", "8", "W", "W");
         Assertions.assertEquals(expected, ImmutableList.sortedCopyOf(result.values()));
     }
 }

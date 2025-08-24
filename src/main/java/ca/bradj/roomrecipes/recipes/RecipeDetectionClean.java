@@ -46,7 +46,6 @@ public class RecipeDetectionClean {
         return new Match<>(room, ImmutableList.copyOf(matchedRecipes), blocksInSpace.entrySet());
     }
 
-
     public static <B> ImmutableMap<ThreePosition, B> getBlocksInRoom(
             Function<ThreePosition, B> level,
             Collection<InclusiveSpace> room,
@@ -55,7 +54,7 @@ public class RecipeDetectionClean {
     ) {
         // Create a map to hold the blocks in the room
         HashMap<ThreePosition, B> blocks = new HashMap<>();
-        HashMap<Position, Boolean> positions = new HashMap<>();
+        HashMap<Position, Integer> positions = new HashMap<>();
         // Iterate over each space in the room
         for (InclusiveSpace space : room) {
             // Get the starting and ending coordinates of the space
@@ -68,9 +67,9 @@ public class RecipeDetectionClean {
                     new ThreePosition(pos2.x, maxY, pos2.z),
                     (pos, block) -> {
                         blocks.put(pos, block);
-                        positions.put(pos.dropY(), true);
+                        positions.merge(pos.dropY(), 1, Integer::sum);
                     },
-                    (pos, block) -> positions.put(pos.dropY(), true)
+                    (pos, block) -> positions.merge(pos.dropY(), 1, Integer::sum)
             );
         }
         // Iterate only the edges of each space
@@ -79,37 +78,57 @@ public class RecipeDetectionClean {
             Position a = space.getNorthXWall().negativeCorner();
             Position b = space.getNorthXWall().positiveCorner();
             for (int i = a.x + 1; i <= b.x - 1; i++) {
-                Position above = new Position(i, a.z - 1);
-                Position below = new Position(i, a.z + 1);
-                tryAddVertical(level, minY, maxY, space, above, positions, i, a, blocks);
-                tryAddVertical(level, minY, maxY, space, below, positions, i, a, blocks);
+                Position testPos = new Position(i, a.z);
+                if (positions.get(testPos) == 1) {
+                    continue;
+                }
+                for (int i1 = minY; i1 <= maxY; i1++) {
+                    ThreePosition t = ThreePosition.of(testPos, i1);
+                    B block = level.apply(t);
+                    skipNull(blocks).accept(t, block);
+                }
             }
             // bottom
             a = space.getSouthXWall().negativeCorner();
             b = space.getSouthXWall().positiveCorner();
             for (int i = a.x + 1; i <= b.x - 1; i++) {
-                Position above = new Position(i, a.z - 1);
-                Position below = new Position(i, a.z + 1);
-                tryAddVertical(level, minY, maxY, space, above, positions, i, a, blocks);
-                tryAddVertical(level, minY, maxY, space, below, positions, i, a, blocks);
+                Position testPos = new Position(i, a.z);
+                if (positions.get(testPos) == 1) {
+                    continue;
+                }
+                for (int i1 = minY; i1 <= maxY; i1++) {
+                    ThreePosition t = ThreePosition.of(testPos, i1);
+                    B block = level.apply(t);
+                    skipNull(blocks).accept(t, block);
+                }
             }
             // left
             a = space.getWestZWall().negativeCorner();
             b = space.getWestZWall().positiveCorner();
             for (int i = a.z + 1; i <= b.z - 1; i++) {
-                Position leftOf = new Position(a.x -1 , i);
-                Position rightOf = new Position(a.x + 1, i);
-                tryAddHorizontal(level, minY, maxY, space, leftOf, positions, i, a, blocks);
-                tryAddHorizontal(level, minY, maxY, space, rightOf, positions, i, a, blocks);
+                Position testPos = new Position(a.x, i);
+                if (positions.get(testPos) == 1) {
+                    continue;
+                }
+                for (int i1 = minY; i1 <= maxY; i1++) {
+                    ThreePosition t = ThreePosition.of(testPos, i1);
+                    B block = level.apply(t);
+                    skipNull(blocks).accept(t, block);
+                }
             }
             // right
             a = space.getEastZWall().negativeCorner();
             b = space.getEastZWall().positiveCorner();
             for (int i = a.z + 1; i <= b.z - 1; i++) {
-                Position leftOf = new Position(a.x -1 , i);
-                Position rightOf = new Position(a.x + 1, i);
-                tryAddHorizontal(level, minY, maxY, space, leftOf, positions, i, a, blocks);
-                tryAddHorizontal(level, minY, maxY, space, rightOf, positions, i, a, blocks);
+                Position testPos = new Position(a.x, i);
+                if (positions.get(testPos) == 1) {
+                    continue;
+                }
+                for (int i1 = minY; i1 <= maxY; i1++) {
+                    ThreePosition t = ThreePosition.of(testPos, i1);
+                    B block = level.apply(t);
+                    skipNull(blocks).accept(t, block);
+                }
             }
         }
         // Return the map of blocks in the room
@@ -127,18 +146,20 @@ public class RecipeDetectionClean {
             Position a,
             HashMap<ThreePosition, B> blocks
     ) {
-        if (!InclusiveSpaces.contains(space, above)) {
-            if (positions.containsKey(above)) {
-                addBlocksInSpace(
-                        level,
-                        new ThreePosition(i, minY, a.z),
-                        new ThreePosition(i, maxY, a.z),
-                        skipNull(blocks),
-                        skipNull(blocks)
-                );
-            }
+        if (InclusiveSpaces.contains(space, above)) {
+            return;
+        }
+        if (positions.containsKey(above)) {
+            addBlocksInSpace(
+                    level,
+                    new ThreePosition(i, minY, a.z),
+                    new ThreePosition(i, maxY, a.z),
+                    skipNull(blocks),
+                    skipNull(blocks)
+            );
         }
     }
+
     private static <B> void tryAddHorizontal(
             Function<ThreePosition, B> level,
             int minY,

@@ -12,12 +12,14 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.ToIntFunction;
 import java.util.stream.Collectors;
 
 public class WallPositionToRooms {
 
     private final int limit;
-    private Consumer<String> flightRecorder = (str) -> {};
+    private Consumer<String> flightRecorder = (str) -> {
+    };
 
     public WallPositionToRooms() {
         this(1000);
@@ -59,7 +61,8 @@ public class WallPositionToRooms {
         InclusiveSpace outer = InclusiveSpace.from(leftX.getAsInt(), topY.getAsInt())
                                              .to(rightX.getAsInt(), bottomY.getAsInt());
 
-        flightRecorder.accept("Checking if the outer walls can be used to define a room: " + InclusiveSpaces.getShortString(outer));
+        flightRecorder.accept("Checking if the outer walls can be used to define a room: " + InclusiveSpaces.getShortString(
+                outer));
 
         if (!positions.containsAll(InclusiveSpaces.getWallPositions(outer, false))) {
             flightRecorder.accept("Positions are not a complete room border: " + Positions.getUIString(positions));
@@ -72,11 +75,13 @@ public class WallPositionToRooms {
         ImmutableSet<Position> nextRing = InclusiveSpaces.getWallPositions(nextLevel, true);
         Set<Position> nextRingWalls = nextRing.stream().filter(positions::contains).collect(Collectors.toSet());
         if (nextRingWalls.isEmpty()) {
-            flightRecorder.accept("All spaces just-inside the outer walls are empty. This means the outer walls are a room.");
+            flightRecorder.accept(
+                    "All spaces just-inside the outer walls are empty. This means the outer walls are a room.");
             return ImmutableList.of(outer);
         }
 
-        flightRecorder.accept("Some spaces just-inside the outer wall are NOT empty. More advanced space detection will be required");
+        flightRecorder.accept(
+                "Some spaces just-inside the outer wall are NOT empty. More advanced space detection will be required");
 
         return ImmutableList.of();
     }
@@ -93,10 +98,18 @@ public class WallPositionToRooms {
     private ImmutableList<InclusiveSpace> tryToInsertMiddleSpace(ImmutableList<InclusiveSpace> spaces) {
         // Find the west-most, east-most, north-most, and south-most spaces
         // Then grab the eastmost coordinate of the west-most space, etc.
-        InclusiveSpace westMost = spaces.stream().min(Comparator.comparingInt(InclusiveSpace::getWestX)).orElseThrow();
-        InclusiveSpace eastMost = spaces.stream().max(Comparator.comparingInt(InclusiveSpace::getEastX)).orElseThrow();
-        InclusiveSpace northMost = spaces.stream().min(Comparator.comparingInt(InclusiveSpace::getNorthZ)).orElseThrow();
-        InclusiveSpace southMost = spaces.stream().max(Comparator.comparingInt(InclusiveSpace::getSouthZ)).orElseThrow();
+        ToIntFunction<InclusiveSpace> avgX = s -> (int) InclusiveSpaces.getWallPositions(s)
+                                                                       .stream()
+                                                                       .mapToInt(v -> v.x)
+                                                                       .average().getAsDouble();
+        ToIntFunction<InclusiveSpace> avgZ = s -> (int) InclusiveSpaces.getWallPositions(s)
+                                                                       .stream()
+                                                                       .mapToInt(v -> v.z)
+                                                                       .average().getAsDouble();
+        InclusiveSpace westMost = spaces.stream().min(Comparator.comparingInt(avgX)).orElseThrow();
+        InclusiveSpace eastMost = spaces.stream().max(Comparator.comparingInt(avgX)).orElseThrow();
+        InclusiveSpace northMost = spaces.stream().min(Comparator.comparingInt(avgZ)).orElseThrow();
+        InclusiveSpace southMost = spaces.stream().max(Comparator.comparingInt(avgZ)).orElseThrow();
 
         // Attempt to find a middle space that connects these four spaces
         if (westMost.getEastX() >= eastMost.getWestX()) {
@@ -126,7 +139,8 @@ public class WallPositionToRooms {
         InclusiveSpace rect = clampRect(positions);
         Sets.SetView<Position> difference = Sets.difference(initPositions, initPositions);
         if (rect != null) {
-            flightRecorder.accept("A space was detected on the outer border of the west walls: " + InclusiveSpaces.getShortString(rect));
+            flightRecorder.accept("A space was detected on the outer border of the west walls: " + InclusiveSpaces.getShortString(
+                    rect));
             b.add(rect);
             coveredSoFar.addAll(InclusiveSpaces.getWallPositions(rect));
             difference = Sets.difference(positions, coveredSoFar);
@@ -141,7 +155,8 @@ public class WallPositionToRooms {
             Position a = rect.getCornerA();
             Position bb = rect.getCornerB();
             InclusiveSpace unspun = InclusiveSpace.from(-a.x, -a.z).to(-bb.x, -bb.z);
-            flightRecorder.accept("A space was detected on the outer border of the east walls: " + InclusiveSpaces.getShortString(unspun));
+            flightRecorder.accept("A space was detected on the outer border of the east walls: " + InclusiveSpaces.getShortString(
+                    unspun));
             b.add(unspun);
             coveredSoFar.addAll(InclusiveSpaces.getWallPositions(unspun));
             difference = Sets.difference(positions, coveredSoFar);
@@ -158,7 +173,8 @@ public class WallPositionToRooms {
             Position a = rect.getCornerA();
             Position bb = rect.getCornerB();
             InclusiveSpace unspun = InclusiveSpace.from(a.z, a.x).to(bb.z, bb.x);
-            flightRecorder.accept("A space was detected on the outer border of the north walls: " + InclusiveSpaces.getShortString(unspun));
+            flightRecorder.accept("A space was detected on the outer border of the north walls: " + InclusiveSpaces.getShortString(
+                    unspun));
             b.add(unspun);
             coveredSoFar.addAll(InclusiveSpaces.getWallPositions(unspun));
             difference = Sets.difference(positions, coveredSoFar);
@@ -174,7 +190,8 @@ public class WallPositionToRooms {
             Position a = rect.getCornerA();
             Position bb = rect.getCornerB();
             InclusiveSpace unspun = InclusiveSpace.from(-a.z, -a.x).to(-bb.z, -bb.x);
-            flightRecorder.accept("A space was detected on the outer border of the south walls: " + InclusiveSpaces.getShortString(unspun));
+            flightRecorder.accept("A space was detected on the outer border of the south walls: " + InclusiveSpaces.getShortString(
+                    unspun));
             b.add(unspun);
             coveredSoFar.addAll(InclusiveSpaces.getWallPositions(unspun));
             difference = Sets.difference(positions, coveredSoFar);
@@ -204,7 +221,8 @@ public class WallPositionToRooms {
             }
         }
 
-        flightRecorder.accept("Unprocessed wall positions remain. Returning empty result. Remaining positions: " + Positions.getUIString(difference.immutableCopy()));
+        flightRecorder.accept("Unprocessed wall positions remain. Returning empty result. Remaining positions: " + Positions.getUIString(
+                difference.immutableCopy()));
         return ImmutableList.of();
     }
 
@@ -216,11 +234,11 @@ public class WallPositionToRooms {
         OptionalInt maxZ = positions.stream().mapToInt(p -> p.z).max();
 
         return positions.stream()
-                .filter(p -> !(p.x == minX.getAsInt() && p.z == minZ.getAsInt())) // Top-left corner
-                .filter(p -> !(p.x == maxX.getAsInt() && p.z == minZ.getAsInt())) // Top-right corner
-                .filter(p -> !(p.x == minX.getAsInt() && p.z == maxZ.getAsInt())) // Bottom-left corner
-                .filter(p -> !(p.x == maxX.getAsInt() && p.z == maxZ.getAsInt())) // Bottom-right corner
-                .collect(ImmutableSet.toImmutableSet());
+                        .filter(p -> !(p.x == minX.getAsInt() && p.z == minZ.getAsInt())) // Top-left corner
+                        .filter(p -> !(p.x == maxX.getAsInt() && p.z == minZ.getAsInt())) // Top-right corner
+                        .filter(p -> !(p.x == minX.getAsInt() && p.z == maxZ.getAsInt())) // Bottom-left corner
+                        .filter(p -> !(p.x == maxX.getAsInt() && p.z == maxZ.getAsInt())) // Bottom-right corner
+                        .collect(ImmutableSet.toImmutableSet());
     }
 
     private ImmutableList<InclusiveSpace> simplify(
@@ -358,6 +376,7 @@ public class WallPositionToRooms {
     }
 
     public void clearFlightRecorder() {
-        this.flightRecorder = str -> {};
+        this.flightRecorder = str -> {
+        };
     }
 }

@@ -760,7 +760,7 @@ class RoomDetectionTest {
 
     }
 
-    @Disabled("Not supported yet") // TODO: Handle doorless walls like this
+    @Disabled("Not supported yet") // TODO: Consider whether we want to support this
     @Test
     public void Test_DetectRoomWithSplitMiddle() {
         // _ = air
