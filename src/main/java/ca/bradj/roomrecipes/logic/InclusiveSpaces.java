@@ -190,6 +190,9 @@ public class InclusiveSpaces {
             Predicate<Position> isWallO,
             boolean requireCorners
     ) {
+        if (space == null) {
+            return false;
+        }
         Map<Position, Boolean> cache = new HashMap<>();
         Predicate<Position> isWall = p -> cache.compute(p, (p2, r) -> r != null ? r : isWallO.test(p2));
         if (!hasNorthAndSouthWalls(space, isWall, requireCorners)) return false;
