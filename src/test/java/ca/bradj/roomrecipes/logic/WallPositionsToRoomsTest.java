@@ -295,5 +295,61 @@ class WallPositionsToRoomsTest {
                 Debugger.getDebugArt(positions)
         );
     }
+    @Test
+    public void test_Regression_2025_08_22_TripleInset_Deep() {
+
+        ImmutableSet<Position> positions = ImmutableSet.of(
+                new Position(1, 0),
+                new Position(2, 0),
+                new Position(3, 0),
+                new Position(4, 0),
+                new Position(5, 0),
+                new Position(0, 1),
+                new Position(1, 1),
+                new Position(5, 1),
+                new Position(6, 1),
+                new Position(0, 2),
+                new Position(6, 2),
+                new Position(0, 3),
+                new Position(6, 3),
+                new Position(6, 4),
+                new Position(0, 4),
+                new Position(1, 4),
+                new Position(1, 5),
+                new Position(2, 5),
+                new Position(3, 5),
+                new Position(4, 5),
+                new Position(5, 5),
+                new Position(6, 5)
+        );
+
+        // This scenario is:
+        //  0 1 2 3 4 5 6
+        //  W W W W W W W 0
+        //  W W _ _ _ W W 1
+        //  W _ _ _ _ _ W 2
+        //  W _ _ _ _ _ W 3
+        //  W W W _ _ _ W 4 <-- Deep inset corner
+        //  W W W W W W W 5
+
+        SINGLETON.setFlightRecorder(Debugger.on("2025-08-24"));
+        ImmutableList<InclusiveSpace> spaces = SINGLETON.getSpaces(positions);
+
+        // The logic assumes that the wall made a diagonal jum from [1,4] to [2,5].
+        // So the block at [2, 4] is considered INSIDE the room.
+        // Therefore, the spaces are equivalent to a standard triple-inset corner room.
+
+        assertSpacesEqual(
+                ImmutableList.of(
+                        InclusiveSpace.from(1, 0).to(5, 1),
+                        InclusiveSpace.from(0, 1).to(1, 4),
+                        InclusiveSpace.from(5, 1).to(6, 5),
+                        InclusiveSpace.from(1, 4).to(5, 5),
+                        InclusiveSpace.from(1, 1).to(5, 4)
+                ),
+                spaces,
+                Debugger.getDebugArt(positions)
+        );
+    }
 
 }

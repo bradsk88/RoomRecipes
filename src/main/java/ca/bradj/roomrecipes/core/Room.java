@@ -71,7 +71,7 @@ public class Room {
      */
     @Deprecated(forRemoval = true, since = "0.0.7")
     public InclusiveSpace getSpace() {
-        return this.space.get(0);
+        return this.space.isEmpty() ? null : this.space.get(0);
     }
 
     public ImmutableList<InclusiveSpace> getSpaces() {
