@@ -6,3 +6,4 @@ bin
 out
 logs
 mcmodsrepo/ca/bradj
+.env

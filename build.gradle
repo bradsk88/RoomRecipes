@@ -13,6 +13,15 @@ apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 apply plugin: 'jacoco'
 
+
+// Load .env file if present (gitignored — store secrets like MODRINTH_TOKEN here)
+def dotEnv = new Properties()
+def dotEnvFile = file('.env')
+if (dotEnvFile.exists()) {
+    dotEnvFile.withInputStream { dotEnv.load(it) }
+    dotEnv.each { k, v -> ext.set(k as String, v as String) }
+}
+
 group = 'ca.bradj' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'roomrecipes'
 
@@ -200,25 +209,8 @@ jar {
     }
 }
 
-publish {
-    manifest {
-        attributes([
-            "Specification-Title": "roomrecipes",
-            "Specification-Vendor": "roomrecipes",
-            "Specification-Version": "1", // We are version 1 of ourselves
-            "Implementation-Title": project.name,
-            "Implementation-Version": "${version}",
-            "Implementation-Vendor" :"roomrecipes",
-            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-        ])
-    }
-}
 
-// // Uncomment these when using [jar]
-//jar.finalizedBy('reobfJar')
-//publish.finalizedBy('reobfJar')
-// // //  Uncomment this when using [publishToMavenLocal]
-publish.dependsOn('reobfJar')
+publish.dependsOn('publishModrinth')
 
 publishing {
     publications {
@@ -229,6 +221,27 @@ publishing {
     repositories {
         maven {
             url "file:///${project.projectDir}/mcmodsrepo"
+        }
+    }
+}
+
+task publishModrinth(dependsOn: 'reobfJar') {
+    group = 'publishing'
+    mustRunAfter('publishToMavenLocal', 'publishMavenJavaPublicationToMavenRepository')
+    doLast {
+        def token = project.findProperty("MODRINTH_TOKEN") ?: System.getenv("MODRINTH_TOKEN") ?: ""
+        def changelog = (project.findProperty("CHANGELOG") ?: System.getenv("CHANGELOG") ?: "").replace('"', '\\"').replace('\n', '\\n')
+        def jarPath = jar.archivePath.absolutePath
+        def cleanVersion = "git rev-parse --abbrev-ref HEAD".execute().text.trim()
+        def versionType = cleanVersion.contains("alpha") ? "alpha" : cleanVersion.contains("beta") ? "beta" : "release"
+        def projectId = project.findProperty("MODRINTH_PROJECT_ID") ?: System.getenv("MODRINTH_PROJECT_ID") ?: "mvnAaWca"
+        def data = """{"name":"RoomRecipes ${cleanVersion}","version_number":"${cleanVersion}","version_type":"${versionType}","featured":false,"game_versions":["1.19.2"],"loaders":["forge"],"project_id":"${projectId}","changelog":"${changelog}","dependencies":[],"file_parts":["file"],"primary_file":"file"}"""
+        exec {
+            commandLine 'curl', '--fail', '-s', '-X', 'POST',
+                'https://api.modrinth.com/v2/version',
+                '-H', "Authorization: ${token}",
+                '-F', "data=${data}",
+                '-F', "file=@${jarPath}"
         }
     }
 }
