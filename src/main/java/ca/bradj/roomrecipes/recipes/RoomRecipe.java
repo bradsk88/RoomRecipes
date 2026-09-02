@@ -7,6 +7,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -91,12 +92,12 @@ public class RoomRecipe implements Recipe<Container>, Comparable<RoomRecipe> {
     }
 
     @Override
-    public @NotNull ItemStack getResultItem() {
+    public @NotNull ItemStack getResultItem(RegistryAccess registries) {
         return ItemStack.EMPTY;
     }
 
     @Override
-    public @NotNull ItemStack assemble(Container p_77572_1_) {
+    public @NotNull ItemStack assemble(Container p_77572_1_, RegistryAccess registries) {
         return ItemStack.EMPTY;
     }
 
